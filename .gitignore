@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.npm-cache/
+.env
+.env.local
+.env.*.local
+data/*.sqlite
+data/*.sqlite-*
+data/*.db
+*.log
+.DS_Store

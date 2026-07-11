@@ -1,0 +1,36 @@
+{
+  "name": "renaiss-tech-hackathon-vote",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "scripts": {
+    "dev": "concurrently --kill-others --names web,server --prefix-colors magenta,cyan \"vite --host 0.0.0.0 --port 4173 --strictPort\" \"node --watch server/index.mjs\"",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0 --port 4173 --strictPort",
+    "start": "node server/index.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/plus-jakarta-sans": "5.2.8",
+    "@fontsource-variable/space-grotesk": "5.2.10",
+    "@fontsource/archivo-black": "5.2.8",
+    "@phosphor-icons/react": "2.1.10",
+    "better-sqlite3": "12.11.1",
+    "compression": "1.8.1",
+    "express": "5.2.1",
+    "helmet": "8.2.0",
+    "jose": "6.2.3",
+    "motion": "12.42.2",
+    "ogl": "1.0.11",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "react-router-dom": "7.18.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "6.0.3",
+    "concurrently": "10.0.3",
+    "vite": "8.1.4"
+  }
+}

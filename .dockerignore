@@ -1,0 +1,11 @@
+.git
+.gitignore
+node_modules
+dist
+.npm-cache
+.env
+.env.*
+data
+*.log
+.DS_Store
+design-qa.md
