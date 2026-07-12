@@ -11,7 +11,6 @@ import { MOTION_EASE, SURFACE_VISIBLE } from './motion/motionTokens.js';
 const NAV_ITEMS = [
   ['nav.home', '/'],
   ['nav.vote', '/vote'],
-  ['nav.rules', '/rules'],
 ];
 
 export function Header({ session, onSignIn, onLogout }) {

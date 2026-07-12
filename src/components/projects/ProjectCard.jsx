@@ -56,9 +56,9 @@ export function ProjectCard({ project, selected, recorded, onOpen, onSelect }) {
             <span className="project-security-note">{t('project.securityReview')}</span>
           ) : (
             <div className="project-links" aria-label={t('project.linksLabel', { name: project.name })}>
-              {project.demoUrls.slice(0, 1).map((url) => <a key={url} href={url} target="_blank" rel="noreferrer">{t('project.demo')} <ArrowSquareOut /></a>)}
-              {project.repoUrl ? <a href={project.repoUrl} target="_blank" rel="noreferrer">{t('project.github')} <GithubLogo weight="fill" /></a> : null}
-              {project.xUrl ? <a href={project.xUrl} target="_blank" rel="noreferrer" aria-label={t('project.xProfile', { name: project.name })}><XLogo weight="fill" /></a> : null}
+              {project.demoUrls.slice(0, 1).map((url) => <a className="project-link" key={url} href={url} target="_blank" rel="noreferrer">{t('project.demo')} <ArrowSquareOut /></a>)}
+              {project.repoUrl ? <a className="project-link" href={project.repoUrl} target="_blank" rel="noreferrer">{t('project.github')} <GithubLogo weight="fill" /></a> : null}
+              {project.xUrl ? <a className="project-link project-link--icon" href={project.xUrl} target="_blank" rel="noreferrer" aria-label={t('project.xProfile', { name: project.name })}><XLogo weight="fill" /></a> : null}
             </div>
           )}
           <RenaissMetalButton

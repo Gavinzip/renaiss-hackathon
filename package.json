@@ -8,7 +8,10 @@
   },
   "scripts": {
     "dev": "concurrently --kill-others --names web,server --prefix-colors magenta,cyan \"vite --host 0.0.0.0 --port 4173 --strictPort\" \"node --watch server/index.mjs\"",
-    "build": "vite build",
+    "build": "vite build && node scripts/r2-static-assets.mjs assert-build",
+    "assets:audit": "node scripts/r2-static-assets.mjs audit",
+    "assets:publish": "node scripts/r2-static-assets.mjs publish --bucket renaiss-hackathon-media",
+    "assets:verify": "node scripts/r2-static-assets.mjs verify",
     "preview": "vite preview --host 0.0.0.0 --port 4173 --strictPort",
     "start": "node server/index.mjs"
   },

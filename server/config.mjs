@@ -103,6 +103,7 @@ function backupConfiguration(env, databasePath) {
     stagingDir: resolve(stagingDir),
     timeoutMs: envInteger(env, 'BACKUP_TIMEOUT_SECONDS', 30 * 60, 60, 2 * 60 * 60) * 1000,
     retention: Object.freeze({
+      hourly: envInteger(env, 'BACKUP_KEEP_HOURLY', 48, 1, 24 * 14),
       daily: envInteger(env, 'BACKUP_KEEP_DAILY', 14, 1, 365),
       weekly: envInteger(env, 'BACKUP_KEEP_WEEKLY', 8, 1, 104),
       monthly: envInteger(env, 'BACKUP_KEEP_MONTHLY', 12, 1, 120),

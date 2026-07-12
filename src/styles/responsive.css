@@ -147,25 +147,12 @@
     min-width: 0;
   }
 
-  .mobile-vote-guide__prompt {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .mobile-vote-guide__prompt > svg {
-    color: var(--purple-light);
-    flex: 0 0 auto;
-  }
-
-  .mobile-vote-guide__prompt > div,
+  .mobile-vote-guide__prompt,
   .mobile-vote-guide__confirm-copy,
   .mobile-vote-guide__success > div {
     min-width: 0;
   }
 
-  .mobile-vote-guide__prompt strong,
-  .mobile-vote-guide__prompt span,
   .mobile-vote-guide__confirm-copy strong,
   .mobile-vote-guide__confirm-copy span,
   .mobile-vote-guide__confirm-copy small,
@@ -175,7 +162,6 @@
     display: block;
   }
 
-  .mobile-vote-guide__prompt strong,
   .mobile-vote-guide__confirm-copy strong,
   .mobile-vote-guide__success strong {
     margin-bottom: 3px;
@@ -183,7 +169,6 @@
     font-size: 0.77rem;
   }
 
-  .mobile-vote-guide__prompt span,
   .mobile-vote-guide__confirm-copy span,
   .mobile-vote-guide__success span {
     overflow: hidden;
@@ -193,6 +178,77 @@
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+  }
+
+  .mobile-vote-guide__prompt-intro > span {
+    display: block;
+    margin-bottom: 3px;
+    color: var(--purple-light);
+    font-family: var(--font-display);
+    font-size: 0.57rem;
+    font-weight: 760;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .mobile-vote-guide__prompt-intro > strong {
+    display: block;
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    line-height: 1.1;
+  }
+
+  .mobile-vote-guide__prompt-steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 11px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .mobile-vote-guide__prompt-steps li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 6px;
+    min-width: 0;
+  }
+
+  .mobile-vote-guide__prompt-steps li > span {
+    color: rgba(183, 174, 230, 0.72);
+    font-family: var(--font-display);
+    font-size: 0.52rem;
+    font-weight: 760;
+  }
+
+  .mobile-vote-guide__prompt-steps li > svg {
+    width: 17px;
+    height: 17px;
+    color: var(--purple-light);
+  }
+
+  .mobile-vote-guide__prompt-steps li > div {
+    grid-column: 1 / -1;
+  }
+
+  .mobile-vote-guide__prompt-steps strong,
+  .mobile-vote-guide__prompt-steps p {
+    display: block;
+  }
+
+  .mobile-vote-guide__prompt-steps strong {
+    margin-bottom: 3px;
+    color: var(--text);
+    font-size: 0.63rem;
+    line-height: 1.25;
+  }
+
+  .mobile-vote-guide__prompt-steps p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.55rem;
+    line-height: 1.38;
   }
 
   .mobile-vote-guide__selected {
@@ -375,14 +431,6 @@
 
   .site-frame:has(.vote-page) .site-footer {
     padding-bottom: calc(210px + env(safe-area-inset-bottom));
-  }
-
-  .site-frame:has(.vote-panel--choose) .vote-page .projects-section {
-    padding-bottom: 72px;
-  }
-
-  .site-frame:has(.vote-panel--choose) .site-footer {
-    padding-bottom: 0;
   }
 
   .project-toolbar {
@@ -605,14 +653,15 @@
   }
 
   .project-links {
-    gap: 11px;
+    gap: 16px;
   }
 
-  .project-links a {
-    font-size: 0.69rem;
+  .project-links .project-link {
+    min-height: 36px;
+    font-size: 0.8rem;
   }
 
-  .project-links svg {
+  .project-links .project-link svg {
     width: 19px;
     height: 19px;
   }
@@ -630,12 +679,50 @@
     grid-template-columns: 1fr;
   }
 
+  .scoring-split {
+    gap: 1px;
+    border-radius: 17px;
+  }
+
   .scoring-card {
-    min-height: 190px;
+    min-height: 204px;
+    padding: 26px 24px 24px;
+  }
+
+  .scoring-card > svg {
+    top: 28px;
+    left: 24px;
+  }
+
+  .scoring-card strong {
+    font-size: clamp(2.65rem, 11.5vw, 4.05rem);
+    line-height: 1.06;
+  }
+
+  .scoring-card p {
+    max-width: 88%;
+    margin-top: 29px;
   }
 
   .awards-section {
     padding-block: 62px 88px;
+  }
+
+  .award-card {
+    min-height: 172px;
+    border-radius: 15px;
+    padding: 23px 22px 21px;
+  }
+
+  .award-card svg {
+    top: 22px;
+    right: 21px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .award-card strong {
+    font-size: clamp(1.42rem, 6.6vw, 2rem);
   }
 
   .site-footer__grid {
@@ -739,9 +826,17 @@
     flex-direction: column;
   }
 
-  .project-links a {
-    font-size: 0;
+  .project-links .project-link {
+    min-height: 34px;
+    font-size: 0.8rem;
+    text-underline-offset: 5px;
   }
+
+  .project-links .project-link svg {
+    width: 18px;
+    height: 18px;
+  }
+
 
   .project-card__footer {
     gap: 9px;

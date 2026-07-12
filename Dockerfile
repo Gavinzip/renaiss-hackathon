@@ -1,5 +1,7 @@
 FROM node:24-bookworm-slim AS build
 WORKDIR /app
+ARG VITE_STATIC_ASSET_CDN_BASE_URL
+ENV VITE_STATIC_ASSET_CDN_BASE_URL=${VITE_STATIC_ASSET_CDN_BASE_URL}
 COPY package.json package-lock.json* ./
 RUN npm ci
 COPY . .

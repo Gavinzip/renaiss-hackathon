@@ -2,8 +2,8 @@ name: Trigger Zeabur offsite backup
 
 on:
   schedule:
-    # 03:20 Asia/Taipei (UTC+8), after the low-traffic period.
-    - cron: '20 19 * * *'
+    # Every hour at :20. Avoid the top-of-hour GitHub Actions congestion.
+    - cron: '20 * * * *'
     # 03:40 Asia/Taipei on the first day of every month.
     - cron: '40 19 1 * *'
   workflow_dispatch:
@@ -21,7 +21,7 @@ permissions: {}
 
 jobs:
   backup:
-    if: (github.event_name == 'workflow_dispatch' && inputs.operation == 'backup') || github.event.schedule == '20 19 * * *'
+    if: (github.event_name == 'workflow_dispatch' && inputs.operation == 'backup') || github.event.schedule == '20 * * * *'
     runs-on: ubuntu-latest
     timeout-minutes: 35
     steps:

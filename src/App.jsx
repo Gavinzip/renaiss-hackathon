@@ -12,6 +12,7 @@ import { ProjectDialog } from './components/projects/ProjectDialog.jsx';
 import { useSession } from './hooks/useSession.js';
 import { useI18n } from './i18n/I18nProvider.jsx';
 import { localizeProjects } from './i18n/localizeProjects.js';
+import { staticAssetCssUrl } from './lib/staticAssets.js';
 import { HomePage } from './pages/HomePage.jsx';
 import { NotFoundPage } from './pages/NotFoundPage.jsx';
 import { VotePage } from './pages/VotePage.jsx';
@@ -136,7 +137,7 @@ export function App() {
   }, [logout]);
 
   return (
-    <div className="site-frame">
+    <div className="site-frame" style={{ '--vote-ribbon-asset': staticAssetCssUrl('/assets/backgrounds/renaiss-vote-ribbon-field.webp') }}>
       <RouteScrollManager />
       <Header session={session} onSignIn={beginHeaderSignIn} onLogout={signOut} />
       <main>

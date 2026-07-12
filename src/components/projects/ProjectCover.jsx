@@ -1,6 +1,7 @@
 import { motion } from 'motion/react';
 
 import { useI18n } from '../../i18n/I18nProvider.jsx';
+import { staticAssetUrl } from '../../lib/staticAssets.js';
 
 export function ProjectCover({
   project,
@@ -22,7 +23,7 @@ export function ProjectCover({
       <motion.img
         {...motionProps}
         className={context === 'dialog' ? 'project-dialog__cover' : undefined}
-        src={project.coverUrl}
+        src={staticAssetUrl(project.coverUrl)}
         alt={alt}
         width="1200"
         height="675"

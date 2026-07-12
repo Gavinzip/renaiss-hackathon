@@ -141,6 +141,7 @@ export async function runDatabaseBackup(config) {
         'forget',
         '--prune',
         '--tag', 'renaiss-hackathon',
+        '--keep-hourly', String(config.backup.retention.hourly),
         '--keep-daily', String(config.backup.retention.daily),
         '--keep-weekly', String(config.backup.retention.weekly),
         '--keep-monthly', String(config.backup.retention.monthly),
