@@ -225,7 +225,7 @@ async function writeReleaseFile(inventory) {
 }
 
 async function verify(inventory) {
-  const base = normalizeCustomCdnBase(requiredOption('base'));
+  const base = normalizeAssetBase(requiredOption('base'));
   const failures = [];
   await Promise.all(inventory.files.map(async (entry) => {
     const response = await fetch(`${base}/${inventory.release}/${entry.relativeToPublic}`, { method: 'HEAD' });
@@ -256,10 +256,10 @@ function requiredOption(name) {
   return value;
 }
 
-function normalizeCustomCdnBase(value) {
+function normalizeAssetBase(value) {
   const url = new URL(String(value).trim());
-  if (url.protocol !== 'https:' || url.hostname.endsWith('.r2.dev')) {
-    throw new Error('Use an HTTPS custom Cloudflare domain, not an r2.dev development URL.');
+  if (url.protocol !== 'https:') {
+    throw new Error('Use an HTTPS static-asset origin.');
   }
   return url.toString().replace(/\/$/, '');
 }

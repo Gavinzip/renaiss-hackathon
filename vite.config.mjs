@@ -3,12 +3,12 @@ import react from '@vitejs/plugin-react';
 
 import { STATIC_ASSET_RELEASE } from './src/generated/staticAssetRelease.js';
 
-function customCdnBase(value) {
+function staticAssetBase(value) {
   const rawValue = String(value || '').trim().replace(/\/+$/, '');
   if (!rawValue) throw new Error('VITE_STATIC_ASSET_CDN_BASE_URL is required for production builds.');
   const url = new URL(rawValue);
-  if (url.protocol !== 'https:' || url.hostname.endsWith('.r2.dev')) {
-    throw new Error('VITE_STATIC_ASSET_CDN_BASE_URL must be an HTTPS custom Cloudflare domain, never an r2.dev development URL.');
+  if (url.protocol !== 'https:') {
+    throw new Error('VITE_STATIC_ASSET_CDN_BASE_URL must be an HTTPS asset origin.');
   }
   return rawValue;
 }
@@ -16,7 +16,7 @@ function customCdnBase(value) {
 export default defineConfig(({ command, mode }) => {
   const productionBuild = command === 'build';
   const env = loadEnv(mode, process.cwd(), 'VITE_');
-  const cdnBase = productionBuild ? customCdnBase(env.VITE_STATIC_ASSET_CDN_BASE_URL) : '';
+  const cdnBase = productionBuild ? staticAssetBase(env.VITE_STATIC_ASSET_CDN_BASE_URL) : '';
   if (productionBuild && STATIC_ASSET_RELEASE === 'unpublished') {
     throw new Error('No immutable static asset release has been published. Run npm run assets:publish first.');
   }
