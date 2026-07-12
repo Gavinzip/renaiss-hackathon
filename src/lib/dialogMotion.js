@@ -1,7 +1,13 @@
-export const LINEAR_DIALOG_TRANSITION = Object.freeze({
+export const PROJECT_DIALOG_EXPAND_TRANSITION = Object.freeze({
   type: 'spring',
-  bounce: 0.05,
-  duration: 0.5,
+  bounce: 0.04,
+  duration: 0.32,
+});
+
+export const PROJECT_DIALOG_RETURN_TRANSITION = Object.freeze({
+  type: 'spring',
+  bounce: 0,
+  duration: 0.22,
 });
 
 export function projectDialogLayoutId(projectId) {

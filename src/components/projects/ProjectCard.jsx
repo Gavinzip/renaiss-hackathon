@@ -1,59 +1,76 @@
-import { ArrowRight, ArrowSquareOut, CheckCircle, GithubLogo, UsersThree, XLogo } from '@phosphor-icons/react';
+import { ArrowRight, ArrowSquareOut, CheckCircle, GithubLogo, XLogo } from '@phosphor-icons/react';
 import { motion } from 'motion/react';
 
+import { useI18n } from '../../i18n/I18nProvider.jsx';
 import {
-  LINEAR_DIALOG_TRANSITION,
-  projectDialogImageLayoutId,
+  PROJECT_DIALOG_RETURN_TRANSITION,
   projectDialogLayoutId,
   projectDialogTitleLayoutId,
+  projectDialogImageLayoutId,
 } from '../../lib/dialogMotion.js';
+import { RenaissMetalButton } from '../metal/RenaissMetalButton.jsx';
+import { ProjectCover } from './ProjectCover.jsx';
+import { ProjectTeamIdentity } from './ProjectTeamIdentity.jsx';
 
 export function ProjectCard({ project, selected, recorded, onOpen, onSelect }) {
-  const actionLabel = recorded ? 'Vote recorded' : selected ? 'Selected' : 'Vote for project';
+  const { t } = useI18n();
+  const securityBlocked = project.auditStatus === 'BLOCK';
+  const actionLabel = securityBlocked
+    ? t('project.securityReview')
+    : recorded
+      ? t('project.voteRecorded')
+      : selected
+        ? t('project.selected')
+        : t('project.select');
+  const trackLabel = t(`tracks.${project.track.toLowerCase()}`);
 
   return (
     <motion.div
       className={`project-card project-card--${project.track.toLowerCase()} ${selected || recorded ? 'project-card--selected' : ''}`}
       layoutId={projectDialogLayoutId(project.id)}
-      transition={LINEAR_DIALOG_TRANSITION}
-      whileHover={{ y: -2 }}
+      layoutDependency={project.id}
+      transition={PROJECT_DIALOG_RETURN_TRANSITION}
     >
       <article>
-        <button className="project-card__main" type="button" onClick={() => onOpen(project)} aria-label={`View ${project.name}`}>
+        <button className="project-card__main" type="button" onClick={() => onOpen(project)} aria-label={t('project.view', { name: project.name })}>
           <span className="project-card__cover">
-            <motion.img
+            <ProjectCover
+              project={project}
+              context="card"
               layoutId={projectDialogImageLayoutId(project.id)}
-              transition={LINEAR_DIALOG_TRANSITION}
-              src={project.coverUrl}
-              alt={`${project.name} product preview`}
-              width="1200"
-              height="675"
-              loading="lazy"
-              decoding="async"
+              layoutDependency={project.id}
+              transition={PROJECT_DIALOG_RETURN_TRANSITION}
             />
-            <span className={`track-badge track-badge--${project.track.toLowerCase()}`}>{project.track}</span>
+            <span className={`track-badge track-badge--${project.track.toLowerCase()}`}>{trackLabel}</span>
           </span>
           <span className="project-card__content">
             <span className="project-card__heading">
-              <motion.strong layoutId={projectDialogTitleLayoutId(project.id)} transition={LINEAR_DIALOG_TRANSITION}>{project.name}</motion.strong>
+              <motion.strong layoutId={projectDialogTitleLayoutId(project.id)} layoutDependency={project.id} transition={PROJECT_DIALOG_RETURN_TRANSITION}>{project.name}</motion.strong>
             </span>
-            <span className="project-card__team"><UsersThree weight="duotone" /> {project.team}</span>
+            <ProjectTeamIdentity project={project} className="project-card__team" />
             <span className="project-card__pitch">{project.pitch}</span>
           </span>
         </button>
         <div className="project-card__footer">
-          <div className="project-links" aria-label={`${project.name} links`}>
-            {project.demoUrls.slice(0, 1).map((url) => <a key={url} href={url} target="_blank" rel="noreferrer">Demo <ArrowSquareOut /></a>)}
-            <a href={project.repoUrl} target="_blank" rel="noreferrer">GitHub <GithubLogo weight="fill" /></a>
-            {project.xUrl ? <a href={project.xUrl} target="_blank" rel="noreferrer" aria-label={`${project.name} on X`}><XLogo weight="fill" /></a> : null}
-          </div>
-          <button
-            className={`button button--vote ${selected || recorded ? 'button--selected' : ''}`}
+          {securityBlocked ? (
+            <span className="project-security-note">{t('project.securityReview')}</span>
+          ) : (
+            <div className="project-links" aria-label={t('project.linksLabel', { name: project.name })}>
+              {project.demoUrls.slice(0, 1).map((url) => <a key={url} href={url} target="_blank" rel="noreferrer">{t('project.demo')} <ArrowSquareOut /></a>)}
+              {project.repoUrl ? <a href={project.repoUrl} target="_blank" rel="noreferrer">{t('project.github')} <GithubLogo weight="fill" /></a> : null}
+              {project.xUrl ? <a href={project.xUrl} target="_blank" rel="noreferrer" aria-label={t('project.xProfile', { name: project.name })}><XLogo weight="fill" /></a> : null}
+            </div>
+          )}
+          <RenaissMetalButton
+            className={`button--vote ${selected || recorded ? 'project-vote-action--selected' : ''}`}
             type="button"
             onClick={() => onSelect(project)}
+            disabled={securityBlocked}
+            leading={selected || recorded ? <CheckCircle weight="fill" /> : null}
+            trailing={selected || recorded ? null : <ArrowRight weight="bold" />}
           >
-            {selected || recorded ? <CheckCircle weight="fill" /> : null}{actionLabel}{selected || recorded ? null : <ArrowRight weight="bold" />}
-          </button>
+            {actionLabel}
+          </RenaissMetalButton>
         </div>
       </article>
     </motion.div>

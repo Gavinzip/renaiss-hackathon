@@ -22,23 +22,6 @@
   }
 }
 
-@keyframes renaissChromeFlowXFast {
-  0% {
-    background-position: 0% 50%;
-    filter: saturate(1.2);
-  }
-
-  50% {
-    background-position: 130% 50%;
-    filter: saturate(1.36);
-  }
-
-  100% {
-    background-position: 260% 50%;
-    filter: saturate(1.2);
-  }
-}
-
 @keyframes renaissLiquidSweep {
   0% {
     background-position: 0% 50%;
@@ -78,7 +61,7 @@
     0 0 18px rgba(206, 107, 255, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.52),
     inset 0 -1px 0 rgba(19, 29, 44, 0.72);
-  font-family: 'Space Grotesk Variable', sans-serif;
+  font-family: var(--font-display);
   font-size: 0.9rem;
   font-weight: 900;
   line-height: 1;
@@ -126,7 +109,7 @@
   background-size: 250% 100%;
   mix-blend-mode: screen;
   opacity: 0.58;
-  animation: renaissLiquidSweep 2.3s cubic-bezier(0.4, 0.05, 0.2, 1) infinite;
+  animation: renaissLiquidSweep 4.8s cubic-bezier(0.4, 0.05, 0.2, 1) infinite;
 }
 
 .renaiss-metal-button > * {
@@ -148,7 +131,7 @@
 .renaiss-metal-button:hover::before,
 .renaiss-metal-button:focus-visible::before {
   opacity: 1;
-  animation: renaissChromeFlowXFast 1.25s ease-in-out infinite;
+  animation: renaissChromeFlowX 3.2s ease-in-out infinite;
 }
 
 .renaiss-metal-button:active {

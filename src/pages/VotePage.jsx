@@ -1,24 +1,39 @@
 import { WarningCircle } from '@phosphor-icons/react';
 
 import { ProjectGallery } from '../components/projects/ProjectGallery.jsx';
+import { VotingConfigurationNotice } from '../components/VotingConfigurationNotice.jsx';
 import { VotePanel } from '../components/voting/VotePanel.jsx';
+import { Reveal } from '../components/motion/Reveal.jsx';
+import { useI18n } from '../i18n/I18nProvider.jsx';
 
 export function VotePage({
   event,
   projects,
   recordedProject,
   selectedProject,
+  session,
+  resumeConfirmation,
   serviceError,
   onOpenProject,
-  onReviewVote,
   onSelectProject,
+  onResumeHandled,
+  onSignIn,
+  onConfirm,
+  onClear,
+  onClearSelection,
 }) {
-  const serviceBanner = serviceError ? (
-    <div className="service-banner" role="status">
-      <WarningCircle weight="fill" />
-      <span>The project gallery remains available, but vote recording is temporarily unavailable.</span>
-    </div>
-  ) : null;
+  const { t } = useI18n();
+  const notices = (
+    <>
+      <VotingConfigurationNotice event={event} />
+      {serviceError ? (
+        <Reveal className="service-banner" distance={14} role="status">
+          <WarningCircle weight="fill" />
+          <span>{t('service.voteOffline')}</span>
+        </Reveal>
+      ) : null}
+    </>
+  );
 
   return (
     <div className="vote-page">
@@ -28,13 +43,19 @@ export function VotePage({
         recordedId={recordedProject?.id || null}
         onOpen={onOpenProject}
         onSelect={onSelectProject}
-        notice={serviceBanner}
+        notice={notices}
         votePanel={(
           <VotePanel
             project={selectedProject}
-            recorded={Boolean(selectedProject && recordedProject?.id === selectedProject.id)}
+            recordedProject={recordedProject}
+            session={{ ...session, event }}
             event={event}
-            onReview={onReviewVote}
+            resumeConfirmation={resumeConfirmation}
+            onResumeHandled={onResumeHandled}
+            onSignIn={onSignIn}
+            onConfirm={onConfirm}
+            onClear={onClear}
+            onClearSelection={onClearSelection}
           />
         )}
       />

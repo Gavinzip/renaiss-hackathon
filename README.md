@@ -6,7 +6,7 @@ Official project gallery and Renaiss-authenticated community voting surface for 
 
 - `/` — official event home and primary entry points.
 - `/vote` — dedicated project gallery, filtering, project detail, selection, and vote confirmation flow.
-- `/rules` — voting rules, official 40/60 result weighting, and the three-award structure.
+- `/rules` — redirects to the official rules section at `/#rules`.
 
 ## Local development
 
@@ -18,9 +18,10 @@ The public gallery remains available when SSO or the voting window is not config
 
 ## Static submission catalog
 
-- The 22 submitted projects are stored in `shared/projects.mjs`; the running site never reads Google Sheets or requests Google permissions.
-- Project preview covers are local WebP assets in `public/assets/projects/` and are mapped by the same stable project IDs.
-- To update the official list, edit the static catalog and its matching local cover, then rebuild the site.
+- The 45 submitted projects are stored in `shared/projects.mjs`; the running site never reads Google Sheets or requests Google permissions.
+- Approved project preview images are local WebP assets in `public/assets/projects/`. Entries without an approved image use the built-in typographic event cover and do not fetch participant-site screenshots.
+- A submission marked `BLOCK` by the organizer's security re-review remains visible for catalog transparency, but its external links and voting action stay disabled until re-audit.
+- To update the official list, edit the static catalog and matching locale chunk; only add a local cover when the organizer has approved the image.
 
 ## Production requirements
 

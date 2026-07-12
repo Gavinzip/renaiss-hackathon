@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto'
 
 import { EVENT } from '../shared/event.mjs'
-import { PROJECTS, PROJECT_IDS } from '../shared/projects.mjs'
+import { PROJECTS, PROJECT_IDS, VOTABLE_PROJECT_IDS } from '../shared/projects.mjs'
 
 import { HttpError } from './http.mjs'
 
@@ -16,6 +16,15 @@ if (Number(EVENT.projectCount) !== PROJECTS.length) {
 const PROJECT_ID_SET = new Set(PROJECT_IDS)
 if (PROJECT_ID_SET.size !== PROJECTS.length) {
   throw new Error('PROJECT_IDS must contain one unique id for every project.')
+}
+const VOTABLE_PROJECT_ID_SET = new Set(VOTABLE_PROJECT_IDS)
+if (VOTABLE_PROJECT_ID_SET.size !== VOTABLE_PROJECT_IDS.length) {
+  throw new Error('VOTABLE_PROJECT_IDS must contain unique project ids.')
+}
+for (const projectId of VOTABLE_PROJECT_ID_SET) {
+  if (!PROJECT_ID_SET.has(projectId)) {
+    throw new Error('VOTABLE_PROJECT_IDS must only contain official project ids.')
+  }
 }
 for (const project of PROJECTS) {
   if (!project?.id || !PROJECT_ID_SET.has(project.id)) {
@@ -59,7 +68,7 @@ function normalizeRequestId(value) {
 
 function normalizeProjectId(value) {
   const projectId = String(value || '').trim()
-  if (!projectId || !PROJECT_ID_SET.has(projectId)) {
+  if (!projectId || !VOTABLE_PROJECT_ID_SET.has(projectId)) {
     throw new HttpError(400, 'project_not_found', 'Select a valid hackathon project.')
   }
   return projectId
@@ -72,14 +81,15 @@ function requestFingerprint(action, projectId = '') {
 }
 
 function votingWindowPayload(config, timestamp = nowMs()) {
-  const { configured, opensAt, closesAt } = config.votingWindow
+  const { configured, prelaunch, opensAt, closesAt } = config.votingWindow
   let status = 'configuration_required'
-  if (configured && timestamp < opensAt) status = 'upcoming'
-  if (configured && timestamp >= opensAt && timestamp < closesAt) status = 'open'
-  if (configured && timestamp >= closesAt) status = 'closed'
+  if (!prelaunch && configured && timestamp < opensAt) status = 'upcoming'
+  if (!prelaunch && configured && timestamp >= opensAt && timestamp < closesAt) status = 'open'
+  if (!prelaunch && configured && timestamp >= closesAt) status = 'closed'
   return {
     status,
-    opensAt: configured ? iso(opensAt) : null,
+    prelaunch: Boolean(prelaunch),
+    opensAt: configured || prelaunch ? iso(opensAt) : null,
     closesAt: configured ? iso(closesAt) : null,
     serverTime: iso(timestamp),
   }

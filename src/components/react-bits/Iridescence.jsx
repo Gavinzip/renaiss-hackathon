@@ -72,7 +72,9 @@ export function Iridescence({
     });
     const mesh = new Mesh(gl, { geometry, program });
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let animationFrame = 0;
+    let animationFrame = null;
+    let inViewport = true;
+    let pageVisible = document.visibilityState === 'visible';
 
     const resize = () => {
       renderer.setSize(container.clientWidth, container.clientHeight);
@@ -83,10 +85,17 @@ export function Iridescence({
       );
     };
 
+    const shouldAnimate = () => !prefersReducedMotion && inViewport && pageVisible;
+
     const render = (time = 0) => {
+      animationFrame = null;
       program.uniforms.uTime.value = time * 0.001;
       renderer.render({ scene: mesh });
-      if (!prefersReducedMotion) animationFrame = requestAnimationFrame(render);
+      if (shouldAnimate()) animationFrame = requestAnimationFrame(render);
+    };
+
+    const requestRender = () => {
+      if (animationFrame === null) animationFrame = requestAnimationFrame(render);
     };
 
     const handlePointerMove = (event) => {
@@ -98,13 +107,27 @@ export function Iridescence({
     container.appendChild(gl.canvas);
     window.addEventListener('resize', resize, { passive: true });
     if (mouseReact) container.addEventListener('pointermove', handlePointerMove, { passive: true });
+    const observer = typeof IntersectionObserver === 'function'
+      ? new IntersectionObserver(([entry]) => {
+        inViewport = entry.isIntersecting;
+        if (inViewport) requestRender();
+      }, { threshold: 0.02 })
+      : null;
+    const handleVisibilityChange = () => {
+      pageVisible = document.visibilityState === 'visible';
+      if (pageVisible) requestRender();
+    };
+    observer?.observe(container);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     resize();
-    render();
+    requestRender();
 
     return () => {
-      cancelAnimationFrame(animationFrame);
+      if (animationFrame !== null) cancelAnimationFrame(animationFrame);
       window.removeEventListener('resize', resize);
       if (mouseReact) container.removeEventListener('pointermove', handlePointerMove);
+      observer?.disconnect();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       gl.canvas.remove();
       gl.getExtension('WEBGL_lose_context')?.loseContext();
     };

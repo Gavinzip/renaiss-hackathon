@@ -1,5 +1,7 @@
 import { isAbsolute, resolve } from 'node:path'
 
+import { EVENT } from '../shared/event.mjs'
+
 export const RENAISS_PRODUCTION_ISSUER = 'https://www.renaiss.xyz/api/auth'
 
 function envString(env, name, fallback = '') {
@@ -54,6 +56,7 @@ export function loadConfig(env = process.env, options = {}) {
   const cwd = options.cwd || process.cwd()
   const nodeEnv = envString(env, 'NODE_ENV', 'development')
   const production = nodeEnv === 'production'
+  const prelaunchRequested = production && envBoolean(env, 'RENAISS_PRELAUNCH_MODE', true)
   const port = envInteger(env, 'PORT', production ? 8080 : 4174, 1, 65535)
   const host = envString(env, 'HOST', production ? '0.0.0.0' : '127.0.0.1')
 
@@ -90,7 +93,9 @@ export function loadConfig(env = process.env, options = {}) {
 
   const clientId = envString(env, 'RENAISS_CLIENT_ID')
   const clientSecret = envString(env, 'RENAISS_CLIENT_SECRET')
-  if (production && (!clientId || !clientSecret)) {
+  const ssoConfigured = Boolean(clientId && clientSecret)
+  const partialSsoConfiguration = Boolean(clientId) !== Boolean(clientSecret)
+  if (production && partialSsoConfiguration) {
     throw new Error('Production requires RENAISS_CLIENT_ID and RENAISS_CLIENT_SECRET.')
   }
 
@@ -118,8 +123,21 @@ export function loadConfig(env = process.env, options = {}) {
   if (votingWindowConfigured && votingOpensAt >= votingClosesAt) {
     throw new Error('VOTING_OPENS_AT must be earlier than VOTING_CLOSES_AT.')
   }
-  if (production && !votingWindowConfigured) {
+  const prelaunchOpensAt = prelaunchRequested
+    ? parseTimestamp(
+      envString(env, 'PRELAUNCH_VOTING_OPENS_AT', EVENT.voteWindow.prelaunchStartsAt),
+      'PRELAUNCH_VOTING_OPENS_AT',
+    )
+    : null
+  const prelaunchMode = prelaunchRequested && (!ssoConfigured || !votingWindowConfigured)
+  if (production && !ssoConfigured && !prelaunchMode) {
+    throw new Error('Production requires RENAISS_CLIENT_ID and RENAISS_CLIENT_SECRET.')
+  }
+  if (production && !votingWindowConfigured && !prelaunchMode) {
     throw new Error('Production requires VOTING_OPENS_AT and VOTING_CLOSES_AT.')
+  }
+  if (prelaunchMode && prelaunchOpensAt === null) {
+    throw new Error('Pre-launch requires PRELAUNCH_VOTING_OPENS_AT.')
   }
 
   return Object.freeze({
@@ -141,12 +159,14 @@ export function loadConfig(env = process.env, options = {}) {
     issuer,
     clientId,
     clientSecret,
-    ssoConfigured: Boolean(clientId && clientSecret),
+    ssoConfigured,
+    prelaunchMode,
     redirectUri,
     scope,
     votingWindow: Object.freeze({
       configured: votingWindowConfigured,
-      opensAt: votingOpensAt,
+      prelaunch: prelaunchMode,
+      opensAt: votingWindowConfigured ? votingOpensAt : prelaunchOpensAt,
       closesAt: votingClosesAt,
     }),
     resultsPublished: envBoolean(env, 'RESULTS_PUBLISHED', false),

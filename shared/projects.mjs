@@ -42,10 +42,11 @@ const PROJECT_DATA = [
     "team": "start5816+amar1316",
     "xLabel": "@AWeb3Going",
     "xUrl": "https://x.com/AWeb3Going",
-    "repoUrl": "https://github.com/euplive/tcgclaw",
-    "demoUrls": [
-      "http://47.93.36.132/tcgclaw/"
-    ],
+    "xAvatarUrl": "https://pbs.twimg.com/profile_images/1960693376409591813/pS6auHIS_normal.jpg",
+    "repoUrl": null,
+    "demoUrls": [],
+    "auditStatus": "REVIEW",
+    "votingAccess": "PARTIAL ACCESS",
     "pitch": "帮助 TCG 玩家快速理解卡牌信息、价值与市场预期，缩小新手与资深收藏家的认知差距。",
     "description": "很多 tcg 玩家其实对于它抽到的卡牌一无所知。所以，我们需要一个工具帮助他更快的了解这张卡牌。或者对于一个新人想要更快的在 renaiss 了解市场上每一张卡牌的价值及预期，我的这个工具就是拉平新人与老人对于卡牌认知差的。",
     "renaissRelation": "我在和 cto 开会的时候，获得一个维度的结合，就是这个工具可以嵌套到每一个卡牌的页面里，点击进入这张卡牌，即可获得这张卡全方位的介绍。",
@@ -77,10 +78,12 @@ const PROJECT_DATA = [
     "team": "larryclues",
     "xLabel": "@zek_eth",
     "xUrl": "https://x.com/zek_eth",
-    "repoUrl": "https://github.com/ezekiel6262/renaiss-lens",
+    "repoUrl": null,
     "demoUrls": [
       "https://renaiss-lens.vercel.app"
     ],
+    "auditStatus": "UNVERIFIED",
+    "votingAccess": "PARTIAL ACCESS",
     "pitch": "An AI collector agent for appraisal, market outlooks, trade strategy, slab-photo valuation, and portfolio analysis.",
     "description": "Renaiss Lens is an AI-powered collector intelligence agent built for the Renaiss ecosystem. It gives collectors, traders, and newcomers a single conversational interface to appraise collectibles, predict market trends, build trade strategies, search Renaiss ecosystem knowledge, and look up real on-chain data via the Renaiss OS Index API. Users type naturally and the agent routes their query to the right intelligence layer - returning structured appraisal cards, market outlook reports, trade playbooks, cert-verified card data, and portfolio health analysis. It also features a Slab Photo Valuator that identifies any graded card from a photo and pulls the Renaiss index price, a live Market Feed surfacing real collector economy signals, and a Collection Tracker with AI portfolio analysis.",
     "renaissRelation": "Renaiss Lens is directly integrated with the Renaiss OS Index API. Every RENAISS intent call queries the live index at api.renaissos.com - users can paste any PSA, BGS, or CGC cert number and get real card identification, index price, confidence tier, and a direct link to the Renaiss Index page. \n\nThe Slab Photo Valuator calls the /v1/graded/by-image endpoint - users upload a slab photo and the Renaiss AI identifies the card and returns its index price with no cert number needed. \n\nEvery appraisal card includes a List this on Renaiss CTA driving collectors directly to the Renaiss platform. \n\nThe SEARCH intent is trained on Renaiss Protocol knowledge covering vault custody, Merkle proof provenance, zero-knowledge validation, and BNB Chain ownership transfer. \n\nThe Market Feed includes a dedicated RENAISS category surfacing live ecosystem news. \n\nThe Collection Tracker helps collectors understand the real-world value of assets they might tokenize on Renaiss. All Renaiss OS Index data is clearly attributed per their attribution requirements.",
@@ -195,6 +198,7 @@ const PROJECT_DATA = [
     "team": "hancrypto_2fa",
     "xLabel": "@Hancrypto_2fa",
     "xUrl": "https://x.com/Hancrypto_2fa",
+    "xAvatarUrl": "https://pbs.twimg.com/profile_images/2009866867046051840/Hz2TcznR_normal.jpg",
     "repoUrl": "https://github.com/Hanhoclamdev/chainsight",
     "demoUrls": [
       "https://chainsight-xi.vercel.app/"
@@ -211,11 +215,13 @@ const PROJECT_DATA = [
     "track": "Game",
     "team": "ducky_56789",
     "xLabel": "@Ducky1st",
-    "xUrl": "https://x.com/Ducky1st",
+    "xUrl": null,
     "repoUrl": "https://github.com/duclucky/arenaiss",
     "demoUrls": [
       "https://arena-card.xyz/"
     ],
+    "auditStatus": "PASS",
+    "votingAccess": "READY",
     "pitch": "A browser card battler that turns Renaiss pack discovery and graded-card data into a simulated draft-and-battle loop.",
     "description": "Arenaiss is a browser card-battler that turns Renaiss-style pack discovery into a playable draft-and-battle loop. Players open simulated packs, collect fictional cards built from real graded-card metadata, assemble a 5-card lineup, and fight a skill-based Top-Trumps duel for virtual credits, then open any card's real-data Card Passport. It is made for collectors and newcomers who want to understand the Renaiss ecosystem (graded collectibles, custody, pricing references) through play instead of a static page. Everything is read-only and simulated: no wallet, no real money, no on-chain transactions.",
     "renaissRelation": "Arenaiss is built directly on Renaiss data and mirrors its core mechanic. It uses three Renaiss sources, all through server-side read-only proxies. First, the Marketplace API (api.renaiss.xyz) supplies the real graded-card pool, card metadata, the real pack catalog, and Card Passport provenance and custody. Second, the official @renaiss-protocol/client public client handles Renaiss reads. Third, the Renaiss OS Index API (api.renaissos.com) provides the reference pricing, confidence, and market movement shown in the Passport (attributed to \"Renaiss OS Index\"). The gacha-as-draft loop mirrors real Renaiss packs: the in-game Eden, OMEGA, and RenaCrypt packs are modeled on the real ones, and every card's Card Passport links back to the real Renaiss packs and marketplace. This makes the game an onboarding funnel into the ecosystem rather than a standalone toy.",
@@ -247,6 +253,7 @@ const PROJECT_DATA = [
     "team": "karu_chibi",
     "xLabel": "@edwordkaru",
     "xUrl": "https://x.com/edwordkaru",
+    "xAvatarUrl": "https://pbs.twimg.com/profile_images/2008464739127693312/L13OS5y1_normal.jpg",
     "repoUrl": "https://github.com/edwordkaru/Renaiss-Collector-Arena",
     "demoUrls": [
       "https://renaiss-collectors-arena.onrender.com"
@@ -264,6 +271,7 @@ const PROJECT_DATA = [
     "team": "cyberpunk_._",
     "xLabel": "@brc20_btc_",
     "xUrl": "https://x.com/brc20_btc_",
+    "xAvatarUrl": "https://pbs.twimg.com/profile_images/2071942244886585344/tbX71378_normal.jpg",
     "repoUrl": "https://github.com/lenmu168/renaiss-rwa-sniper",
     "demoUrls": [
       "https://cool-ui-design-459a56.surf.computer/"
@@ -281,6 +289,7 @@ const PROJECT_DATA = [
     "team": "dada_64060",
     "xLabel": "@dugd127411",
     "xUrl": "https://x.com/dugd127411",
+    "xAvatarUrl": "https://pbs.twimg.com/profile_images/2043592270805659648/X0IEh6us_normal.jpg",
     "repoUrl": "https://github.com/Mario11761/Renaiss-Card-Story",
     "demoUrls": [
       "https://youtu.be/Jwf34no3iHc?si=FuYS4Oo8QhKB1Ong"
@@ -315,6 +324,7 @@ const PROJECT_DATA = [
     "team": "@arr_kr",
     "xLabel": "@arr_kr",
     "xUrl": "https://x.com/arr_kr",
+    "xAvatarUrl": "https://pbs.twimg.com/profile_images/2047841486390345728/zohX5mRw_normal.jpg",
     "repoUrl": "https://github.com/Arrkr/vinci-vault-battle",
     "demoUrls": [
       "https://arrkr.github.io/vinci-vault-battle/"
@@ -366,15 +376,447 @@ const PROJECT_DATA = [
     "team": "falloutfushe",
     "xLabel": "@crypto_fallout",
     "xUrl": "https://x.com/crypto_fallout",
+    "xAvatarUrl": "https://pbs.twimg.com/profile_images/1978825036288106496/nKUxUChC_normal.jpg",
     "repoUrl": "https://github.com/ifallout101i-renaiss/renaiss-alpha-radar",
     "demoUrls": [
       "https://youtube.com/shorts/pQobmyCMXOE?feature=share"
     ],
+    "auditStatus": "BLOCK",
+    "votingAccess": "READY",
     "pitch": "面向 Renaiss RWA 生态的 AI 资金情报系统，用于发现低估资产、追踪巨鲸并生成实时 Alpha 预警。",
     "description": "Renaiss Alpha Radar 是一款专为 Renaiss RWA 生态系统打造的 AI 智能资金情报系统。\n\n它监控市场活动、收藏品走势和市场信号，以发现被低估的资产、追踪巨鲸的行为，并为收藏家、交易者和社群生成实时 Alpha 预警。",
     "renaissRelation": "Renaiss Alpha Radar 以 Renaiss 生态系统为核心，利用生态系统数据、市场活动、可收集信息和交易信号构建而成。\n\n该项目将 Renaiss 数据源与人工智能驱动的分析相结合，将原始的生态系统活动转化为可执行的情报。\n\n它展示了如何利用 Renaiss 开发工具、CLI 功能和可收集数据来创建全新的原生人工智能 RWA 体验。",
     "testInstructions": "Judges can test the project by cloning the GitHub repository:\n\ngit clone https://github.com/ifallout101i-renaiss/renaiss-alpha-radar.git\n\nInstall dependencies:\n\npip install -r requirements.txt\n\nRun:\n\npython renaiss-alpha-radar.py\n\nThe terminal will start the Renaiss Alpha Radar monitoring engine and display real-time scanning activity.\n\nThe project can also be verified through the provided demo video.",
     "judgeNotes": "Renaiss Alpha Radar 致力于为 Renaiss RWA 生态系统构建智能层。\n\n它不仅展示区块链数据，更通过人工智能分析、机会检测和社区警报，将生态系统活动转化为可执行的洞察。\n\n该项目旨在让 RWA 市场更易于理解，并方便收藏家和交易者参与。"
+  },
+  {
+    "id": "tilik",
+    "name": "Tilik",
+    "track": "Tool",
+    "team": "hajislamet",
+    "xLabel": "@BangDropID",
+    "xUrl": "https://x.com/BangDropID",
+    "repoUrl": "https://github.com/PugarHuda/tilik",
+    "demoUrls": [
+      "https://tilikrip.vercel.app"
+    ],
+    "pitch": "An independent EV, odds-transparency, price-scanning, and on-chain provenance tool for Renaiss gacha packs.",
+    "description": "Tilik is an independent EV & odds-transparency tool for Renaiss gacha card packs. Renaiss packs advertise only the top prize — never the expected value or the odds. Tilik shows the realistic EV, the distribution of the last 30 real pulls, an honest verdict (that factors in P(profit), not just the mean), and a fairness cross-check of Renaiss' own FMV against an independent, sale-based estimate — plus a Monte Carlo \"should I rip?\" simulator, an independent price scanner (cert or slab photo), and on-chain provenance. For collectors who want to know their rip before they rip.",
+    "renaissRelation": "Tilik is built entirely on Renaiss dev tools. It reads pack data (rip price, stated EV, featured card, the last 30 real pulls, and marketplace listings) from the official Renaiss CLI (npx renaiss), and cross-checks Renaiss FMV against independent, sale-based valuations from the Renaiss OS Index API (/v1/graded/{cert} plus the by-image SSE endpoint for photo identification). It also surfaces each card's real BNB Chain transfer/mint/sell events, linked to BscScan — substantiating Renaiss' \"verifiable on-chain\" claim. It's pro-ecosystem: transparent gacha builds collector trust, giving Renaiss the third-party credibility a first-party calculator never could. Independent valuations are attributed to \"Renaiss OS Index\"; every figure is labeled an estimate.",
+    "testInstructions": "No setup needed — open the live demo: https://tilikrip.vercel.app\n• Landing → \"Check a Pack\" opens the app dashboard.\n• Packs: switch OMEGA / RenaCrypt / Eden — EV vs Renaiss' stated EV, honest verdict, value histogram, tier odds, and a compare-all-packs table.\n• Scanner: click a cert chip (instant, cached), paste any PSA/CGC/BGS cert, or \"📸 identify from a photo\" of a slab (streams live progress).\n• Simulator: drag the rips slider → Monte Carlo P&L distribution.\n• On-chain: BscScan-linked events.\nData is a committed snapshot, so the demo works even offline. To run locally: npm install && npm run dev. npm run check runs the engine self-tests. Optional partner Index access via RENAISS_API_KEY / RENAISS_API_SECRET env vars.",
+    "judgeNotes": "\"Tilik\" is Javanese/Indonesian for to inspect/peek carefully — \"nilik dulu sebelum rip.\" Everything is a clearly-labeled estimate, never presented as verified fact; the tone is pro-collector, not a watchdog. Data sources, assumptions, and limitations are documented in-app and in the repo (README + SUBMISSION.md). Built solo. Not affiliated with Renaiss; not financial advice."
+  },
+  {
+    "id": "wurp-arena",
+    "name": "Wurp Arena",
+    "track": "Game",
+    "team": "patlu_sh",
+    "xLabel": "@elaaa_prasad",
+    "xUrl": "https://x.com/elaaa_prasad",
+    "repoUrl": "https://github.com/wurli-sh/wurp-arena",
+    "demoUrls": [
+      "https://www.youtube.com/watch?v=PO9-z_q96Uc"
+    ],
+    "pitch": "A 2D arena fighter that turns on-chain Renaiss NFTs into combat loadouts for ranked or CPU battles.",
+    "description": "Wurp turns your on-chain Renaiss NFTs into 2D arena fighters. Card tier, grade, and collection depth determine your combat loadout. Queue ranked matches (classic or chaos) with ELO settled on BSC testnet, or practice vs CPU. Built for Renaiss collectors who want to battle their cards.",
+    "renaissRelation": "Wurp reads from RenaissRegistry (BSC mainnet) to gate ranked play — only cards you own can queue. It pulls on-chain tokenURI metadata for grade/set/tier → matchmaking and loadout. It integrates the Renaiss OS Index API for experimental slab signal (high/elite bands grant bonus Damage charges in combat). Built using the Renaiss CLI during development, with a pnpm slab:inspect command that mirrors the server's loadout math.",
+    "testInstructions": "Quick spar (no wallet, no setup):\npnpm install && pnpm dev\nOpen http://localhost:5173 -> click Quick Spar -> pick a mock card and fight CPU. Server defaults to OWNERSHIP_MODE=testnet so 4 mock cards (Mona Lisa diamond, Starry Night platinum, etc.) are available immediately.\nFull featured (wallet):\n1. Copy .env.example → .env (defaults work for local dev)\n2. pnpm dev starts server (:3000) + web (:5173)\n3. Connect wallet on BSC mainnet chain 56 — any wallet with a Renaiss NFT can queue ranked\n4. Practice vs CPU uses the same card loadout logic with your wallet's cards\n5. pnpm test runs unit tests across sim, protocol, renaiss, server, and Foundry contracts\n6. pnpm slab:inspect previews how Renaiss OS Index slab bands map to combat loadouts",
+    "judgeNotes": ""
+  },
+  {
+    "id": "tgpoke-renaiss",
+    "name": "Tgpoke (with Renaiss)",
+    "track": "Game",
+    "team": "MOONYU",
+    "xLabel": "@moonyu_myu",
+    "xUrl": "https://x.com/moonyu_myu",
+    "repoUrl": "https://github.com/yys5584/renaiss-tcg-bot",
+    "demoUrls": [
+      "https://t.me/TGPoke_Renaiss_bot",
+      "https://t.me/+jR4IMfNGqTZiYTBl",
+      "https://tgpoke.com/renaiss"
+    ],
+    "pitch": "A Telegram group card-catching game whose persistent collection and season pool are powered by Renaiss Index data.",
+    "description": "Renaiss Collector Bot is a Telegram group game for TCG collector communities. Players type \"c\" to join a public blind card catch, optionally guess a hidden market reference, watch the group reveal, and build a persistent in-game collection. It turns card-market learning into a lightweight social game without trading, cash balances, or physical/NFT ownership.",
+    "renaissRelation": "The bot is built directly on the Renaiss Index API and collector data. It resolves card identity and market references through /v1/search and card-detail endpoints, and audited the public sitemap plus every /v1/sets/{game}/{set} listing to build a PSA 10 catalog of 8,600+ positive-priced Pokémon and One Piece assets. 90-day trade volume from /v1/cards/{game}/{set}/{card}/trades drives a quota-based 1,000-card season pool (high value / high volume / cheap-active / diversity), so gameplay reflects real market activity, not just price.\n\nA market reference must pass exact-identity, freshness, confidence, source-count, HTTPS-source, and valuation-method gates before it can affect any scored experience. Verified prices and images are cached in PostgreSQL and refreshed twice daily under a lease, so the live game loop never blocks on the API and stays within partner rate limits. Every card reveal deep-links back to the Renaiss card page, converting group play into collector traffic for the Renaiss ecosystem.",
+    "testInstructions": "Requirements: Python 3.10 or later. No Telegram, PostgreSQL, or Renaiss credentials are required for the standard review and test path.\n\ngit clone --branch codex/renaiss-collector-pilot-hardening https://github.com/yys5584/renaiss-tcg-bot.git\ncd renaiss-tcg-bot\npython -m venv .venv\n\n# macOS / Linux\n.venv/bin/python -m pip install -r requirements-dev.txt\n.venv/bin/python -m pytest tests -q\n\n# Windows\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements-dev.txt\n.\\.venv\\Scripts\\python.exe -m pytest tests -q\n\nFor a no-credential feature smoke test, set RENAISS_SKIP_DB=1 and follow the \"Local smoke test\" section in renaiss_bot/RUNBOOK.md. Mock API data is always marked non-competitive and cannot affect scored features.\n\nRunning the live Telegram experience requires a dedicated Telegram bot, an official test supergroup, an isolated PostgreSQL database, and optionally approved Renaiss Partner API credentials. Copy renaiss_bot/.env.example to .env and follow the database fingerprint, preparation, preflight, and release-gate steps in renaiss_bot/RUNBOOK.md. We do not publish test tokens or production credentials.",
+    "judgeNotes": "This is an independent Renaiss community collaboration prototype, not an official Renaiss product. Cards are in-game collection records only; the project does not grant physical-card or NFT ownership, execute trades, hold funds, or provide investment advice.\n\nMarket references are experimental. A price must pass exact identity, freshness, confidence, source-count, HTTPS-source, and valuation-method checks before it can affect a scored experience; otherwise the card remains collection-only.\n\nThe project ships fail-closed feature flags, database target fingerprint pinning, PostgreSQL concurrency protection, idempotent result handling, release gates, health checks, and 600+ automated tests. The companion collection website (Korean-first with English switching, anonymous completion leaderboard, and a beginner guide) is served from renaiss_bot/web in this same repository and is live at https://tgpoke.com/renaiss."
+  },
+  {
+    "id": "renaiss-air",
+    "name": "Renaiss AIR",
+    "track": "Tool",
+    "team": "@mo0oj412 @naborii @tenoli0424",
+    "xLabel": "@w0w_zzang_",
+    "xUrl": "https://x.com/w0w_zzang_",
+    "xAvatarUrl": "https://pbs.twimg.com/profile_images/1693913857201446912/R4rE6EeU_normal.jpg",
+    "repoUrl": "https://github.com/tenoli750/RenaissAirFinal",
+    "demoUrls": [
+      "https://renaissair.xyz/"
+    ],
+    "pitch": "An all-in-one gacha simulator, pack-EV dashboard, cross-market comparison, watchlist, and portfolio platform.",
+    "description": "This all-in-one platform brings together the features we believe would enhance the Renaiss experience. Users can explore Renaiss gacha through an interactive simulator, while checking Infinite Gacha Pack EV, current contents, and recent pulls in one place. The platform also compares Renaiss listings with major marketplaces such as SNKRDUNK and ALT, helping users make more informed trading decisions. With Watchlist alerts, users can track desired cards and price targets without constantly monitoring the market. Finally, a personal portfolio lets users manage both Renaiss and privately owned cards, tracking purchase prices, estimated values, and returns.",
+    "renaissRelation": "Our project is an all-in-one platform designed to improve the overall Renaiss user experience by combining gacha analytics, market comparison, watchlist tools, and portfolio management in one place.\n\nThe platform connects with Renaiss-related data and tools to let users explore Renaiss gacha through an interactive simulator, while also checking Infinite Gacha Pack EV, current pack contents, and recent pull activity. It also uses card and trading data to compare Renaiss listings with major marketplaces such as SNKRDUNK and ALT, helping collectors evaluate prices and make more informed trading decisions.\n\nIn addition, users can create watchlists for specific cards and price targets, reducing the need to constantly monitor the market. A personal portfolio feature allows collectors to manage both Renaiss assets and privately owned cards, including purchase prices, estimated values, and returns.\n\nOverall, the project acts as a collector-focused analytics and management layer built around the Renaiss ecosystem, making Renaiss data more accessible, practical, and useful for everyday collectors and traders.",
+    "testInstructions": "Our website is available at https://renaissair.xyz/.\n\nThe Watchlist, Portfolio, and Renaiss World features can be tested after creating an account. Other features, including Renaiss listing data and Web2 marketplace price comparisons, are available without logging in.",
+    "judgeNotes": "For One Piece listings, BGS-graded cards are more dominant in the market, so price data sourced from ALT may currently be less accurate. We plan to continue improving and refining this feature as we build."
+  },
+  {
+    "id": "renaisslens-oojae",
+    "name": "RenaissLens",
+    "track": "Tool",
+    "team": "oojae_",
+    "xLabel": "@_OoJae",
+    "xUrl": "https://x.com/_OoJae",
+    "repoUrl": "https://github.com/OoJae/renaisslens",
+    "demoUrls": [
+      "https://youtu.be/FGXSA1rTzK0",
+      "https://renaisslens-production.up.railway.app/studio"
+    ],
+    "pitch": "A reproducible pack-EV and market-intelligence dashboard with fairness analysis, listing anomalies, and provenance certificates.",
+    "description": "RenaissLens is a pack expected-value and market-intelligence dashboard for renaiss.xyz, built for collectors deciding whether to rip a gacha pack. It answers one question — \"is this pack +EV, or am I donating?\" — honestly, from public data only. EV is always a range (P10–P90 from a two-layer Monte Carlo that resamples the odds themselves), every parameter is labeled observed / inferred / assumed, and below 20 observed pulls the verdict is \"insufficient data\" — it refuses to invent a number. Around that core: a market desk (sales pulse + two-sided listing-anomaly radar), a fairness observatory (observed per-tier pull frequencies with Wilson confidence intervals, reconciled against Renaiss's claimed EV), an optional AI explainer that must cite the page's own numbers and refuses buy/sell advice, and a brand layer where every graded listing gets a shareable certificate of observed provenance (/vault → /proof). Useful to collectors first — and to Renaiss itself as an independent market-health lens.",
+    "renaissRelation": "Built entirely on Renaiss Protocol surfaces, read-only and polite:\n\n- Renaiss public API (api.renaiss.xyz — the same API the official npx renaiss CLI wraps): /v0/packs, /v0/packs/{slug} and /v0/marketplace power pack pricing, the empirical pull feed, and graded-listing data. The client exposes only GET wrappers — write endpoints are unreachable by construction.\n- Renaiss trading data: the homepage \"Latest Activities\" sales feed is parsed (with a Playwright DOM fallback) into a categorized sales pulse and a two-sided listing-anomaly radar — listings priced far from Renaiss's own FMV, in both directions.\n- Renaiss OS Index API (api.renaissos.com, partner-keyed): every graded listing is cross-referenced against the independent Index by exact company·grade·set·number·language match — never fuzzy — and divergences between Renaiss FMV and Index price are shown with attribution. The same cross-reference appears on each object's /proof certificate.\n- Collector/card tools: each graded card's on-chain token_id becomes a shareable certificate of observed provenance — identity, grade, custody, price history, Index cross-check, and a SHA-256 content seal from the underlying scrape snapshot.\n- Ecosystem-forward: the Fairness tab does the honest half now (observed outcomes with confidence intervals) and reserves a cryptographic pull-verification section that activates the day Renaiss open-sources its provably-fair commitment scheme.\n- Polite citizen throughout: identified RenaissLens-Hackathon/1.0 UA, one serial request queue with ≥2s spacing, capped backoff honoring Retry-After.",
+    "testInstructions": "Zero setup — it's live (kept up through judging by a 15-minute uptime canary):\n\n1) Start at https://renaisslens-production.up.railway.app/studio (scroll — the slab authenticates), then \"Enter the vault\".\n2) Dashboard: https://renaisslens-production.up.railway.app/ — note EV is a range and some packs honestly say \"insufficient data\". Open /packs/omega for the Monte Carlo histogram, five-scenario sensitivity ladder, labeled assumptions, and the \"Explain it like a collector\" button (AI explainer — live and keyed on the deployment).\n3) /market (sales pulse, anomaly radar, Renaiss OS Index panel) · /fairness (observed outcomes vs claimed EV) · /vault → click any slab → its /proof certificate · /standard and /methodology (the limitations section is deliberately the longest) · /api/health (live status JSON).\n\nLocal run (no accounts, no keys, no env vars, no network): git clone https://github.com/OoJae/renaisslens && cd renaisslens && pnpm i && pnpm dev — boots offline from committed demo snapshots (Node 22+, pnpm). Optional: pnpm scrape for one polite live ingestion cycle; pnpm test runs the 195-test suite; the AI explainer button only renders if you set the explainer env vars from .env.example. There is no auth anywhere — nothing to log into.",
+    "judgeNotes": "Honesty is the design principle, not a disclaimer: EV is never a single number, \"insufficient data\" is a verdict the tool is proud to return, mispriced listings are called \"anomalies\" (never arbitrage or advice), the AI explainer's not-financial-advice caveat is appended by the server regardless of what the model outputs, and the seeded RNG makes every published number reproducible from the same data state. No wallets, no auth, no cookies, no tracking."
+  },
+  {
+    "id": "card-platform-analysis",
+    "name": "card_platform_analysis",
+    "track": "Tool",
+    "team": "crypto0xgoblin",
+    "xLabel": "@Crypto0XGoblin",
+    "xUrl": "https://x.com/Crypto0XGoblin",
+    "xAvatarUrl": "https://pbs.twimg.com/profile_images/1980268779675553792/sniM2sxc_normal.jpg",
+    "repoUrl": "https://github.com/goblin0xcrypto/card_platform_analysis",
+    "demoUrls": [
+      "https://docs.google.com/document/d/1p9Hff0U1inbvNoYXX2eixH6g4q_K5Dj3RmFHhHkgYEk/edit?tab=t.0#heading=h.8tt154mdot0f"
+    ],
+    "pitch": "An on-chain card-platform analysis framework covering pack contracts, fund flows, bot detection, and wash-volume estimation.",
+    "description": "卡牌平台的鏈上分析框架。從開包合約抓取、金流追蹤、機器人偵測到自刷量估算",
+    "renaissRelation": "卡牌平台鏈上交易數據收集與分析",
+    "testInstructions": "可以參考 ANALYSIS_SOP.md 詳細流程",
+    "judgeNotes": "renaiss 分析：https://docs.google.com/document/d/1p9Hff0U1inbvNoYXX2eixH6g4q_K5Dj3RmFHhHkgYEk/edit?tab=t.0#heading=h.8tt154mdot0f\nMNSTR 分析：https://docs.google.com/document/d/1-21BM7BsYXogbRyJfNasQKtXHxg4uy1BOJBlcTmEuu8/edit?tab=t.0"
+  },
+  {
+    "id": "renaiss-dashboard",
+    "name": "Renaiss Dashboard",
+    "track": "AI",
+    "team": "buranne.0908",
+    "xLabel": "@Gailvlun0908",
+    "xUrl": "https://x.com/Gailvlun0908",
+    "xAvatarUrl": "https://pbs.twimg.com/profile_images/2036808056424816640/RvZvhxXx_normal.jpg",
+    "repoUrl": "https://github.com/GGGGGailv/Renaiss_dashboard",
+    "demoUrls": [
+      "https://youtu.be/xwhsRXTG6wQ"
+    ],
+    "pitch": "A Renaiss card-market dashboard for prices, listings, historical sales, activity, charts, trends, and card details.",
+    "description": "Renaiss Card Market Dashboard is a market analytics tool designed for card collectors and traders in the Renaiss ecosystem. It uses the Renaiss CLI to retrieve card prices, marketplace listings, historical sales, and activity data, then presents them through intuitive price charts, trend analysis, and individual card detail pages.\n\nThe project helps users quickly evaluate current card values, understand price movements, and identify better opportunities for collecting and trading.",
+    "renaissRelation": "This project is a card market visualization tool built around data from the Renaiss Protocol ecosystem. It primarily uses the Renaiss CLI to retrieve marketplace listings, individual card details, pricing information, transaction history, and activity data. By calling commands such as marketplace, card <tokenId>, and packs, the application organizes fragmented card data into a searchable, filterable, and visual interface.\n\nThe project converts current listing prices, FMV estimates, historical sales, and activity records into price charts and trend analysis. This helps collectors quickly evaluate a card’s current market value, understand price movements, and identify potential trading opportunities. Users can also view information such as card grade, set, owner, pack details, and market circulation, improving transparency and decision-making within the Renaiss ecosystem.\n\nIn the future, the project plans to integrate the Renaiss Index API and additional collector, sales, and market-depth data. Planned features include price alerts, unusual price movement notifications, portfolio valuation, and community trending-card rankings, with the goal of becoming a practical analytics tool that connects Renaiss Protocol data, collectors, and trading activity.",
+    "testInstructions": "1. Clone the GitHub repository and enter the project directory:\ngit clone <YOUR_GITHUB_REPOSITORY_URL>\ncd Renaiss-card-market-dashboard\n\n2. Create a virtual environment:\npython -m venv .venv\n\n3. Activate the virtual environment:\n# Windows\n.venv\\Scripts\\activate\n\n# macOS / Linux\nsource .venv/bin/activate\n\n4. Install the required dependencies:\npython -m pip install -r requirements.txt\n\n5. Start the Streamlit application:\npython -m streamlit run app.py\n\n6. Open the local URL shown in the terminal, usually:\nhttp://localhost:8501\n\nTesting with Real Renaiss Data\n\nTo test the application with live Renaiss data, make sure the Renaiss CLI is installed and accessible from the terminal:\n\nrenaiss --version\n\nThe application uses Renaiss CLI commands such as:\n\nrenaiss marketplace\nrenaiss card <tokenId>\nrenaiss packs\n\nThese commands are used to retrieve marketplace listings, card details, prices, activity history, and pack information.\n\nTest Account\n\nNo additional test account is required.\n\nIf the Renaiss CLI is unavailable in the reviewer’s environment, the application can still be tested by selecting Mock Data mode from the sidebar. This mode allows reviewers to explore the main features, including card filtering, price charts, trend analysis, marketplace data, and individual card details.",
+    "judgeNotes": "Wishing Renaiss continued success and growth."
+  },
+  {
+    "id": "csr-renaiss-slab-king",
+    "name": "CSR (Creating Something IN RENAISS)",
+    "track": "Game",
+    "team": "chamdom410, nftkira, semo_web3, dydy9855, _bluedragon",
+    "xLabel": "@_chamdom_, @Crypto_Monkeyys, @degen_kirakira, @ariadne__kim, @myway10041004",
+    "xUrl": "https://x.com/_chamdom_",
+    "repoUrl": "https://github.com/tmdry4530/renaiss-slab",
+    "demoUrls": [
+      "https://renaiss-slab-production.up.railway.app/"
+    ],
+    "pitch": "A multiplayer card-matching puzzle game that teaches PSA grades, card value, and digital ownership with real Renaiss data.",
+    "description": "Renaiss Slab King is a multiplayer card-matching puzzle game that utilizes real Renaiss card data.\nWhile playing short, intuitive games, users naturally learn about collecting concepts such as PSA grades, card values, and digital ownership, and can immediately check out any cards that pique their interest on the Renaiss Marketplace.\nThis project offers a gaming-based collecting experience to new users who are interested in TCGs and card collecting but are unfamiliar with grading, market prices, and on-chain ownership, as well as to casual users encountering Renaiss for the first time.",
+    "renaissRelation": "1. You can log in and play the game using an X account or Web3 wallet linked to Renaiss. (Coming in a future update)\n2. Card images and information used in the game are retrieved via the Renaiss API.\n3. On Card Dex, you can view each card’s FMV, card details, and Renaiss Marketplace links. If you’re interested in a card you’ve discovered in the game, you can go directly to that card’s Renaiss Marketplace page.",
+    "testInstructions": "1. Access the demo link\n2. Create Room: Create a room where you can play with community members. (You can choose between Pokémon and One Piece modes.)\n3. Gameplay: Play through a map featuring various content, use items, and collect cards in the game.\n5. Check the Card Dex: View the list of cards you’ve collected through gameplay in the lobby.\n6. There are five map modes — Choose Pokémon or One Piece, then play across five map modes: Normal, Rolling, Victory, and Shanghai.",
+    "judgeNotes": "The key to a Web3 project is attracting new users and getting them to use the product consistently, and I hope the game we’ve created will play a key role in that."
+  },
+  {
+    "id": "resona",
+    "name": "Resona",
+    "track": "Tool",
+    "team": "Lord_Cybrox",
+    "xLabel": "@ManuelChuk89697",
+    "xUrl": "https://x.com/ManuelChuk89697",
+    "repoUrl": "https://github.com/cybroxgottalent/resona",
+    "demoUrls": [
+      "https://youtube.com/shorts/_DYa0VNrhZY?si=kZDIRX8EtkyRPR3N"
+    ],
+    "pitch": "An emotion-driven collectible discovery platform with cinematic reveals, live Renaiss verification, and direct listing links.",
+    "description": "Resona is an immersive collectible discovery platform that reimagines how collectors explore trading cards. By combining emotion-driven recommendations, cinematic interaction design, and real-time marketplace verification through the Renaiss Index API, Resona transforms traditional browsing into a memorable discovery experience. The platform delivers curated card recommendations, premium reveal animations, and direct deep links to individual Renaiss listings, demonstrating how storytelling and thoughtful user experience can create deeper engagement with digital collectibles.",
+    "renaissRelation": "Resona explores a new interaction layer for the Renaiss ecosystem. Instead of building another marketplace, it uses the Renaiss Index API to verify collectibles, enrich recommendations with live market data, and deep-link users directly to the exact Renaiss listing. By combining Renaiss infrastructure with a cinematic, emotion-driven discovery experience, the project demonstrates how the protocol can enable entirely new ways for collectors to discover, engage with, and acquire trading cards, while laying the foundation for future gamified and community-driven experiences.",
+    "testInstructions": "1. Open the live Vercel deployment.\n2. Click \"How do you feel?\" and select any available mood.\n3. The application will curate and reveal a matching collectible through a cinematic animation.\n4. Click \"Acquire\" to verify that it opens the corresponding Renaiss collectible page in a new browser tab.\n\nFor local development:\n\nnpm install\nnpm run dev\n\nThen open http://localhost:3000.\n\nNo authentication or test accounts are required.",
+    "judgeNotes": "Resona is an exploration of how collectible discovery can evolve beyond traditional marketplace interfaces. This submission focuses on user experience, emotional engagement, and seamless integration with the Renaiss ecosystem, demonstrating how protocol infrastructure can power entirely new collector experiences. While this MVP emphasizes discovery, it also lays the foundation for a larger vision of gamified collectible journeys, interactive storytelling, and community-driven experiences built on Renaiss."
+  },
+  {
+    "id": "pullev",
+    "name": "PullEV",
+    "track": "Tool",
+    "team": "ola_nuel",
+    "xLabel": "@ola_nuell",
+    "xUrl": "https://x.com/ola_nuell",
+    "repoUrl": "https://github.com/Manuel-dev01/pullEV",
+    "demoUrls": [
+      "https://pullev.vercel.app/",
+      "https://www.youtube.com/watch?v=2mFQuAnavfQ"
+    ],
+    "pitch": "A sourced pack-EV engine and independent client-side Merkle-proof verifier for Renaiss Infinite Gacha.",
+    "description": "PullEV makes Renaiss's Infinite Gacha provably fair and EV-transparent — so you decide with math and proof instead of trust. It answers the two questions every ripper asks, and grounds every number in a labeled source:\n\n1.) \"Should I rip this pack?\" a live expected-value verdict (EV vs cost, the full value distribution, and chance of profit), computed by PullEV's own deterministic engine from 100% real Renaiss Index prices.\n\n2.) \"Was my pull fair?\" an independent, client-side Merkle-proof verifier that recomputes a draw's inclusion proof in your own browser, checked against Renaiss's real on-chain merkle root. You trust the chain and your own math, not us.\n\nWho it's for: collectors/rippers (decide with a sourced EV + verify fairness themselves), builders and the Renaiss Tool Directory (a reusable client-side verifier + a strictly-grounded AI pattern), operators/vaults/RenaissOS nodes (an independent transparency layer over the packs they run), and the wider Renaiss community (labeled, independent evidence the flagship is fair and EV-transparent).",
+    "renaissRelation": "PullEV targets the heart of Renaiss, Infinite Gacha is the core revenue mechanic, so making it transparent makes the flagship itself transparent. It plugs directly into Renaiss primitives:\n\n- Renaiss Index API (beta) is PullEV's FMV oracle. Every card price is a real Index valuation sourced via cert lookup, structured-card lookup, and search and it also consumes the Index's market indices and price-history series. It prices a ~148-card real graded-card library (One Piece + Pokémon) that the pack pools are built from.\n\n- Real on-chain fairness. For the 12 sealed packs, PullEV reads Renaiss's genuine committed merkle root from the gacha contract on BNB Chain via getMerkleRoot(packId) and shows a BscScan link so anyone can reproduce the lookup. The client-side verifier targets Renaiss's Merkle-proof + ZK fairness structure directly.\n\n- Reads only, never transacts. No wallet, no writes; it complements the on-chain layer (SBT identity, RenaissOS verification nodes) rather than duplicating it, and is safe to run against the live ecosystem.",
+    "testInstructions": "App: https://pullev.vercel.app\nEngine health: https://pullev-engine-production.up.railway.app/api/health\n\nSuggested 90-second flow:\n\n1.) Landing: the featured pack's live EV console (edge, chance of profit, distribution). Every figure is labeled.\n\n2.) Launch app → The Floor — 15 real packs (3 live Infinite + Champion + 11 sold-out previous), each with a live edge. Tap one.\n\n3.) X-Ray Bay — EV vs cost, value distribution, the \"what is loaded\" draw bands, per-card LIVE price tags. Open \"Under the hood\" to see the glass-box EV computation (the exact EV = Σ chance × avg sum + an inputs fingerprint hash).\n\n4.) Rip → Proof Vault (the money shot) — watch the Merkle proof recompute in your browser → VERIFIED; toggle the tampered example → MISMATCH. For sealed packs, see Renaiss's real on-chain root + the BscScan link.\n\n5.) AI advisor orb — ask \"should I rip this pack?\" (cited answer) and something off-topic (it refuses).\n\n6.) /vault — the ~148-card real library with price-history sparklines. /value — look up any PSA/CGC/BGS cert.",
+    "judgeNotes": "nil"
+  },
+  {
+    "id": "jcompany",
+    "name": "Jcompany",
+    "track": "Tool",
+    "team": "ssiberry",
+    "xLabel": "@wlstn7189",
+    "xUrl": "https://x.com/wlstn7189",
+    "repoUrl": "https://github.com/SSiberry/07-03renaiss",
+    "demoUrls": [
+      "https://youtu.be/uWvPCpMTUho"
+    ],
+    "pitch": "Vault is an AI-assisted trading-card grading workspace for centering, defects, counterfeit risk, identification, market price, and PDF reports.",
+    "description": "Vault is an AI-powered trading card grading assistant that predicts PSA, BGS, and CGC grades from photos of trading cards such as One Piece Card Game and Pokémon cards. Users simply upload images of their cards, and Vault precisely measures centering (left/right and top/bottom margins) at the pixel level using computer vision, automatically detects surface defects such as scratches, whitening, and dents (with support for manual correction and comparison with the original image), analyzes edge and corner wear, and uses Gemini AI to identify the card while retrieving real-time market prices from SNKRDUNK and PSA Population Report data. All of these results are combined into a comprehensive grade prediction report that can be exported as a PDF. Vault runs entirely in the browser with no installation required and supports English, Korean, Japanese, and Chinese.\n\nI know that there are already applications that measure card centering. However, I wanted to build something that is genuinely useful in real-world situations by adding features such as whitening and scratch detection, counterfeit detection, instant market price lookup, and PSA 10 Population Report data in one place.\n\nThe idea came from my own experience visiting card shops. I realized that even when a valuable card is available, competition is so intense that you often have only a few seconds to decide whether to buy it. Instead of checking multiple websites or relying solely on visual inspection, Vault allows users to instantly analyze centering, whitening, scratches, and counterfeit risk while simultaneously viewing the card's current market value and PSA 10 population. This makes it much easier to determine whether a card is fairly priced and make faster, more informed purchasing decisions than other buyers.\n\nVault is designed for collectors who want to estimate a card's grade before submitting it to professional grading services, buyers and sellers who want to quickly evaluate a card's condition and market value before a transaction, and anyone who wants a free preliminary assessment before paying official grading fees and waiting several weeks for the results.",
+    "renaissRelation": "Vault uses the Renaiss Index API as its primary source for card pricing and identification data. When a user uploads a card photo, Gemini AI first identifies the card number, name, and other details, then immediately attempts to retrieve matching information from the Renaiss Index API.\n\nCertificate lookup (/v1/graded/{cert}) — If the card has already been graded by PSA, BGS, or CGC and a certification number is recognized, Vault queries Renaiss directly using that certificate number to retrieve the official grading result and current market value.\n\nCard number/name lookup (/v1/cards/search) — For raw (ungraded) cards, Vault searches the Renaiss Index using the identified card number and name.\n\nImage-based lookup (/v1/graded/by-image) — If text recognition is uncertain, Vault sends the card image itself to the Renaiss API and performs image matching to identify the card.\n\nWhen Renaiss successfully returns card information such as the card name, set, grade, and estimated value, this data is displayed first in the report's Card Info panel. However, because the Renaiss Index database is still relatively limited in size, searches—especially for Japanese-market One Piece and Pokémon cards—may not always return results.\n\nTo address this limitation, Vault automatically falls back to a real-time price search through SNKRDUNK whenever the requested card is unavailable in Renaiss or the lookup fails. It also incorporates population data from alt.xyz, allowing the report to include both market value and graded population statistics.\n\nThis creates a hybrid card information and pricing system that uses Renaiss as the primary data source while seamlessly supplementing missing coverage with additional providers when necessary.",
+    "testInstructions": "Note: This project is Windows-only and requires PowerShell 5.1 or later. If you're using macOS or Linux, you won't be able to run it locally. Please refer to the demo video instead.\n\n1. Prerequisites\n- Windows with PowerShell 5.1 or later\n- .NET 8 SDK (required for the high-precision centering measurement engine)\n- A free Google AI Studio Gemini API key: https://aistudio.google.com/app/apikey\n\n2. Clone the Repository\ngit clone https://github.com/SSiberry/07-03renaiss.git\ncd 07-03renaiss\n\n3. Configure the API Key\nCopy .env.example to .env.local, then set:\nGEMINI_API_KEY=YOUR_API_KEY\nGOOGLE_CLOUD_PROJECT= (optional)\nGOOGLE_CLOUD_LOCATION=us-central1\n\n4. Start Both Servers (Required)\nTerminal 1 — Main Application:\npowershell -ExecutionPolicy Bypass -File serve.ps1\nRuns at http://localhost:7000\n\nTerminal 2 — Centering Measurement Engine (C#/OpenCV):\ndotnet run --project centering-engine/CenteringEngine.csproj --urls http://localhost:5080\nRuns at http://localhost:5080\n\n5. How to Test\n1. Open http://localhost:7000.\n2. Select English, Korean, Japanese, or Chinese.\n3. Upload a card image.\n4. The app performs image-quality checks, centering analysis, surface/edge/corner inspection, and report generation; both servers must remain running.\n5. Open Report and click Identify Card with Google AI to verify Gemini recognition, Renaiss Index lookup, and SNKRDUNK market-price fallback when applicable.\n6. Click Export PDF.\n\nNo test account or login is required. If you cannot run the project locally, please use the demo video first.",
+    "judgeNotes": "I’d like to honestly share some of the challenges and trade-offs I encountered while building this project.\n\nThroughout development, I repeatedly learned that “having AI make a reasonable guess” is very different from “performing an accurate measurement.” I initially implemented card centering using AI estimation and JavaScript pixel scanning, but the results often differed from real-world measurements, so I replaced the approach with a deterministic C# computer-vision engine based on OpenCV. It measures the printed borders at pixel level and proved much more reliable.\n\nSurface scratch detection still has clear limitations. For holographic and Secret Rare cards with detailed artwork, a heuristic based on one photo cannot perfectly distinguish scratches from reflections or complex backgrounds. I therefore added original-image comparison with a before/after slider and brightness-difference highlighting so human verification is easier and more trustworthy.\n\nThe Renaiss Index database also has limited card coverage, so the project uses real-time SNKRDUNK prices when Renaiss cannot find a match. As Renaiss grows, this supplemental path should become less necessary.\n\nThe original vision was mobile-first, enabling instant card evaluation at shops or trades. To meet the deadline, I focused on a stable desktop version first, while camera capture and leveling assistance are already responsive; further mobile optimization is planned. Local execution is currently Windows-only, and surface-defect detection remains under active improvement. The priority was not a quick impressive demo, but measurements users can genuinely trust."
+  },
+  {
+    "id": "renaiss-collector-assistant",
+    "name": "Renaiss Collector Assistant",
+    "track": "AI",
+    "team": "blueskylh",
+    "xLabel": "@blueskylh1",
+    "xUrl": "https://x.com/blueskylh1",
+    "repoUrl": "https://github.com/blueskylh/Renaiss-Collector-Assistant",
+    "demoUrls": [
+      "https://www.youtube.com/watch?v=JvZRrjviPjc"
+    ],
+    "pitch": "An AI Agent Skill for natural-language card search, wallet analysis, pull tracking, sequential-cert discovery, and FMV/Index spread scans.",
+    "description": "Renaiss Collector Assistant 是一个面向 Renaiss 收藏家和社区成员的 AI Agent Skill。用户可以用自然语言查询卡牌、分析钱包、追踪开包、发现 PSA 连号机会，并扫描 FMV / Index 价差机会。它让不懂代码的用户也能通过对话方式使用 Renaiss 数据和工具。",
+    "renaissRelation": "本项目连接并使用了 Renaiss 生态的多类数据与工具，包括 Renaiss CLI、Marketplace 卡牌数据、Renaiss OS Index API、FMV / top offer / last sale 数据，以及 BSC 链上钱包数据。\n它可以帮助用户查询 Renaiss 卡牌信息、扫描市场折价机会、寻找 Sequential Cert / PSA 连号机会、用 Index API 对比参考价格，并分析 Renaiss 钱包的开包、buyback、marketplace 买卖、迁移和 SBT 持仓。",
+    "testInstructions": "推荐让 AI Agent 读取安装文档：\n请先阅读并遵守 AGENT.md，然后阅读 AGENT_INSTALL.md，帮我安装 Renaiss-Collector-Assistant skill：\nhttps://github.com/blueskylh/Renaiss-Collector-Assistant/blob/main/AGENT.md\nhttps://github.com/blueskylh/Renaiss-Collector-Assistant/blob/main/AGENT_INSTALL.md\n然后运行钱包分析、PSA 连号扫描、Index 查询等 README 中的示例命令。README 首页也包含产品宣传视频和演示截图。",
+    "judgeNotes": "这个项目的核心目标是降低 Renaiss 生态的数据使用门槛。用户不需要理解 API、链上交易或复杂脚本，只需要用自然语言提问，就可以获得卡牌、钱包、市场机会和 SBT 相关分析。"
+  },
+  {
+    "id": "tasteforge",
+    "name": "TasteForge",
+    "track": "AI",
+    "team": "@emer_xch",
+    "xLabel": "@emer__eth",
+    "xUrl": "https://x.com/emer__eth",
+    "repoUrl": "https://github.com/emer-eth/tasteforge",
+    "demoUrls": [
+      "https://tasteforge.vercel.app/",
+      "https://x.com/emer__eth/status/2075939781201047796?s=20"
+    ],
+    "pitch": "An AI taste layer that turns live holdings and collector signals into an archetype, taste vector, and personalized Renaiss marketplace discovery.",
+    "description": "TasteForge is an AI taste layer for Renaiss. Collectors paste a BNB wallet (and optionally social notes or a short taste form).\nThe app builds a 10-dimension taste vector and collector archetype from live holdings and signals, then recommends Best Overall and Best Value cards from the live Renaiss marketplace—with explanations, portfolio snapshot, and a path to buy on Renaiss.\n\nWho it’s for: Renaiss card holders who want smarter next buys, and new/non-holders who want personalized discovery without already owning cards.",
+    "renaissRelation": "TasteForge plugs into Renaiss Protocol via the live marketplace API (listings, FMV, asks, owners) and read-only BNB wallet checks. We scan collector holdings and the live catalog, score cards with AI taste vectors, and send users to Renaiss card pages to buy. Serial-pair style discovery is inspired by Renaiss community card tools. We’re the taste layer; Renaiss remains the marketplace and protocol of record.",
+    "testInstructions": "Open https://tasteforge.vercel.app or https://tasteforge.vercel.app/?wallet=0x378ffaaf220ac102ea5c29bddcff1a16a2cab731&analyze=1 — wait for analysis, then check archetype, holdings portfolio, Best Overall/Best Value, and Ask AI Any Question. No account needed. Repo: https://github.com/emer-eth/tasteforge",
+    "judgeNotes": "TasteForge isn't a recommender it's a mirror. Instead of telling you what to buy, it reads your on-chain cards and tells you who you are as a collector, then points you to the Renaiss cards that fit.\n\nIt runs entirely on live data, works even for newcomers with no cards (just share your taste), and every pick opens the real Renaiss listing, so it drives demand into the marketplace. Zero integration cost, no API key, built to plug straight into Renaiss."
+  },
+  {
+    "id": "renaiss-library",
+    "name": "Renaiss Library",
+    "track": "Tool",
+    "team": "Shawn_bw",
+    "xLabel": "@Shawnn_moon",
+    "xUrl": "https://x.com/Shawnn_moon",
+    "xAvatarUrl": "https://pbs.twimg.com/profile_images/2033109625260883968/83x3sXvh_normal.jpg",
+    "repoUrl": "https://github.com/Shawnn22/Renaiss-Library",
+    "demoUrls": [
+      "https://drive.google.com/drive/folders/1UmYMNxYGzDmB0SKsNA9dewfF6qg9j5Ft?usp=sharing",
+      "https://psa-tracker-sigma.vercel.app/collections"
+    ],
+    "pitch": "A graded-Pokémon portfolio tracker that scans PSA slabs, verifies certificates, prices through Renaiss Index, and tracks live value and P&L.",
+    "description": "Renaiss Library is a portfolio tracker for graded Pokémon cards. You just take a photo of your PSA slab — the app finds the label, verifies the cert against PSA's official database, prices it through the Renaiss Index, and drops it into your collection with live value and P&L. It's built for collectors who own real slabs and want one clean place to see what they have, what it's worth, and what's moving in the market — no spreadsheets, no signup, no guesswork.",
+    "renaissRelation": "Renaiss is at the heart of every layer of the app. Card search, cert lookups, and valuations all run through the Renaiss Index API, with confidence tiers shown right in the UI. There's a one-click \"Sync with Renaiss\" that re-matches your entire collection against the Index and refreshes every price.\n\nThe Market page streams cards that are listed for sale on renaiss.xyz right now — we parse the live marketplace feed server-side and automatically flag cards priced below Renaiss FMV. And the featured cards, indices, and recent trades panels are all powered by Renaiss endpoints too. Basically: if there's a number in the app, it probably came from Renaiss.",
+    "testInstructions": "Easiest way: open the live demo link — no account or setup needed, everything is stored locally in your browser. Hit \"Load demo data\" on the Collections page to instantly get a full portfolio to play with. Then try the fun parts: go to Add Card and upload any PSA slab photo (or use ours in the repo) and watch it get PSA-verified automatically; or try \"Add by Cert #\" with cert 115965538 — it pulls the card straight from PSA's database. Press \"Sync with Renaiss\" inside any collection to see live re-pricing, and check the Market page for the real-time renaiss.xyz feed.\n\nTo run locally: npm install, copy .env.local.example to .env.local with your Renaiss API key, then npm run dev. Full steps and quality gates (typecheck, security scan, build) are in the README.",
+    "judgeNotes": "Our vision is for Renaiss Library to become the single home for TCG collectors across both worlds on-chain and off-chain. Real collections are hybrid today: some slabs sit in a binder at home, others are vaulted and tokenized on Renaiss.\n\nRenaiss Library gives collectors one place to see, control, and value everything they own — physical cards verified through PSA's cert database, on-chain cards priced and matched through the Renaiss Index and marketplace — with the provenance of every number clearly labeled.\n\nThe app also keeps collectors in the flow of the market: a live feed of cards listed on the Renaiss marketplace (with automatic undervalued-vs-FMV detection) and a TCG news ticker, so users don't just store their collection. They stay informed and act on it. Next steps on our roadmap: portfolio value snapshots over time, wallet connection to auto-import tokenized cards, and one-tap listing to the Renaiss marketplace directly from your collection.\n\nEverything in the demo is live data no mocks: Renaiss Index API, renaiss.xyz marketplace listings, and PSA cert verification."
+  },
+  {
+    "id": "renaisslens-yanyuan",
+    "name": "RenaissLens",
+    "track": "AI",
+    "team": "evan_yan",
+    "xLabel": "@yanyuan888",
+    "xUrl": "https://x.com/yanyuan888",
+    "repoUrl": "https://github.com/YanYuanFE/renaisslens",
+    "demoUrls": [
+      "https://renaisslens.vercel.app/",
+      "https://youtu.be/x3HYmy3InE4"
+    ],
+    "pitch": "A Renaiss Index research suite for card search, anomaly detection, grading break-even, watchlists, collection analysis, and read-only MCP access.",
+    "description": "Search cards, surface market anomalies, model grading break-even, compare a watchlist, and expose the same intelligence to AI agents through MCP—all powered by Renaiss Index data.",
+    "renaissRelation": "RenaissLens is built directly on top of the Renaiss Index API. It transforms Renaiss collector and trading data—including card search, reference prices, confidence, grade data, recent trades, market indices, and certificate lookup—into practical market-research tools for collectors.\nBeyond displaying the data, RenaissLens derives Deal Quality Scores, grade comparisons, anomaly signals, grading break-even scenarios, watchlist comparisons, collection scans, and data-quality reports. It also exposes these capabilities through a read-only MCP endpoint, allowing AI agents to access Renaiss-powered card intelligence safely. Renaiss remains the underlying data source, while RenaissLens makes that data easier to interpret, compare, and use without providing financial advice.",
+    "testInstructions": "No account or wallet connection is required. Open the hosted demo:\nhttps://renaisslens.vercel.app/\nSuggested test flow:\nReview the live Market Pulse on the homepage.\nSearch for pikachu and open “Pikachu with Grey Felt Hat.”\nExplore the Deal Quality Score, anomaly signals, Grade Ladder, and Grading Break-even calculator.\nAdjust the assumed PSA 10 rate to test different grading scenarios.\nAdd multiple cards to the Watchlist and try Research Comparison, Collection Scan, and Data Doctor.\nTest certificate lookup with PSA99170568.\nFor the agent integration, open the MCP page and click “Check endpoint.” It should return six read-only tools for card search, snapshots, grading break-even, certificate lookup, indices, and recent trades.\nJudges can click “Copy JSON” and add the configuration to any Streamable HTTP MCP-compatible agent, including Claude, Codex, or OpenClaw:\n{\n  \"name\": \"renaiss-index\",\n  \"transport\": \"streamable-http\",\n  \"url\": \"https://renaisslens.vercel.app/api/mcp\"\n}\nAfter connecting, try prompts such as:\n“Search Renaiss for Pikachu with Grey Felt Hat.”\n“Analyze this card’s market snapshot and anomalies.”\n“Calculate its grading break-even with a $25 fee.”\n“Show the latest Pokémon index and recent trades.”\nNo API key, test account, payment, or transaction signing is required.",
+    "judgeNotes": "RenaissLens is intentionally tool-first and AI-assisted—not a chatbot or trading bot. The core research features, scores, anomaly detection, grading break-even calculations, and batch analysis are deterministic and inspectable. AI is used only to explain the underlying evidence more clearly.\nThe grading calculator does not predict a card’s grade. Its probability slider represents the collector’s own assumption, while the break-even result is calculated from current Renaiss-tracked prices. Likewise, the project never provides buy, sell, or return recommendations.\nMarket values may change because the application uses live Renaiss data. AI explanations also include a deterministic fallback, so the core experience remains usable if an AI provider is unavailable.\nMost importantly, RenaissLens is not limited to its web interface: the read-only MCP endpoint turns the same Renaiss-powered intelligence into reusable infrastructure for Claude, Codex, OpenClaw, and other MCP-compatible agents."
+  },
+  {
+    "id": "team-index",
+    "name": "Team Index",
+    "track": "Tool",
+    "team": "sirdrey",
+    "xLabel": "@dreyethh",
+    "xUrl": "https://x.com/dreyethh",
+    "repoUrl": "https://github.com/enoch208/index",
+    "demoUrls": [
+      "https://useindex.vercel.app/",
+      "https://youtu.be/uD57yAcbpVM"
+    ],
+    "coverUrl": "/assets/projects/team-index.webp",
+    "auditStatus": "PASS",
+    "votingAccess": "READY",
+    "pitch": "An AI agent layer that turns Renaiss marketplace, pack, portfolio, FMV, and on-chain data into research, valuation, verification, and safer trade tools.",
+    "description": "Index is an Ai powered layer built on Renaiss that helps collectors and agents research,value,verify and safely trade real world collectible. It turns fragmented marketplace,pricing,pack and on-chain data into structured tools both humans and Ai can use \n\nWith Index, collectors can :\n\n◉value assets in a wallet\n◉find underpriced listings \n◉compare buying vs pulling from packs \n◉calculate pack expected value \n◉verify custody and onchain data \n◉generate safe trade proposals \n\n\nRenaiss brings collectives on-chain, index gives them intelligence ",
+    "renaissRelation": "index is an AI agent layer built on Renaiss Protocol data.\n\nIt turns Renaiss listings, pack odds, portfolios, FMV history, and on-chain pool commitments into 9 tools that AI agents can use through an open MCP server.\n\nKey tools include:\n\n* Pack expected value and risk\n* Rip-or-buy recommendations\n* Mispriced listing detection\n* Portfolio valuation\n* Market insights\n* On-chain Merkle root verification\n\nEvery result includes its source, timestamp, and limitations. index also includes The Curator, a collector-focused AI agent, and an agent-to-agent trading demo.\n\nIt works with live Renaiss data when API access is provided and uses clearly labeled snapshot data for offline judging.",
+    "testInstructions": "Requirements: Node.js 20+. No account or API key is required.\n\ngit clone https://github.com/Enoch208/Index\ncd Index\nnpm install\nnpm test\nnpm run dev\n\nThe test suite should show 42 passing tests. Open:\n\nhttp://localhost:3000/dashboard\n\nJudges can test:\n\n* Curator chat\n* Portfolio valuation\n* Mispricing scanner\n* Rip-or-buy analysis\n* Pack EV\n* Fairness verification\n\nSample data:\n\n* Wallet: 0xdemo\n* Pack: eden-pack\n* Cards: charizard-base-psa9-014, eevee-heroes-psa10-001\n\nRun the MCP server with:\n\nnpm run mcp\n\nOptional environment variables enable live Renaiss data, AI chat, and on-chain verification.\n\nLive demo: https://useindex.vercel.app",
+    "judgeNotes": "Nil"
+  },
+  {
+    "id": "dokipoki",
+    "name": "Dokipoki",
+    "track": "Tool",
+    "team": "jacker42001, asobi.cc",
+    "xLabel": "@dokipokiapp",
+    "xUrl": "https://x.com/dokipokiapp",
+    "repoUrl": "https://github.com/bouob/renaiss-demo",
+    "demoUrls": [
+      "https://merchant.dokipoki.app/"
+    ],
+    "coverUrl": "/assets/projects/dokipoki.webp",
+    "auditStatus": "PASS",
+    "votingAccess": "READY",
+    "pitch": "A merchant copilot that turns Renaiss market and inventory data into Promote, Hold, and Clear decisions for trading-card stores.",
+    "description": "Merchant Copilot is a merchant-facing dashboard for trading card stores that turns Renaiss market data into actionable selling decisions. It helps shop owners understand market conditions, compare their inventory against the broader market, identify which cards to feature or promote, and spot which cards are better to hold or clear.",
+    "renaissRelation": "Index data: Show overall market conditions for card shops.\nFMV series: Compare store inventory performance against the broader market.\nCard-level market data: Identify high-potential cards for featuring and promotion.\nTrading data: Surface cards with real momentum and liquidity.\nGraded card lookup: Support fast valuation and merchant decision-making.\nMarket signals: Convert live card data into Promote, Hold, and Clear actions.\nMarket infrastructure: Power a merchant-facing intelligence and inventory decision tool.",
+    "testInstructions": "The app is built as a two-page merchant experience:\n\n1. Dashboard: shows market conditions, featured cards, promotion candidates, fast-selling cards, and inventory cards that are outperforming or appearing in index movers.\n2. Inventory: shows merchant inventory with cost, pricing, market comparison, relative strength, trade-history demos, and Push / Hold / Clear suggestions.\n\n---\nJudges can explore the demo using the preloaded hackathon data.\nRecommended test flow:\n1. Open Dashboard and review the market index and recommended cards.\n2. Check which cards are flagged for promotion, fast-selling, or special attention.\n3. Open Inventory and inspect individual cards, market comparison charts, and suggested actions.\n4. Review how inventory cards are classified into Promote, Hold, and Clear.",
+    "judgeNotes": ""
+  },
+  {
+    "id": "renaiss-collector-console",
+    "name": "YJAY / Renaiss Collector Console",
+    "track": "Tool",
+    "team": "younjae_",
+    "xLabel": "@yunjae44024216",
+    "xUrl": "https://x.com/yunjae44024216",
+    "repoUrl": "https://github.com/YounJae-H/renaiss-collector-console",
+    "demoUrls": [
+      "https://t.me/RenaissPackBot"
+    ],
+    "coverUrl": "/assets/projects/renaiss-collector-console.webp",
+    "auditStatus": "PASS",
+    "votingAccess": "READY",
+    "pitch": "A Telegram and dashboard operations layer that turns community participation into Renaiss Credits, campaign packs, collections, rankings, and analytics.",
+    "description": "Renaiss Collector Console is a community operations tool for collector campaigns. Telegram participation earns Renaiss Credits, Credits open Campaign Packs, and packs create fictional Renaiss Slab Card collection records. Collectors get a visual pack-opening flow, grouped collection, rankings, and a display-only BNB Chain wallet link, while community administrators manage campaign probabilities and eligibility rules from bot DM and review outcomes in a dashboard.",
+    "renaissRelation": "The project is built for the Renaiss collector economy as a community operations layer. It converts community engagement into a measurable collector loop: Credits, Campaign Packs, fictional Slab Card drops, collections, rankings, and campaign analytics. The dashboard also integrates the public Renaiss OS Index featured-cards endpoint as clearly attributed, beta market-reference context. Renaiss Index data is kept separate from the prototype's fictional off-chain drops, and the UI documents the source, assumptions, and limitations.",
+    "testInstructions": "Fast live demo: open https://t.me/RenaissPackBot and send /start. Create or use a Telegram group, add the bot, and as that group's Telegram administrator run /allowchat. Send 'renaiss settings' in the group, then in the bot DM send 'renaiss settings' and select the group. The DM panel can set Activity Credit chance, card-tier chances, Pack Booster bonus/duration, cooldown, minimum message length, card names, stock, and duplicate-win rules. In the group, use 'renaiss', 'renaiss credits', 'renaiss open pack', 'renaiss collection', 'renaiss drops', and 'renaiss rank'. Full operator guide: https://github.com/YounJae-H/renaiss-collector-console/blob/main/docs/COMMAND_REFERENCE.md#dm-settings-panel . Local web demo: clone the repo, run 'cd dashboard', 'npm install', and 'npm run dev', then open http://127.0.0.1:3001/guide. No database is required for the built-in demo data. An offline bot transcript is available with 'python demo_bot_flow.py'.",
+    "judgeNotes": "All demo cards and artwork are original fictional Renaiss campaign assets. The MVP is intentionally off-chain: no minting, wallet signing, custody, token transfer, physical-card claim, or marketplace listing. BNB Chain wallet support is display-only. The Renaiss OS Index API is beta/experimental and may be incomplete, delayed, or unavailable; the dashboard fails safely and labels it as reference data. The repository contains no bot token, database URL, private community data, or production credentials."
+  },
+  {
+    "id": "vinci-appraiser",
+    "name": "Vinci Appraiser",
+    "track": "Game",
+    "team": "uruzuy",
+    "xLabel": "@mikae_luv",
+    "xUrl": "https://x.com/mikae_luv",
+    "repoUrl": "https://github.com/mikaelaMolina/vinci-appraiser",
+    "demoUrls": [
+      "https://vinciappraiser.creates.works/"
+    ],
+    "coverUrl": "/assets/projects/vinci-appraiser.webp",
+    "auditStatus": "PASS",
+    "votingAccess": "READY",
+    "pitch": "A pixel-art action RPG that teaches RWA due diligence through live Renaiss cards, FMV checks, SBT provenance, and multi-signature custody.",
+    "description": "Vinci Appraiser is a pixel-art action RPG that gamifies Web3 onboarding. Instead of reading whitepapers, players fight in arenas to earn gold and spend it at a shop stocked with real collectible cards pulled live from the Renaiss marketplace API. To buy safely, players must run three on-chain checks, FMV Oracle, SBT provenance, and multi-sig custody, learning what these mean in plain language. Verified cards boost your stats; fake ones weaken you. We turn RWA due diligence from a chore into a core gameplay mechanic.",
+    "renaissRelation": "Vinci Appraiser is built directly on the Renaiss Index API, pulling live marketplace listings so the in-game card shop is stocked with real collectible cards instead of placeholders. Each card carries real data from Renaiss, including fair market value, owner address, vault location, PSA grade, grading company, and ask price. This data drives both the gameplay and the learning built into it.\n\nThe game models three core Renaiss concepts as in-game checks. The FMV Oracle check compares a card's price to its fair market value, teaching players how price oracles prevent overpaying. The SBT provenance check looks at the owner address on a card to show how soulbound tokens prove ownership history. The vault multi-sig check ties custody requirements to card grade, showing how multi-signature vaults secure higher-value assets.\n\nCard images come straight from Renaiss's marketplace data, with the Pokemon TCG API used only as a backup when an image is missing. Grade and price data also set the shop's pricing tiers and the stat bonuses cards give when equipped, so the in-game economy reflects Renaiss's real marketplace rather than a made-up one.\n\nFuture phases push this connection further, with real SBT registry lookups, actual Gnosis Safe multi-sig checks, and eventually letting an in-game purchase trigger a real RWA mint on the Vinci World smart contract, turning the game into an actual entry point into the protocol.",
+    "testInstructions": "Judges can try Vinci Appraiser directly at https://vinciappraiser.creates.works/. No login, wallet, or credentials of any kind are needed, just open the link and play.\n\nQuick walkthrough:\n1 In Town, use WASD to move and enter the Arena, Shop, or Home (Space).\n2. In the Arena, pick a floor and fight using WASD, click/Space to attack, Shift to dodge.\n3. Earn gold, then head to the Shop to browse real cards pulled live from the Renaiss marketplace API.\n4. Click Inspect on a card to run it through the FMV Oracle, SBT Provenance, and Vault Multi-Sig checks, then Buy or Pass.\n5. Go to Home to equip cards and watch Power Level update, then return to the Arena to see harder floors unlock.",
+    "judgeNotes": "Vinci Appraiser started as my attempt to make Web3 verification concepts click for newcomers, because I'm one myself. I learned how Renaiss and its verification systems work by actually building with them, rather than just reading documentation, and that shaped the whole design of the game: every check the player runs is also a concept I had to learn first. This is a working prototype proving the core loop, real data driving both gameplay and education, and I have a clear roadmap toward real SBT lookups, Gnosis Safe integration, and on-chain minting in future phases. I want to commend this initiative for giving newcomers like me a genuinely approachable way into a space that can otherwise feel intimidating, and that's exactly the approachability I'm trying to extend further with this project."
+  },
+  {
+    "id": "cardscene",
+    "name": "Cardscene",
+    "track": "Game",
+    "team": "@joh3729 , @kikiundo, @ariii0770, @crypto20226",
+    "xLabel": "@cryptohypegirl0",
+    "xUrl": "https://x.com/cryptohypegirl0",
+    "repoUrl": "https://github.com/dadaclub/renaiss",
+    "demoUrls": [
+      "https://cardscene.vercel.app/"
+    ],
+    "coverUrl": "/assets/projects/cardscene.webp",
+    "auditStatus": "PASS",
+    "votingAccess": "READY",
+    "pitch": "An interactive 3D collector room that turns Renaiss cards, SBTs, social visits, and mini-games into an immersive spatial showcase.",
+    "description": "CardScene is an interactive 3D spatial collection showcase web application designed for TCG card collectors.\n\nBreaking away from rigid, traditional list or grid-based UIs, CardScene allows users to explore their collections within a fully realized, cozy gamer’s room. Users can naturally interact with various objects in the room—such as card storage units, computers, albums, and guestbooks—to experience their card collections, SBTs, mini-games, and more, all within an environment that shifts its atmosphere based on real-time day and night cycles.\n\nRather than just displaying cards, CardScene aims to create a next-generation social space for collectors, offering a sense of true ownership (my actual room) and deep immersion (visiting a friend's room).",
+    "renaissRelation": "CardScene is a UI/UX layer project that actively utilizes Renaiss Protocol’s public APIs to organically connect on-chain and off-chain data with an interactive 3D space.\n\nCollector Data Integration:\nBy utilizing the User API (/v0/users/{id}), we sync the user's profile and avatar (avatarUrl), ensuring any profile changes are automatically reflected inside the room.\n\nWe fetch the user's designated Showcase cards (favoritedCollectibles) and Favorite SBTs (favoritedSBTs) to place them as core display elements in the room, rendering a 100% real data-driven, personalized space. (We also support tokenId-based loading for users who haven't set up a Showcase yet.)\n\nIf no Favorite SBT data is found, we have implemented a fallback logic that directly queries the on-chain SBT contract on the BNB Smart Chain to guarantee data continuity.\n\nCard Tools & Physical Card Support:\nWe use the Marketplace API (/v0/marketplace) and Card API (/v0/cards/{tokenId}) to retrieve total collections and metadata—such as card images, rarity, and FMV (Fair Market Value)—and seamlessly map them onto the photo frames and album objects inside the room.\n\nBeyond digital collections, the application supports the registration and exhibition of Physical Cards. Furthermore, we provide a standalone \"Gallery Mode\" tool, allowing users to fully immerse themselves in the card's visuals and metadata alone.\n\nCommunity Tools & Game Experiences (Multi-room):\nWe offer a Multi-room environment where users can visit other rooms simply by entering another Renaiss user's profile UUID.\n\nThis transforms CardScene into a social and community hub within the Renaiss ecosystem, enabling users to visit friends' rooms, explore their actual Showcases and SBTs, leave guestbook messages, and enjoy mini-games together.",
+    "testInstructions": "1. Live Demo Access\n\nYou can instantly test the live application via the following link: https://cardscene.vercel.app/\n\nIf you prefer to run the project locally, please refer to the README file in our GitHub repository: https://github.com/dadaclub/renaiss\n\n2. Authentication & Entry\n\nFor a seamless judging experience, we have implemented a Mock Authentication system. You can bypass complex wallet connections or registration steps—simply click the login button on the main screen to instantly enter the dashboard and 3D room with a demo account.\n\n3. Core Test Scenarios\n\nDesk Figures (Community Ecosystem Links): Clicking each figure lined up to the right of the computer monitor redirects you to the Renaiss ecosystem and its respective community channels:\n\nLinks: Renaiss Official Site (https://www.renaiss.xyz/), Founder Winchman's X (https://x.com/Plus_Ultra_715), Renaiss Discord (https://x.com/Plus_Ultra_715), Renaiss Community X (https://x.com/Renaiss_cmty), and Vinci World X (https://x.com/vinciwld).\n\nComputer Monitor (Mini-game): Click on the PC monitor on the desk to launch and play the classic arcade-style \"Winchman Run\" 2D platformer mini-game.\n\nOpened Notebook on the Bottom-Left Floor (Guestbook & Multi-room): Click on the opened notebook lying on the floor to the left of the chair to open the Guestbook. Clicking on the profile (home) icon of any user who left a message will instantly transition the environment to that specific user's room, dynamically loading their actual Renaiss Showcase and SBT data.\n\nSBT Album Book Stack on the Bottom-Right Floor (SBT Viewer): Click on the stack of books on the floor to the right of the chair to view the user's actual earned SBT collections.\n\nShowcase Shelf & Frames (Card Collection): Click on the cards displayed on the large shelf on the left or the frames on the wall to explore Renaiss API-driven card metadata and enter the dedicated Gallery Mode.",
+    "judgeNotes": "Visual Details Shifting with Time (Real-time Day/Night Cycles)\n\nTo make users feel like this space is truly \"their own room,\" we custom-implemented a visual system where the room's lighting and color temperature automatically shift between day and night modes based on the user's actual real-time clock.\n\nHandling of Physical Card Price Data (Overcoming Constraints)\n\nOur project supports the registration and visualization of both digital and physical cards. However, for physical card live-price lookups, we encountered paid tier limitations with external specialized APIs. To prevent UI breaking and ensure a high-fidelity visual experience during judging, we strategically hard-coded certain core price data points for the demo. We kindly ask for your understanding regarding this implementation detail.\n\nUltimate Vision of the Project\n\nRather than duplicating existing wallet or trading functionalities, CardScene focuses on leveraging Renaiss Protocol's robust data infrastructure to present a next-generation social UI/UX paradigm where collectors can visualize and share their assets in the most engaging and immersive way possible."
+  },
+  {
+    "id": "pullprophet",
+    "name": "Team PullProphet/ PullProphet",
+    "track": "AI",
+    "team": "pause_codm",
+    "xLabel": "@pause2k22",
+    "xUrl": "https://x.com/pause2k22",
+    "repoUrl": "https://github.com/ibrahimadewuyi/PullProhet",
+    "demoUrls": [
+      "https://pull-prohet-web.vercel.app/"
+    ],
+    "coverUrl": "/assets/projects/pullprophet.webp",
+    "auditStatus": "REVIEW",
+    "votingAccess": "READY",
+    "pitch": "A deterministic expected-value engine and AI analyst for live on-chain gacha pools, loot boxes, and Renaiss card packs.",
+    "description": "PullProphet is a real-time expected-value engine and AI analyst for on-chain gacha pools, loot boxes and card packs, on BNB Chain. Advertised odds become fiction the moment a finite pool starts draining, so PullProphet reads each pool's live on-chain inventory and real secondary market floor prices to continuously recompute the true expected value of the next pull, then delivers a plain-language +EV / −EV verdict. Its defining guarantee: the AI never does the maths; every number comes from a deterministic engine, and it is traced and cryptographically signed on-chain. It is built for collectors and traders deciding whether a pull is worth it, and as a transparency layer for an on-chain loot-box economy that regulators are increasingly scrutinising.\n",
+    "renaissRelation": "PullProphet integrates with Renaiss Protocol in two complementary ways. First, it analyses real Renaiss packs through the Renaiss CLI and Packs API (api.renaiss.xyz/v0/packs), reading each pack's advertised price, published expected value (EV), featured-card fair market value (FMV), and stream of recent pulls. It compares Renaiss's published metrics with what players are actually pulling to deliver a grounded +EV / −EV verdict on whether a real pack is worth opening.\nSecond, PullProphet is built directly on the Renaiss OS Index API, which serves as the source of truth for every card price in the system. The Market Data module resolves each card's live secondary market floor price by querying GET /v1/cards/{game}/{set}/{card} and reading priceUsdCents, with card slugs resolved through GET /v1/search. The integration authenticates using an API key and batches and caches requests to respect the Index's rate limits.\nThose live market prices power PullProphet's deterministic expected-value engine using the formula: EV = Σ (remainingᵢ / total_remaining × Renaiss floorᵢ) − pack_cost. As finite pools drain and high-value cards are pulled, the engine continuously recomputes the true expected value based on the remaining inventory and current Renaiss floor prices. A live demo pool, \"Charizard Line\", is seeded with real PSA 10 Pokémon cards resolved from the Renaiss OS Index, including an authentic Charizard chase worth approximately US$431, ensuring every verdict is based on real market data rather than fabricated values.\nBoth integrations support live and reproducible snapshot modes, and every figure is deterministically computed, cryptographically traceable, and directly attributable to Renaiss data. The AI explains the results in plain language, but it never generates or invents the underlying numbers.",
+    "testInstructions": "No installation, wallet, or test account is required The application is live and read-only\n\nOpen the app using the submitted Vercel link On your first visit, allow around 30–60 seconds for the free-tier backend to wake from sleep After that, the application responds normally\n\nThe Market page ranks all four pools by their live on-chain expected-value edge and includes an AI-generated market summary Every numerical value is highlighted and traceable back to the deterministic engine\n\nOpen any pool, such as Pokémon Base Set, Unlimited You will see a plain-language +EV or −EV verdict, followed by the Proof section, which demonstrates that the AI never performs calculations It presents the engine's fact sheet alongside the verdict, verifies every numerical value, traces each figure referenced by the AI, and displays an on-chain EIP-712 attestation that your browser verifies live\n\nUse the What-if Simulator to adjust the number of packs to 5, 20, or 50 and watch the projected profit-and-loss confidence cone and outcome distribution update in real time\n\nTry Ask the Prophet by asking questions such as \"How many pulls until this becomes −EV?\" or \"What happens if the chase card's floor price falls by 30%?\" The AI calls deterministic engine tools to answer, and every numerical value in the response is linked back to the underlying engine output\n\nVisit Pack Prophet to analyse real Renaiss packs, including Eden Pack, OMEGA, and RenaCrypt The page compares each pack's advertised price and expected value with observed pull data to determine whether opening the pack currently represents positive or negative expected value\n\nFinally, verify the on-chain deployment by opening the BNB Chain Testnet contract links Each pool contract is source-verified and links directly to its corresponding BscScan page\n\nWallet connection is entirely optional and is only used to surface pools for which you are eligible All core functionality can be evaluated without connecting a wallet If a verdict is labelled \"deterministic narrator\", Groq's free daily API quota has been exhausted The calculations, proof trace, and verdict remain identical because every figure is produced by the deterministic engine Only the wording changes The live Simulate Crossing feature and Telegram alerts rely on a local blockchain instance and an always-on background worker, so they are demonstrated during the project walkthrough To run the complete interactive version yourself, follow the Run it locally instructions in the repository README",
+    "judgeNotes": "AI narration (Groq / Llama). PullProphet uses Llama 3.3 70B Versatile on Groq's free tier to translate deterministic outputs into plain-language verdicts. Because Groq's free tier has a daily request limit, the application automatically falls back to a deterministic template narrator whenever that limit is exhausted. The underlying engine still computes every figure, so the verdict, calculations, proof trace, and on-chain attestation remain identical. The only difference is that the Proof panel displays \"deterministic narrator\" instead of \"phrased by llama-3.3-70b-versatile\".\nWhale Sniper (Telegram alerts). The bidirectional expected-value crossing detector and Telegram notification bot are fully implemented and tested. However, continuous background workers are not available on Render's free hosting tier, so live Telegram notifications are demonstrated during the project walkthrough rather than running continuously on the deployed application. The hosted dashboard still exposes the same functionality through the Market view, which continuously recomputes expected values, re-ranks pools, and flags those that have just crossed into +EV or −EV, using the same deterministic engine that powers the alert system."
+  },
+  {
+    "id": "pullcast",
+    "name": "PullCast",
+    "track": "Tool",
+    "team": "arefine / Bapin#1108",
+    "xLabel": "@bapeetttt",
+    "xUrl": "https://x.com/bapeetttt",
+    "repoUrl": "https://github.com/louissarvin/PullCast",
+    "demoUrls": [
+      "https://youtu.be/CkyrCXgSS1c",
+      "https://pullcast.vercel.app/",
+      "https://discord.gg/5eRP4efhqa"
+    ],
+    "coverUrl": "/assets/projects/pullcast.webp",
+    "auditStatus": "PASS",
+    "votingAccess": "READY",
+    "pitch": "A read-only Renaiss community client spanning Discord, web, and CLI, with pack share cards, Cert Bridge pricing, trade alerts, and leaderboards.",
+    "description": "PullCast is a read-only community client for Renaiss collectors. It watches Renaiss pack openings on BSC mainnet and turns every pull into a permanent share card that gets auto-posted to Discord and rendered as a public gallery on the web. The headline feature is the Cert Bridge, which chains the Renaiss main API and the Renaiss OS Index API in one command so a collector can look up a graded FMV from either a tokenId or a cert serial without doing two curl calls by hand. On top of that we run a Big Trade Alert cron that polls live graded trades every five minutes and posts an alert embed inside every subscribed Discord server, plus a Pull of the Day leaderboard that ranks the top three net-gain pulls in the trailing 24 hours across all subscribed servers, medaled and updated hourly.\n\nThe product is for Pokemon and One Piece collectors who want an instant brag moment the second a pack opens without leaving Discord, and for Discord server admins who want passive engagement inside their guilds without having to moderate a bot every day. It is also for Renaiss builders who want a reference client that composes every builder surface shipped in Hackathon S1 — the main API, the brand-new OS Index API, and the official CLI — in one envelope with source-cited responses. Delivered as one read-only product on three channels: a Discord bot with nineteen slash commands, a web app with twelve server-rendered routes, and an npx pullcast CLI that mirrors the read verbs of the official renaiss CLI.",
+    "renaissRelation": "PullCast is the first community client that composes all three Renaiss builder surfaces shipped during Hackathon S1. On the main API side we wire six of six read endpoints. GET v0 collectibles by tokenId is the source of truth for every pull the indexer detects, because it carries the buyer address and the slab serial that becomes the input to the Cert Bridge. GET v0 marketplace powers the browse slash command in Discord and the marketplace page on the web, and it mirrors the flag surface of the official renaiss marketplace CLI verb. GET v0 packs seeds the tracked-packs list and the packs slash command. GET v0 wallets by address returns the pulls for a wallet, which powers the public gallery at pullcast.vercel.app slash address. GET v0 graded by cert is the second half of the Cert Bridge chain and enriches the Discord embed with grade and condition metadata. POST v0 report is the write path we do allow, because it is a data-quality feedback loop that helps the beta corpus.\n\nOn the OS Index API side we wire twenty-eight or more endpoints with partner-tier authentication, which gives us ten thousand requests per day per key instead of the ten per day per IP that anonymous callers get. The indices tile group powers the market slash command and the Market page on the web, with a thirty-day sparkline and per-window deltas at seven, thirty, and three hundred sixty-five days. The featured endpoint drives the homepage hero fan of three share cards and the featured slash command. The card slug family covers full card detail with sparklines, a per-grade table, similar cards, and recent trades, all rendered on the card detail page as a serialized waterfall of four requests so we never exceed Renaiss's undocumented per-second burst limit. The trades feed powers the trades slash command, the Live trades page on the web, and the Big Trade Alert worker that polls every five minutes. The graded cert endpoint is the first half of the Cert Bridge on the Index side, cached behind a six-hour Postgres-backed TTL. Search powers the search slash command and the search page. Set listing powers the set slash command with top-five by price and aggregate FMV.\n\nThe Cert Bridge is our headline integration and it is the reason we exist. Renaiss main API identifies cards by tokenId, which is a seventy-eight-digit uint256 on BSC. The OS Index API identifies graded cards by cert serial, like PSA73628064. Before PullCast, chaining them was a manual two-step curl script. PullCast chains them in one endpoint: GET api slash price slash cert slash PSA73628064 returns a blended FMV with a variance flag and cites both upstreams in the response envelope. The same primitive powers price token in Discord, which starts with a tokenId and extracts the serial from Renaiss main API attributes then chains to the Index, price cert in Discord, which starts with a cert and chains both graded endpoints, and the Card Lens page on the web which does either flow in the browser.\n\nFor on-chain reads we go straight to BSC mainnet on chain ID fifty-six via ethers v6, with the primary RPC at bsc.publicnode.com and a fallback at rpc.ankr.com/bsc. We hold read-only handles to three Renaiss contracts: the Registry V3 collectible ERC-721 at 0xF864, the TokenVendingMachine that mints packs at 0x9215, and the Orderbook at 0xdb44. No signer is loaded anywhere in the process, no wallet, no private key, so PullCast literally cannot send a transaction even by accident.\n\nWe also touch collector data, trading data, card tools, community tools, and game experiences in specific ways. Collector data means we track three real wallets at submission time and surface each wallet at pullcast.vercel.app slash the address with an infinite-scroll gallery and OG meta images for shareable link previews. Trading data means the Big Trade Alert cron that polls the Index trades feed every five minutes and has already posted one real alert to our test channel during the build window. Card tools means the Card Lens in Discord and browser, plus the thirty-day FMV sparkline and per-grade table on every card detail page. Community tools means channel-level subscribe and unsubscribe flows, per-channel threshold overrides on alerts, an opt-out registry for wallets that do not want to be tracked, and a profile lookup that bridges Discord identity to Renaiss identity when the collector opts in. Game experiences means Pull of the Day, which is the medaled leaderboard of the top three net-gain pulls in the last twenty-four hours, and CardOfTheDay, which posts the top graded featured mover to every subscribed channel at midnight Asia Hong Kong time.\n\nFor grounded AI we use Groq Llama 3.3 seventy billion via the OpenAI-compatible endpoint. The explain slash command runs a strict citation guard that refuses to publish any answer without at least two cited sources and one citation per paragraph. Predictive questions like should I buy or will it moon refuse before the model is called, which is both a cost saver and a safety boundary. The listing slash command computes the low, mid, and high range deterministically from real Renaiss trades and only asks the LLM to write the reasoning around the numbers. Every response envelope from the backend carries a BETA warning code and cites its upstream URLs, so consumers can re-verify every number against Renaiss without trusting us.",
+    "testInstructions": "There are two paths and both are documented in the repo. The fastest is the live web app which needs zero install. Open a browser and hit http localhost 3200 or the deployed URL if it is up. The landing page shows a fan of three share cards on the right side of the hero. Hover them and they spread apart in three-D with a coordinated animation, which is the fastest way to signal that the app is a real product rather than a demo. Scroll down and you will find the Pull of the Day section with three medaled cards, one gold, one silver, one bronze, showing the top net-gain pulls in the last twenty-four hours from real BSC-indexed data. From there you can click through to slash market for the Renaiss OS Index tiles with the What is a Renaiss OS Index expandable explainer, slash trades for the live cross-market graded trade feed with card thumbnails, slash featured for the top-mover grid, slash stats for the adoption counters and Pull of the Day leaderboard, slash ecosystem for the integration matrix that lists every Renaiss endpoint we wire, and slash 0x72a5c69fb393b81e1cf96255453072a1348b9532 for the wallet gallery of a real address with four indexed pulls.\n\nThe deeper path is a local install which takes about five minutes end-to-end. Prerequisites are Bun one point x, PostgreSQL sixteen, a Discord bot token from the Discord developer portal, and Renaiss OS Index partner keys, which look like rk underscore twenty-seven characters and rsk underscore fifty-two characters. Clone the repo with git clone https github.com slash louissarvin slash PullCast, change into it, then set up the backend. Change directory to backend, run bun install, copy env dot example to env, and fill in DATABASE_URL, DISCORD_BOT_TOKEN, DISCORD_APP_ID, DISCORD_DEV_GUILD_ID which is your test-server snowflake for instant slash command registration, RENAISS_INDEX_KEY_ID which is the twenty-seven character key, RENAISS_INDEX_SECRET which must be exactly fifty-two characters because one missing character silently downgrades you to public tier and you get ten requests per day per IP instead of ten thousand, and GROQ_API_KEY which is only required if you want to test explain, listing, or valuate photo. Then run bun run db push to push the Prisma schema to Postgres, and bun dev to start the backend. You must see four things in the log before you continue. The boot log line renaiss-index partner_auth true. Then five warmed OK lines for indices, indices pokemon, indices one-piece, featured limit twenty-four, and trades recent. Then discord registered nineteen commands scope guild your ID. Then Server started successfully on port 3700. If any of those is missing, the fix is almost always the secret being fifty-one characters instead of fifty-two.\n\nIn a second terminal change to the web directory, run bun install, and bun dev. The web app starts on http localhost 3200. To test the Cert Bridge which is our money shot, invite the Discord bot to your test server, then type slash price cert PSA73628064. Wait about three seconds and you will get a Charizard PSA ten embed with FMV, confidence tier, last-sale timestamp, and a source footer citing both Renaiss main API and Renaiss OS Index. The same Cert Bridge is on the web at slash price where you can paste PSA73628064 and hit search.\n\nTo test the full nineteen-command surface, type just a slash in Discord and let the autocomplete dropdown pop up. You will see every PullCast command listed. Then try a handful in sequence: slash help, slash market, slash market game pokemon, slash featured limit three, slash trades limit five, slash search query luffy, slash browse query charizard, slash packs, slash packs slug eden-pack, slash leaderboard daily, slash valuate cert PSA73628064, slash explain cert cert PSA73628064 question what is the current price and confidence, slash listing cert cert PSA73628064, and slash renaiss for the ecosystem reference embed. Every command returns in under five seconds because the second cert lookup is cached and the market and featured routes are cached for ten and five minutes fresh with a twenty-four times multiplier for stale-serve during upstream jitter.\n\nThe CLI is the Tool track proof. Change directory to backend slash cli, run bun run build, and then PULLCAST_API_URL http localhost 3700 node dist slash pullcast dot mjs trades dash dash limit three. You will see a one-line JSON envelope with success true and a sources array. Same envelope as the REST API. Repeat for marketplace, search luffy, and price PSA73628064.\n\nFor a raw REST verification, curl http localhost 3700 slash health, curl the api slash featured limit three, api slash trades slash recent limit three, api slash marketplace limit three, api slash price slash cert slash PSA73628064, api slash leaderboard slash daily, and api slash market. Every response follows the same envelope with a data field, a sources array, a warnings array containing at least the BETA warning, and a generated_at timestamp. If you pipe any of them through jq dot success you should see true across the board.\n\nA few common setup issues to save time. If the boot log shows warmed FAILED with status four hundred twenty-nine on every endpoint, your partner secret is wrong. It must be exactly fifty-two characters, starting with rsk underscore and ending with underscore I. One missing character silently downgrades you to the public tier which is ten requests per day per IP, so within minutes you hit the daily quota. If slash commands do not appear in Discord, DISCORD_DEV_GUILD_ID is not set. Global commands take up to an hour to propagate; guild-scoped commands are instant. If every route returns Live data paused, Renaiss upstream is rate-limiting your IP. If you are on Cloudflare Warp, switch to DNS only HTTPS mode because Warp exit IPs are shared across thousands of users and get throttled by Renaiss's edge. If Pull of the Day is empty, the leaderboard cron computes hourly so give it an hour or scroll to the Recent pulls section which reads from local Postgres directly.",
+    "judgeNotes": "YOU NEEDED TO JOIN TO MY DISCORD SO WE CAN TESTING THE BOT THAT I CREATED, THIS IS THE LINK DISCORD : \nhttps://discord.gg/5eRP4efhqa\n\nLETS GO TO TRY IT ALL OF THE SLASH\n\nEverything is real and everything is verifiable. The GitHub repository at github.com/louissarvin/PullCast contains two hundred five commits spanning nine days of build. The dot env file exists on disk with the real partner keys but is git-ignored, and only env dot example and env dot test are checked in. At submission time we have four live BSC pulls indexed by the cron worker, three wallets tracked, one real Big Trade Alert already posted to the test channel, and four entries in the Pull of the Day leaderboard computed from the actual LeaderboardSnapshot table. Everything shown in the ninety-second demo video is live on BSC mainnet with no testnet, no mocks, and no seed data.\n\nThe product is read-only end-to-end and this is a deliberate choice. No wallet signing, no custody, no gacha pulls, no listing writes. To buy or list, users hand off to npx renaiss version 0.0.3-beta.2, which is the official CLI, and the official CLI stays the source of truth for state-changing actions. This is what we mean when we say PullCast extends Renaiss rather than replacing it. Every price surface carries a BETA warning code embedded in the response envelope. Every AI answer runs through a citation guard that refuses uncited output and requires at least two sources. Predictive questions refuse before the model is called so we do not spend tokens on a bad question. Rate limiting is atomic per user per command via Postgres-backed token buckets.\n\nWhat makes the build production-shaped rather than demo-shaped is the hardening we added while chasing the real bugs Renaiss upstream throws at you. Partner-tier auth boot probe proves the keys work before any user request lands. Boot warmup with a two-second spacing between five hot endpoints seeds the cache so the first user hitting slash market after a backend restart gets an instant response. The circuit breaker caps its cooldown at five minutes regardless of what Retry-After the upstream sends, because Renaiss occasionally returns multi-hour Retry-After values on transient per-IP burst limits and we refuse to lock ourselves out for fifteen hours when the daily quota is actually fresh. Stale-serve with a twenty-four times TTL multiplier means a partial upstream outage feels like slightly-old data on the tiles rather than a broken app. In-flight coalescing on the card detail routes deduplicates the four waterfall requests, main plus overview plus fmv plus trades, so a rapid navigation across cards never triggers a burst four hundred twenty-nine. Schema drift tolerance means every zod schema uses passthrough with optional fields, which is why when Renaiss added a prime confidence tier mid-beta we only had to bump one enum and every command using confidence kept working.\n\nIf a judge asks what is the one thing you want us to remember, the answer depends on which judge. If they are a builder judge, we solved the Cert Bridge and are the first client that chains Renaiss main API tokenIds with OS Index certs in one command with source-cited responses. If they are a design judge, the hero fan animates in three-D on hover, the market page has a plain-English explainer for what an Index actually is, empty states are dashed panels with real copy instead of spinners, and every surface has beta disclaimers built into the envelope rather than bolted on as a footer. If they are a business judge, Pull of the Day is the retention hook and Big Trade Alerts is the passive engagement layer, and both fire automatically inside every subscribed Discord server so it is zero-effort virality. If they are a safety judge, read-only end-to-end, AI answers require citations or refuse, rate-limiting on every route, beta warnings on every price envelope, and we extend Renaiss rather than replacing it.\n\nOne honest disclosure about the Discord auto share-card. The killer UX moment is a subscribed channel getting an auto-posted share card the second a wallet opens a Renaiss pack. This requires two things: slash pullcast subscribe wallet with a real address that has an active buyer, and a live pack opening within the ninety-second demo window. That timing is fragile for a live judge session, so we lean on Big Trade Alerts in the demo instead, because that cron fires every five minutes from indexed BSC trade data and has already posted a real alert during our test window. If judges want to see the auto share-card end to end, we can arrange a live session where we time it with a wallet we control.\n\nContact is a Discord DM to the bot owner or an issue on the GitHub repository. Everything else is in the repo README."
+  },
+  {
+    "id": "renaiss-nexus",
+    "name": "renaiss nexus",
+    "track": "Tool",
+    "team": "error403kabaaperror",
+    "xLabel": "@youuuxu",
+    "xUrl": "https://x.com/youuuxu",
+    "repoUrl": "https://github.com/dfgsgwegw/renaiss-nexus",
+    "demoUrls": [
+      "https://renaiss-nexus.netlify.app/"
+    ],
+    "coverUrl": "/assets/projects/renaiss-nexus.webp",
+    "auditStatus": "PASS",
+    "votingAccess": "READY",
+    "pitch": "A collector copilot for deal checks, graded-cert intelligence, price watches, market alerts, Telegram delivery, and FMV learning games.",
+    "description": "Renaiss Nexus is a collector copilot for people who buy, sell, and follow graded cards.\n\nCollectors can check a seller offer, inspect a PSA, CGC, or BGS cert, ask normal market questions, create price targets, and receive important market changes directly in Telegram.\n\nThe main idea is to reduce repeated manual checking. A collector should not need to search the same card every day or keep a market dashboard open. Nexus uses available Renaiss data to answer the question now and can keep watching selected conditions afterwards.\n\nThe project also includes FMV Duel, a small game using available indexed card images and reference values to help collectors build market familiarity.",
+    "renaissRelation": "Renaiss Nexus uses Renaiss as the collector data layer behind the product.\n\nWe use the Renaiss OS Index API for card search, featured cards, recent trades, market indices, graded cert lookup, card reference data, card details, trade context, price series, and FMV series.\n\nInstead of exposing raw API results to users, Nexus turns the data into practical collector workflows.\n\nFor Deal Check, a user can give Nexus a graded cert or card and the seller asking price. Nexus checks the available Renaiss reference data, calculates the gap between the ask and the reference, and explains whether the offer is below, near, or above the available reference.\n\nFor Price Drop Watch, users can set a target through Telegram. Nexus stores the watch and checks the available Renaiss reference on a schedule. When the target condition is reached, the user receives a Telegram message.\n\nMarket Mover Alerts and New Card Radar compare the current featured Renaiss Index snapshot with the previously saved snapshot and bring important changes back to the collector.\n\nCert Intelligence uses graded card data to explain a PSA, CGC, or BGS cert in normal collector language.\n\nFMV Duel uses available featured Renaiss card images and reference values to create a simple market learning game.\n\nThe Renaiss developer tools are used by us as builders and data infrastructure. The normal user only sees the collector experience.",
+    "testInstructions": "Open the live demo:\n\nhttps://renaiss-nexus.netlify.app/\n\nA simple test flow is:\n\n1. Ask Nexus:\ncheck PSA52269439\n\n2. Follow up with:\nseller wants $900 for this is that expensive\n\nNexus should keep the recent conversation context and use the available Renaiss data to explain the seller offer.\n\nYou can also try:\n\nshow trending cards\n\nshow recent trades\n\nis Pikachu PSA 10 moving right now\n\nwhat about recent trades\n\nThe website also has a Deal Check page where you can enter a card or cert and a seller asking price.\n\nFor Telegram, open:\n\n@renaiss_nexus_bots\n\nSend /start to open the command menu.\n\nThe bot also supports normal conversation, so you can simply ask:\n\nwhat can you do\n\nis Pikachu PSA 10 moving right now\n\nwhat about recent trades\n\nis it expensive at $900\n\nUseful Telegram shortcuts include:\n\n/deal PSA52269439 900\n\n/cert PSA52269439\n\n/watch Pikachu PSA 10 700\n\n/watchlist\n\n/movers\n\n/movers_on\n\n/radar_on\n\n/daily_on\n\nPrice watches and alert preferences are stored for the Telegram chat. The monitoring function runs on a schedule and checks the available Renaiss data.\n\nFMV Duel can be opened from the Play section. It loads available featured Renaiss card data, shows two card images, and asks the player to choose which card has the higher reference value.\n\nRenaiss Index data is beta, so some cards may have incomplete or unavailable data.",
+    "judgeNotes": "The project started from a very simple collector problem.\n\nPeople repeatedly ask questions such as what is this card, is this seller asking too much, has the market moved, and can someone tell me when this card gets cheaper.\n\nA normal lookup website only solves the question once.\n\nWe wanted Nexus to solve both parts of the workflow.\n\nThe website is where a collector researches a card or checks an offer.\n\nTelegram is where Nexus keeps working after the collector leaves the website.\n\nA user can set a price target once and wait for a message. They can enable market mover alerts or New Card Radar and receive changes directly in the chat they already use.\n\nThe website and Telegram bot use the same Nexus AI flow, so a conversation can feel natural rather than command only.\n\nWe were careful not to present Renaiss reference values as guaranteed sale prices or guaranteed profit. Renaiss Index data is beta and Nexus presents it as reference data with clear limitations.\n\nNew Card Radar specifically monitors new cards appearing in the featured Renaiss Index snapshot. It is not described as a complete feed of every new collection.\n\nOur goal was not to make another generic AI chatbot. The goal was to take Renaiss collector data and turn it into a practical assistant for checking deals, understanding cards, monitoring targets, and receiving important changes without repeatedly checking the same dashboard."
   }
 ];
 
@@ -382,10 +824,18 @@ export const PROJECTS = Object.freeze(
   PROJECT_DATA.map((project) =>
     Object.freeze({
       ...project,
-      coverUrl: `/assets/projects/${project.id}.webp`,
+      coverUrl: project.coverUrl === null
+        ? null
+        : project.coverUrl || `/assets/projects/${project.id}.webp`,
       demoUrls: Object.freeze([...project.demoUrls]),
     }),
   ),
 );
 
 export const PROJECT_IDS = Object.freeze(PROJECTS.map(({ id }) => id));
+
+export const VOTABLE_PROJECT_IDS = Object.freeze(
+  PROJECTS
+    .filter(({ auditStatus }) => auditStatus !== 'BLOCK')
+    .map(({ id }) => id),
+);

@@ -13,6 +13,7 @@
     "start": "node server/index.mjs"
   },
   "dependencies": {
+    "@fontsource-variable/noto-sans-tc": "5.2.10",
     "@fontsource-variable/plus-jakarta-sans": "5.2.8",
     "@fontsource-variable/space-grotesk": "5.2.10",
     "@fontsource/archivo-black": "5.2.8",

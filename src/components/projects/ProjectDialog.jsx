@@ -1,16 +1,24 @@
-import { ArrowSquareOut, GithubLogo, UsersThree, XLogo } from '@phosphor-icons/react';
-import { motion } from 'motion/react';
+import { ArrowRight, CheckCircle, GithubLogo, GlobeSimple, XLogo } from '@phosphor-icons/react';
+import { motion, useReducedMotion } from 'motion/react';
 
+import { useI18n } from '../../i18n/I18nProvider.jsx';
 import {
-  LINEAR_DIALOG_TRANSITION,
-  projectDialogImageLayoutId,
+  PROJECT_DIALOG_EXPAND_TRANSITION,
   projectDialogLayoutId,
   projectDialogTitleLayoutId,
+  projectDialogImageLayoutId,
 } from '../../lib/dialogMotion.js';
 import { Modal } from '../Modal.jsx';
+import { RenaissMetalButton } from '../metal/RenaissMetalButton.jsx';
+import { MOTION_EASE, MOTION_EXIT_EASE } from '../motion/motionTokens.js';
+import { ProjectCover } from './ProjectCover.jsx';
+import { ProjectTeamIdentity } from './ProjectTeamIdentity.jsx';
 
 export function ProjectDialog({ project, open, onClose, onSelect, selected, recorded }) {
+  const { t } = useI18n();
+  const reduceMotion = useReducedMotion();
   if (!project) return null;
+  const securityBlocked = project.auditStatus === 'BLOCK';
   return (
     <Modal
       open={open}
@@ -19,49 +27,95 @@ export function ProjectDialog({ project, open, onClose, onSelect, selected, reco
       className="project-dialog"
       layoutId={projectDialogLayoutId(project.id)}
       titleLayoutId={projectDialogTitleLayoutId(project.id)}
-      transition={LINEAR_DIALOG_TRANSITION}
+      transition={PROJECT_DIALOG_EXPAND_TRANSITION}
     >
-      <motion.img
-        className="project-dialog__cover"
+      <ProjectCover
+        project={project}
+        context="dialog"
         layoutId={projectDialogImageLayoutId(project.id)}
-        transition={LINEAR_DIALOG_TRANSITION}
-        src={project.coverUrl}
-        alt={`${project.name} product preview`}
-        width="1200"
-        height="675"
-        decoding="async"
+        transition={PROJECT_DIALOG_EXPAND_TRANSITION}
       />
       <motion.div
         className="project-dialog__revealed-content"
-        initial={{ opacity: 0, scale: 0.8, y: -40 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.8, y: -50 }}
-        transition={{ duration: 0.34, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+        variants={CONTENT_CONTAINER}
+        initial={reduceMotion ? false : 'hidden'}
+        animate="visible"
+        exit={{
+          opacity: 0.56,
+          scale: 0.98,
+          y: -8,
+          filter: 'blur(2px)',
+          transition: { duration: reduceMotion ? 0 : 0.1, ease: MOTION_EXIT_EASE },
+        }}
       >
-        <div className="project-dialog__intro">
-          <span className={`track-badge track-badge--${project.track.toLowerCase()}`}>{project.track}</span>
-          <span><UsersThree weight="duotone" /> {project.team}</span>
-          {project.xUrl ? <a href={project.xUrl} target="_blank" rel="noreferrer"><XLogo weight="fill" /> {project.xLabel}</a> : null}
-        </div>
-        <p className="project-dialog__lead">{project.pitch}</p>
-        <div className="project-dialog__links">
-          {project.demoUrls.map((url, index) => <a className="button button--secondary" key={url} href={url} target="_blank" rel="noreferrer">{index === 0 ? 'Open demo' : `Demo link ${index + 1}`} <ArrowSquareOut /></a>)}
-          <a className="text-link" href={project.repoUrl} target="_blank" rel="noreferrer"><GithubLogo weight="fill" /> View repository</a>
-        </div>
-        <div className="project-dialog__body">
-          <DetailSection title="About the project" text={project.description} />
-          <DetailSection title="Built for Renaiss" text={project.renaissRelation} />
-          <DetailSection title="How to test it" text={project.testInstructions} />
-          {project.judgeNotes ? <DetailSection title="Participant notes" text={project.judgeNotes} /> : null}
-        </div>
-        <div className="project-dialog__sticky-action">
-          <span>{recorded ? 'This is your recorded vote.' : selected ? 'Selected for review.' : 'Ready to support this project?'}</span>
-          <button className={`button button--primary ${selected || recorded ? 'button--selected' : ''}`} type="button" onClick={() => onSelect(project)}>{recorded ? 'Vote recorded' : selected ? 'Review vote' : 'Vote for project'}</button>
-        </div>
+        <motion.div className="project-dialog__intro" variants={CONTENT_ITEM}>
+          <span className={`track-badge track-badge--${project.track.toLowerCase()}`}>{t(`tracks.${project.track.toLowerCase()}`)}</span>
+          <ProjectTeamIdentity project={project} className="project-dialog__team" />
+          {!securityBlocked && project.xUrl ? <a href={project.xUrl} target="_blank" rel="noreferrer"><XLogo weight="fill" /> {project.xLabel}</a> : null}
+        </motion.div>
+        <motion.p className="project-dialog__lead" variants={CONTENT_ITEM}>{project.pitch}</motion.p>
+        {securityBlocked ? (
+          <motion.p className="project-security-notice" variants={CONTENT_ITEM}>{t('project.securityReviewNotice')}</motion.p>
+        ) : (
+          <motion.div className="project-dialog__links" variants={CONTENT_ITEM}>
+            {project.demoUrls.map((url, index) => (
+              <a className="text-link project-dialog__site-link" key={url} href={url} target="_blank" rel="noreferrer">
+                <GlobeSimple weight="duotone" aria-hidden="true" />
+                {index === 0 ? t('project.demo') : t('project.demoLink', { number: index + 1 })}
+              </a>
+            ))}
+            {project.repoUrl ? <a className="text-link" href={project.repoUrl} target="_blank" rel="noreferrer"><GithubLogo weight="fill" /> {t('project.viewRepository')}</a> : null}
+          </motion.div>
+        )}
+        <motion.div className="project-dialog__body" variants={CONTENT_ITEM}>
+          <DetailSection title={t('project.about')} text={project.description} />
+          <DetailSection title={t('project.forRenaiss')} text={project.renaissRelation} />
+          {securityBlocked ? null : <DetailSection title={t('project.test')} text={project.testInstructions} />}
+          {project.judgeNotes ? <DetailSection title={t('project.notes')} text={project.judgeNotes} /> : null}
+        </motion.div>
+        <motion.div className="project-dialog__sticky-action" variants={CONTENT_ITEM}>
+          <span>{securityBlocked ? t('project.securityReviewNotice') : recorded ? t('project.recordedNotice') : selected ? t('project.selectedNotice') : t('project.readyNotice')}</span>
+          <RenaissMetalButton
+            className={`project-dialog__vote-action ${selected || recorded ? 'project-vote-action--selected' : ''}`}
+            type="button"
+            onClick={() => onSelect(project)}
+            disabled={securityBlocked || selected || recorded}
+            leading={selected || recorded ? <CheckCircle weight="fill" /> : null}
+            trailing={selected || recorded ? null : <ArrowRight weight="bold" />}
+          >
+            {securityBlocked ? t('project.securityReview') : recorded ? t('project.voteRecorded') : selected ? t('project.selected') : t('project.select')}
+          </RenaissMetalButton>
+        </motion.div>
       </motion.div>
     </Modal>
   );
 }
+
+const CONTENT_CONTAINER = {
+  hidden: { opacity: 0.42, scale: 0.94, y: -20, filter: 'blur(7px)' },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    filter: 'blur(0px)',
+    transition: {
+      duration: 0.34,
+      delayChildren: 0.12,
+      staggerChildren: 0.07,
+      ease: MOTION_EASE,
+    },
+  },
+};
+
+const CONTENT_ITEM = {
+  hidden: { opacity: 0.48, y: 10, filter: 'blur(4px)' },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: 'blur(0px)',
+    transition: { duration: 0.28, ease: MOTION_EASE },
+  },
+};
 
 function DetailSection({ title, text }) {
   return (

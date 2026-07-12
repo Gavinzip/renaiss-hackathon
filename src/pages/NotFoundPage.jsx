@@ -1,14 +1,16 @@
 import { ArrowLeft } from '@phosphor-icons/react';
 
 import { RenaissMetalButton } from '../components/metal/RenaissMetalButton.jsx';
+import { useI18n } from '../i18n/I18nProvider.jsx';
 
 export function NotFoundPage() {
+  const { t } = useI18n();
   return (
     <section className="not-found-page page-shell">
-      <span>404</span>
-      <h1>This page is outside the arena.</h1>
-      <p>Return to the official Season 1 voting home.</p>
-      <RenaissMetalButton to="/" tone="light" leading={<ArrowLeft size={18} weight="bold" />}>Back home</RenaissMetalButton>
+      <span>{t('notFound.code')}</span>
+      <h1>{t('notFound.title')}</h1>
+      <p>{t('notFound.body')}</p>
+      <RenaissMetalButton to="/" tone="light" leading={<ArrowLeft size={18} weight="bold" />}>{t('notFound.action')}</RenaissMetalButton>
     </section>
   );
 }

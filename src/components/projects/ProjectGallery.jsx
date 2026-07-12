@@ -1,12 +1,23 @@
 import { MagnifyingGlass } from '@phosphor-icons/react';
+import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from 'motion/react';
 import { useMemo, useState } from 'react';
 
+import { useI18n } from '../../i18n/I18nProvider.jsx';
+import { Reveal } from '../motion/Reveal.jsx';
+import { MOTION_EASE, MOTION_EXIT_EASE, staggerDelay } from '../motion/motionTokens.js';
 import { ProjectCard } from './ProjectCard.jsx';
 
-const TRACKS = ['All', 'AI', 'Tool', 'Game'];
-const INITIAL_COUNT = 8;
+const TRACKS = [
+  { value: 'All', labelKey: 'tracks.all' },
+  { value: 'AI', labelKey: 'tracks.ai' },
+  { value: 'Tool', labelKey: 'tracks.tool' },
+  { value: 'Game', labelKey: 'tracks.game' },
+];
+const INITIAL_COUNT = 9;
 
 export function ProjectGallery({ projects, selectedId, recordedId, onOpen, onSelect, notice, votePanel }) {
+  const { intlLocale, t } = useI18n();
+  const reduceMotion = useReducedMotion();
   const [track, setTrack] = useState('All');
   const [query, setQuery] = useState('');
   const [sortMode, setSortMode] = useState('discover');
@@ -20,60 +31,75 @@ export function ProjectGallery({ projects, selectedId, recordedId, onOpen, onSel
       return trackMatch && textMatch;
     });
     return [...result].sort(sortMode === 'alpha'
-      ? (left, right) => left.name.localeCompare(right.name)
+      ? (left, right) => left.name.localeCompare(right.name, intlLocale)
       : (left, right) => stableHash(left.id) - stableHash(right.id));
-  }, [projects, query, sortMode, track]);
+  }, [intlLocale, projects, query, sortMode, track]);
 
   const visible = expanded || query || track !== 'All' ? filtered : filtered.slice(0, INITIAL_COUNT);
 
   return (
     <section className="projects-section page-shell" id="projects">
-      <div className="section-heading section-heading--projects">
+      <Reveal className="section-heading section-heading--projects" distance={24}>
         <div>
-          <h2>Meet the builders</h2>
-          <p>Every Season 1 final submission, presented from the participant’s own entry.</p>
+          <h2>{t('gallery.heading')}</h2>
+          <p>{t('gallery.summary', { count: projects.length })}</p>
         </div>
-        <span>{filtered.length} projects</span>
-      </div>
+        <span>{t('gallery.count', { count: filtered.length })}</span>
+      </Reveal>
       {notice}
-      <div className="project-toolbar">
-        <div className="filter-tabs" aria-label="Filter projects by track">
+      <Reveal className="project-toolbar" delay={0.06} distance={18}>
+        <div className="filter-tabs" aria-label={t('gallery.filterLabel')}>
           {TRACKS.map((item) => (
-            <button key={item} type="button" className={track === item ? 'is-active' : ''} aria-pressed={track === item} onClick={() => setTrack(item)}>{item}</button>
+            <button key={item.value} type="button" className={track === item.value ? 'is-active' : ''} aria-pressed={track === item.value} onClick={() => setTrack(item.value)}>{t(item.labelKey)}</button>
           ))}
         </div>
         <label className="search-field">
           <MagnifyingGlass size={20} />
-          <span className="sr-only">Search projects</span>
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search projects or teams" />
+          <span className="sr-only">{t('gallery.searchLabel')}</span>
+          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t('gallery.searchPlaceholder')} />
         </label>
         <label className="sort-field">
-          <span>Sort</span>
+          <span>{t('gallery.sort')}</span>
           <select value={sortMode} onChange={(event) => setSortMode(event.target.value)}>
-            <option value="discover">Discover</option>
-            <option value="alpha">A–Z</option>
+            <option value="discover">{t('gallery.discover')}</option>
+            <option value="alpha">{t('gallery.alpha')}</option>
           </select>
         </label>
-      </div>
+      </Reveal>
       <div className="gallery-layout">
-        <div>
-          <div className="project-list" aria-live="polite">
-            {visible.map((project, index) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                selected={selectedId === project.id}
-                recorded={recordedId === project.id}
-                onOpen={onOpen}
-                onSelect={onSelect}
-              />
-            ))}
+        <LayoutGroup id="project-gallery">
+          <div>
+            <div className="project-list" aria-live="polite">
+              <AnimatePresence initial={false} mode="popLayout">
+                {visible.map((project, index) => (
+                  <motion.div
+                    className="project-list__item"
+                    key={project.id}
+                    layout="position"
+                    exit={reduceMotion ? undefined : { opacity: 0.58, y: -6, scale: 0.994, filter: 'blur(2px)', transition: { duration: 0.18, ease: MOTION_EXIT_EASE } }}
+                    transition={{
+                      layout: { duration: reduceMotion ? 0 : 0.38, ease: MOTION_EASE },
+                    }}
+                  >
+                    <div className="project-list__entry" style={{ '--entry-delay': `${reduceMotion ? 0 : staggerDelay(index)}s` }}>
+                      <ProjectCard
+                        project={project}
+                        selected={selectedId === project.id}
+                        recorded={recordedId === project.id}
+                        onOpen={onOpen}
+                        onSelect={onSelect}
+                      />
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+            {!visible.length ? <div className="empty-state"><h3>{t('gallery.emptyTitle')}</h3><p>{t('gallery.emptyBody')}</p></div> : null}
+            {!expanded && !query && track === 'All' && filtered.length > INITIAL_COUNT ? (
+              <button className="show-all-button" type="button" onClick={() => setExpanded(true)}>{t('gallery.showAll', { count: filtered.length })}</button>
+            ) : null}
           </div>
-          {!visible.length ? <div className="empty-state"><h3>No projects found</h3><p>Try another track or search term.</p></div> : null}
-          {!expanded && !query && track === 'All' && filtered.length > INITIAL_COUNT ? (
-            <button className="show-all-button" type="button" onClick={() => setExpanded(true)}>View all {filtered.length} projects</button>
-          ) : null}
-        </div>
+        </LayoutGroup>
         {votePanel}
       </div>
     </section>

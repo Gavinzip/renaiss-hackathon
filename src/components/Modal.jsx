@@ -1,7 +1,10 @@
 import { X } from '@phosphor-icons/react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
+
+import { useI18n } from '../i18n/I18nProvider.jsx';
+import { MOTION_EASE, MOTION_EXIT_EASE } from './motion/motionTokens.js';
 
 export function Modal({
   open,
@@ -13,6 +16,8 @@ export function Modal({
   titleLayoutId,
   transition,
 }) {
+  const { t } = useI18n();
+  const reduceMotion = useReducedMotion();
   const titleId = useId();
   const panelRef = useRef(null);
 
@@ -65,9 +70,9 @@ export function Modal({
           <motion.div
             className="modal-backdrop modal-backdrop--linear"
             role="presentation"
-            initial={{ opacity: 0 }}
+            initial={{ opacity: 0.42 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            exit={{ opacity: 0.56, transition: { duration: 0.13, ease: [0.4, 0, 1, 1] } }}
             transition={{ duration: 0.2, ease: [0.4, 0, 0.4, 1] }}
             onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}
           >
@@ -79,15 +84,15 @@ export function Modal({
               aria-modal="true"
               aria-labelledby={titleId}
               tabIndex="-1"
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
+              initial={{ scale: 0.95, opacity: 0.42, filter: 'blur(7px)' }}
+              animate={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
+              exit={{ opacity: 0.56, filter: 'blur(2px)', transition: { duration: 0.16, ease: [0.4, 0, 1, 1] } }}
               transition={transition}
               style={{ willChange: 'transform, opacity' }}
             >
               <div className="modal-panel__header">
                 <motion.h2 id={titleId} layoutId={titleLayoutId} layout="position" transition={transition}>{title}</motion.h2>
-                <button className="icon-button" type="button" onClick={onClose} aria-label="Close dialog"><X size={22} /></button>
+                <button className="icon-button" type="button" onClick={onClose} aria-label={t('common.closeDialog')}><X size={22} /></button>
               </div>
               {children}
             </motion.section>
@@ -98,18 +103,39 @@ export function Modal({
     );
   }
 
-  if (!open) return null;
-
   return createPortal(
-    <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-      <section ref={panelRef} className={`modal-panel ${className}`} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex="-1">
-        <div className="modal-panel__header">
-          <h2 id={titleId}>{title}</h2>
-          <button className="icon-button" type="button" onClick={onClose} aria-label="Close dialog"><X size={22} /></button>
-        </div>
-        {children}
-      </section>
-    </div>,
+    <AnimatePresence initial={false}>
+      {open ? (
+        <motion.div
+          className="modal-backdrop"
+          role="presentation"
+          initial={reduceMotion ? false : { opacity: 0.42 }}
+          animate={{ opacity: 1 }}
+          exit={reduceMotion ? undefined : { opacity: 0.56, transition: { duration: 0.14, ease: MOTION_EXIT_EASE } }}
+          transition={{ duration: reduceMotion ? 0 : 0.22, ease: MOTION_EASE }}
+          onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}
+        >
+          <motion.section
+            ref={panelRef}
+            className={`modal-panel ${className}`}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            tabIndex="-1"
+            initial={reduceMotion ? false : { opacity: 0.42, y: 14, scale: 0.985, filter: 'blur(6px)' }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+            exit={reduceMotion ? undefined : { opacity: 0.56, y: 8, scale: 0.99, filter: 'blur(2px)', transition: { duration: 0.14, ease: MOTION_EXIT_EASE } }}
+            transition={{ duration: reduceMotion ? 0 : 0.3, ease: MOTION_EASE }}
+          >
+            <div className="modal-panel__header">
+              <h2 id={titleId}>{title}</h2>
+              <button className="icon-button" type="button" onClick={onClose} aria-label={t('common.closeDialog')}><X size={22} /></button>
+            </div>
+            {children}
+          </motion.section>
+        </motion.div>
+      ) : null}
+    </AnimatePresence>,
     document.body,
   );
 }
