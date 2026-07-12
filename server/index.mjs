@@ -330,7 +330,7 @@ export function createApplication(options = {}) {
       console.error('[backup] offsite backup failed', {
         message: sanitizeLogMessage(error),
         command: sanitizeLogMessage(error?.command),
-        detail: sanitizeLogMessage(error?.stderr),
+        detail: sanitizeLogMessage(error?.stderr, 1200),
       })
       throw new HttpError(502, 'backup_failed')
     }
@@ -348,7 +348,7 @@ export function createApplication(options = {}) {
       console.error('[backup] repository check failed', {
         message: sanitizeLogMessage(error),
         command: sanitizeLogMessage(error?.command),
-        detail: sanitizeLogMessage(error?.stderr),
+        detail: sanitizeLogMessage(error?.stderr, 1200),
       })
       throw new HttpError(502, 'backup_check_failed')
     }

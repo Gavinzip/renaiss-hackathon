@@ -83,8 +83,9 @@ export function errorHandler(error, request, response, _next) {
   })
 }
 
-export function sanitizeLogMessage(error) {
+export function sanitizeLogMessage(error, maxLength = 240) {
   return String(error instanceof Error ? error.message : error || 'Unknown error')
+    .replace(/\b(client_secret|private_key|refresh_token|access_token|token)\s*([:=])\s*(?:"[^"]*"|'[^']*'|[^,\s]+)/gi, '$1$2[redacted]')
     .replace(/[A-Za-z0-9_-]{48,}/g, '[redacted]')
-    .slice(0, 240)
+    .slice(0, maxLength)
 }
