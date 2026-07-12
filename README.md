@@ -32,4 +32,17 @@ The public gallery remains available when SSO or the voting window is not config
 - Keep `RESULTS_PUBLISHED=false` until the organizer intentionally publishes results.
 - Define the official community-score normalization, team-score input, tie-breaking, and result aggregation process before calculating the final combined score. The current vote store records the community selection truth; it does not invent the organizer's 60% scoring data.
 
+## Zeabur offsite backup
+
+The live service stores its SQLite database in the Zeabur Volume mounted at `/data`. The application can create a consistent SQLite snapshot and encrypt it with restic before uploading it through an rclone remote. It never copies the live WAL database files directly.
+
+1. In Zeabur, keep the existing `/data` Volume mounted. Do not re-mount it while vote data exists.
+2. Configure a dedicated Google Drive rclone remote named `gdrive` with a service account. Share only the dedicated backup folder with that account, set it as `RCLONE_CONFIG_GDRIVE_ROOT_FOLDER_ID`, and store its `RCLONE_CONFIG_GDRIVE_SERVICE_ACCOUNT_CREDENTIALS` only in Zeabur Variables or Config Files. This avoids user OAuth refresh tokens and limits Drive access to that folder.
+3. Set `BACKUP_REPOSITORY`, `RESTIC_PASSWORD`, and a 48+-character `BACKUP_TRIGGER_SECRET` together. The `/healthz` payload reports `not_configured`, `incomplete`, or `ready`; no backup fallback is used.
+4. On the first successful backup, the service initializes the empty repository only if its restic config is absent. A wrong password, unreachable Drive remote, or any other error is not treated as an initialization condition.
+5. Configure the GitHub Actions secrets `ZEABUR_BACKUP_BASE_URL` and `ZEABUR_BACKUP_TRIGGER_SECRET`. The scheduled workflow calls `POST /api/internal/backup` daily. The endpoint is bearer-token protected, rate-limited, and creates a SQLite online backup before restic uploads it.
+6. Keep an independent copy of `RESTIC_PASSWORD` in a password manager. Losing it makes encrypted snapshots unrecoverable.
+
+The temporary SQLite snapshot is deleted after each successful or failed upload. Restic applies 14 daily, 8 weekly, and 12 monthly snapshots by default, while the scheduled workflow asks the repository to verify 5% of encrypted data monthly. Neither operation uses a sync fallback or blindly deletes Google Drive files.
+
 Official results use Community Vote at 40% and Renaiss Team Evaluation at 60%. The prize structure has three recipients: one Champion at $2,000 USDT and two Excellence Awards at $1,000 USDT each.

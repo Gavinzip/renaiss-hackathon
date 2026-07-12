@@ -1,4 +1,4 @@
-import { isAbsolute, resolve } from 'node:path'
+import { dirname, isAbsolute, resolve } from 'node:path'
 
 import { EVENT } from '../shared/event.mjs'
 
@@ -52,6 +52,64 @@ function assertSecret(secret, production) {
   }
 }
 
+function backupConfiguration(env, databasePath) {
+  const repository = envString(env, 'BACKUP_REPOSITORY')
+  const password = envString(env, 'RESTIC_PASSWORD')
+  const triggerSecret = envString(env, 'BACKUP_TRIGGER_SECRET')
+  const configuredValues = [repository, password, triggerSecret].filter(Boolean)
+
+  if (configuredValues.length > 0 && configuredValues.length < 3) {
+    return Object.freeze({
+      configured: false,
+      state: 'incomplete',
+      repository: '',
+      password: '',
+      triggerSecret: '',
+      stagingDir: '',
+      timeoutMs: 0,
+    })
+  }
+
+  if (configuredValues.length === 0) {
+    return Object.freeze({
+      configured: false,
+      state: 'not_configured',
+      repository: '',
+      password: '',
+      triggerSecret: '',
+      stagingDir: '',
+      timeoutMs: 0,
+    })
+  }
+
+  if (!repository.startsWith('rclone:')) {
+    throw new Error('BACKUP_REPOSITORY must use the rclone:<remote>:<path> format.')
+  }
+  if (triggerSecret.length < 48) {
+    throw new Error('BACKUP_TRIGGER_SECRET must contain at least 48 characters.')
+  }
+
+  const stagingDir = envString(env, 'BACKUP_STAGING_DIR', resolve(dirname(databasePath), 'backup-staging'))
+  if (!isAbsolute(stagingDir)) {
+    throw new Error('BACKUP_STAGING_DIR must be absolute and use persistent storage.')
+  }
+
+  return Object.freeze({
+    configured: true,
+    state: 'ready',
+    repository,
+    password,
+    triggerSecret,
+    stagingDir: resolve(stagingDir),
+    timeoutMs: envInteger(env, 'BACKUP_TIMEOUT_SECONDS', 30 * 60, 60, 2 * 60 * 60) * 1000,
+    retention: Object.freeze({
+      daily: envInteger(env, 'BACKUP_KEEP_DAILY', 14, 1, 365),
+      weekly: envInteger(env, 'BACKUP_KEEP_WEEKLY', 8, 1, 104),
+      monthly: envInteger(env, 'BACKUP_KEEP_MONTHLY', 12, 1, 120),
+    }),
+  })
+}
+
 export function loadConfig(env = process.env, options = {}) {
   const cwd = options.cwd || process.cwd()
   const nodeEnv = envString(env, 'NODE_ENV', 'development')
@@ -85,6 +143,7 @@ export function loadConfig(env = process.env, options = {}) {
   const databasePath = configuredDatabasePath
     ? resolve(cwd, configuredDatabasePath)
     : resolve(cwd, 'data/hackathon.sqlite')
+  const backup = backupConfiguration(env, databasePath)
 
   const issuer = envString(env, 'RENAISS_ISSUER', RENAISS_PRODUCTION_ISSUER).replace(/\/+$/, '')
   if (issuer !== RENAISS_PRODUCTION_ISSUER) {
@@ -147,6 +206,7 @@ export function loadConfig(env = process.env, options = {}) {
     host,
     publicOrigin,
     databasePath,
+    backup,
     distDir: resolve(cwd, 'dist'),
     sessionSecret,
     cookieSecure: publicOrigin.startsWith('https://'),

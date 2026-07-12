@@ -1,0 +1,67 @@
+name: Trigger Zeabur offsite backup
+
+on:
+  schedule:
+    # 03:20 Asia/Taipei (UTC+8), after the low-traffic period.
+    - cron: '20 19 * * *'
+    # 03:40 Asia/Taipei on the first day of every month.
+    - cron: '40 19 1 * *'
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Backup creates a new SQLite snapshot; check verifies encrypted backup data.
+        required: true
+        default: backup
+        type: choice
+        options:
+          - backup
+          - check
+
+permissions: {}
+
+jobs:
+  backup:
+    if: (github.event_name == 'workflow_dispatch' && inputs.operation == 'backup') || github.event.schedule == '20 19 * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Trigger the encrypted Zeabur snapshot
+        env:
+          BACKUP_BASE_URL: ${{ secrets.ZEABUR_BACKUP_BASE_URL }}
+          BACKUP_TRIGGER_SECRET: ${{ secrets.ZEABUR_BACKUP_TRIGGER_SECRET }}
+        run: |
+          test -n "$BACKUP_BASE_URL"
+          test -n "$BACKUP_TRIGGER_SECRET"
+          curl \
+            --fail-with-body \
+            --retry 2 \
+            --retry-all-errors \
+            --connect-timeout 20 \
+            --max-time 1800 \
+            --request POST \
+            --header "Authorization: Bearer $BACKUP_TRIGGER_SECRET" \
+            --header "Accept: application/json" \
+            "${BACKUP_BASE_URL%/}/api/internal/backup"
+
+  check:
+    if: (github.event_name == 'workflow_dispatch' && inputs.operation == 'check') || github.event.schedule == '40 19 1 * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Verify encrypted repository data
+        env:
+          BACKUP_BASE_URL: ${{ secrets.ZEABUR_BACKUP_BASE_URL }}
+          BACKUP_TRIGGER_SECRET: ${{ secrets.ZEABUR_BACKUP_TRIGGER_SECRET }}
+        run: |
+          test -n "$BACKUP_BASE_URL"
+          test -n "$BACKUP_TRIGGER_SECRET"
+          curl \
+            --fail-with-body \
+            --retry 2 \
+            --retry-all-errors \
+            --connect-timeout 20 \
+            --max-time 1800 \
+            --request POST \
+            --header "Authorization: Bearer $BACKUP_TRIGGER_SECRET" \
+            --header "Accept: application/json" \
+            "${BACKUP_BASE_URL%/}/api/internal/backup/check"

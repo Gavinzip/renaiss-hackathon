@@ -6,6 +6,9 @@ COPY . .
 RUN npm run build && npm prune --omit=dev
 
 FROM node:24-bookworm-slim AS runtime
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ca-certificates rclone restic sqlite3 \
+  && rm -rf /var/lib/apt/lists/*
 ENV NODE_ENV=production \
     PORT=8080 \
     DATABASE_PATH=/data/renaiss-hackathon.sqlite

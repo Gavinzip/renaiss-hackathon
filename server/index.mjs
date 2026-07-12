@@ -1,4 +1,4 @@
-import { randomBytes } from 'node:crypto'
+import { randomBytes, timingSafeEqual } from 'node:crypto'
 import { existsSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -35,6 +35,7 @@ import {
   verifyCookieValue,
 } from './security.mjs'
 import { createVoteStore } from './vote-store.mjs'
+import { runDatabaseBackup, runRepositoryCheck } from './backup/runner.mjs'
 
 function displayUser(session) {
   if (!session) return null
@@ -58,6 +59,14 @@ function requestIdFrom(request) {
 function setApiNoStore(request, response, next) {
   response.set('Cache-Control', 'no-store')
   next()
+}
+
+function secretsMatch(expected, actual) {
+  const expectedBuffer = Buffer.from(String(expected || ''))
+  const actualBuffer = Buffer.from(String(actual || ''))
+  return expectedBuffer.length > 0
+    && expectedBuffer.length === actualBuffer.length
+    && timingSafeEqual(expectedBuffer, actualBuffer)
 }
 
 function setStaticCacheHeaders(response, filePath) {
@@ -141,10 +150,30 @@ export function createApplication(options = {}) {
     ])
   }
 
+  function requireBackupTrigger(request) {
+    if (!config.backup.configured) {
+      throw new HttpError(503, 'backup_not_configured', 'Offsite backup is not configured.')
+    }
+    const authorization = String(request.get('authorization') || '')
+    const token = authorization.startsWith('Bearer ')
+      ? authorization.slice('Bearer '.length).trim()
+      : ''
+    if (!secretsMatch(config.backup.triggerSecret, token)) {
+      throw new HttpError(401, 'backup_trigger_unauthorized', 'Backup trigger is not authorized.')
+    }
+    rateLimiter.consume({
+      scope: 'backup_trigger',
+      key: 'service',
+      limit: 1,
+      windowMs: 10 * 60 * 1000,
+    })
+  }
+
   app.get('/healthz', (_request, response) => {
     sendNoStore(response, 200, {
       ok: true,
       service: 'renaiss-hackathon-vote',
+      backup: { state: config.backup.state },
       checkedAt: new Date().toISOString(),
     })
   })
@@ -288,6 +317,38 @@ export function createApplication(options = {}) {
     })
     sendNoStore(response, 200, result)
   })
+
+  app.post('/api/internal/backup', asyncRoute(async (request, response) => {
+    requireBackupTrigger(request)
+    try {
+      const result = await runDatabaseBackup(config)
+      sendNoStore(response, 200, { ok: true, ...result })
+    } catch (error) {
+      if (error?.code === 'backup_in_progress') {
+        throw new HttpError(409, 'backup_in_progress', 'A backup is already running.')
+      }
+      console.error('[backup] offsite backup failed', {
+        message: sanitizeLogMessage(error),
+      })
+      throw new HttpError(502, 'backup_failed')
+    }
+  }))
+
+  app.post('/api/internal/backup/check', asyncRoute(async (request, response) => {
+    requireBackupTrigger(request)
+    try {
+      const result = await runRepositoryCheck(config)
+      sendNoStore(response, 200, { ok: true, ...result })
+    } catch (error) {
+      if (error?.code === 'backup_in_progress') {
+        throw new HttpError(409, 'backup_in_progress', 'A backup is already running.')
+      }
+      console.error('[backup] repository check failed', {
+        message: sanitizeLogMessage(error),
+      })
+      throw new HttpError(502, 'backup_check_failed')
+    }
+  }))
 
   app.use('/api', notFoundHandler)
   app.use('/auth', notFoundHandler)
