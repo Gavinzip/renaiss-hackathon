@@ -25,6 +25,8 @@ The public gallery remains available when SSO or the voting window is not config
 
 ## Production requirements
 
+- Publish public media to the dedicated Cloudflare R2 bucket with `npm run assets:publish`. It creates a content-addressed release and records it in `src/generated/staticAssetRelease.js`. The production build deliberately fails until `VITE_STATIC_ASSET_CDN_BASE_URL` is set to an HTTPS custom Cloudflare R2 hostname; `r2.dev` is not accepted because it has no production CDN cache. The Dockerfile declares this as a build-stage `ARG`, so set the same variable in Zeabur before the multi-stage image is built. Validate live objects with `npm run assets:verify -- --base=https://media.example.com`.
+- `public/assets/` is available only to Vite development. Production builds do not copy it into `dist`; all media URLs resolve to the published R2 release. Content images must be WebP or AVIF. Platform icons may remain PNG where WebP is not reliably supported.
 - Set `PUBLIC_APP_ORIGIN` to the exact HTTPS origin and allowlist `${PUBLIC_APP_ORIGIN}/auth/callback` with Renaiss.
 - Store `RENAISS_CLIENT_SECRET` and `AUTH_SESSION_SECRET` only in the server environment.
 - Set exact `VOTING_OPENS_AT` and `VOTING_CLOSES_AT` timestamps before launch.
@@ -37,7 +39,7 @@ The public gallery remains available when SSO or the voting window is not config
 The live service stores its SQLite database in the Zeabur Volume mounted at `/data`. The application can create a consistent SQLite snapshot and encrypt it with restic before uploading it through an rclone remote. It never copies the live WAL database files directly.
 
 1. In Zeabur, keep the existing `/data` Volume mounted. Do not re-mount it while vote data exists.
-2. Configure a dedicated Google Drive rclone remote named `gdrive` with a service account. Share only the dedicated backup folder with that account, set it as `RCLONE_CONFIG_GDRIVE_ROOT_FOLDER_ID`, and store its `RCLONE_CONFIG_GDRIVE_SERVICE_ACCOUNT_CREDENTIALS` only in Zeabur Variables or Config Files. This avoids user OAuth refresh tokens and limits Drive access to that folder.
+2. Configure a dedicated Google Drive rclone remote named `gdrive` with a published OAuth client of type `TVs and Limited Input devices`. Use the `drive.file` scope, create a dedicated backup folder through that client, set it as `RCLONE_CONFIG_GDRIVE_ROOT_FOLDER_ID`, and store only `RCLONE_CONFIG_GDRIVE_CLIENT_ID`, `RCLONE_CONFIG_GDRIVE_CLIENT_SECRET`, and `RCLONE_CONFIG_GDRIVE_TOKEN` in Zeabur Variables or Config Files. The refresh token renews access automatically; Drive access remains limited to files created through this backup client.
 3. Set `BACKUP_REPOSITORY`, `RESTIC_PASSWORD`, and a 48+-character `BACKUP_TRIGGER_SECRET` together. The `/healthz` payload reports `not_configured`, `incomplete`, or `ready`; no backup fallback is used.
 4. On the first successful backup, the service initializes the empty repository only if its restic config is absent. A wrong password, unreachable Drive remote, or any other error is not treated as an initialization condition.
 5. Configure the GitHub Actions secrets `ZEABUR_BACKUP_BASE_URL` and `ZEABUR_BACKUP_TRIGGER_SECRET`. The scheduled workflow calls `POST /api/internal/backup` daily. The endpoint is bearer-token protected, rate-limited, and creates a SQLite online backup before restic uploads it.
