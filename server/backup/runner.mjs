@@ -8,6 +8,7 @@ class BackupCommandError extends Error {
       ? `${command} timed out.`
       : `${command} exited with status ${code ?? 'unknown'}.`)
     this.name = 'BackupCommandError'
+    this.command = command
   }
 }
 
