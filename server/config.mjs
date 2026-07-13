@@ -106,7 +106,7 @@ function sbtEligibilityConfiguration(env) {
     apiKey,
     chainId: envInteger(env, 'BSCSCAN_CHAIN_ID', DEFAULT_BSCSCAN_CHAIN_ID, 1, 999999),
     sbtContract: sbtContract.toLowerCase(),
-    minimumBadgeCount: envInteger(env, 'VOTE_MINIMUM_SBT_BADGES', 50, 1, 1000000),
+    minimumBadgeCount: envInteger(env, 'VOTE_MINIMUM_SBT_BADGES', 10, 1, 1000000),
     cacheTtlMs: envInteger(env, 'VOTE_SBT_CACHE_TTL_SECONDS', 60, 15, 3600) * 1000,
     requestTimeoutMs: envInteger(env, 'BSCSCAN_TIMEOUT_MS', 8000, 1000, 30000),
   })

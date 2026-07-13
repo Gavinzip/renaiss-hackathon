@@ -11,10 +11,12 @@ import { RouteScrollManager } from './components/RouteScrollManager.jsx';
 import { PageTransition } from './components/motion/PageTransition.jsx';
 import { ProjectDialog } from './components/projects/ProjectDialog.jsx';
 import { useSession } from './hooks/useSession.js';
+import { useVoteEligibility } from './hooks/useVoteEligibility.js';
 import { useI18n } from './i18n/I18nProvider.jsx';
 import { localizeProjects } from './i18n/localizeProjects.js';
 import { initializeAnalytics, trackPageView } from './lib/analytics.js';
-import { staticAssetCssUrl } from './lib/staticAssets.js';
+import { staticAssetCssUrl, staticAssetUrl } from './lib/staticAssets.js';
+import { voteSelectionLockStatus } from './lib/voteEligibility.js';
 import { HomePage } from './pages/HomePage.jsx';
 import { AdminPage } from './pages/AdminPage.jsx';
 import { NotFoundPage } from './pages/NotFoundPage.jsx';
@@ -37,6 +39,7 @@ export function App() {
   const [projectDialogId, setProjectDialogId] = useState(null);
   const [projectDialogOpen, setProjectDialogOpen] = useState(false);
   const [resumeVoteConfirmation, setResumeVoteConfirmation] = useState(false);
+  const [eligibilityPromptRequested, setEligibilityPromptRequested] = useState(false);
   const [authNotice, setAuthNotice] = useState(null);
   const [initialAssetsReady, setInitialAssetsReady] = useState(false);
   const [initialPaintReady, setInitialPaintReady] = useState(false);
@@ -61,6 +64,12 @@ export function App() {
     ...EVENT,
     voting: { status: session.loading ? 'loading' : 'configuration_required', opensAt: null, closesAt: null },
   };
+  const voteEligibility = useVoteEligibility({
+    enabled: location.pathname === '/vote',
+    authenticated: session.authenticated,
+    checkEligibility: checkVoteEligibility,
+  });
+  const selectionLock = voteSelectionLockStatus(session, voteEligibility);
 
   useEffect(() => {
     setProjectDialogOpen(false);
@@ -160,6 +169,8 @@ export function App() {
         title: t('auth.failedTitle'),
         message: authErrorMessage(params.get('reason'), t),
       });
+    } else if (authStatus === 'success' && location.pathname === '/vote') {
+      setEligibilityPromptRequested(true);
     } else if (location.pathname === '/vote' && params.get('reviewVote') === '1' && selectedProject) {
       setResumeVoteConfirmation(true);
     }
@@ -176,10 +187,22 @@ export function App() {
     }
   }, [location.hash, location.pathname, location.search, navigate, selectedProject, session.loading, t]);
 
+  useEffect(() => {
+    if (voteEligibility.status !== 'unqualified') return;
+    setSelectedId(null);
+    setResumeVoteConfirmation(false);
+    sessionStorage.removeItem(PENDING_PROJECT_KEY);
+  }, [voteEligibility.status]);
+
+  useEffect(() => {
+    if (!eligibilityPromptRequested || voteEligibility.status === 'checking' || voteEligibility.status === 'idle') return;
+    if (voteEligibility.status !== 'unqualified') setEligibilityPromptRequested(false);
+  }, [eligibilityPromptRequested, voteEligibility.status]);
+
   const selectProject = useCallback((project) => {
-    if (project.auditStatus === 'BLOCK') return;
+    if (project.auditStatus === 'BLOCK' || selectionLock) return;
     setSelectedId(project.id);
-  }, []);
+  }, [selectionLock]);
 
   const beginSignIn = useCallback((returnTo) => {
     if (!session.authConfigured) {
@@ -214,7 +237,7 @@ export function App() {
     return payload;
   }, [recordVote]);
 
-  const verifyVoteEligibility = useCallback(async () => checkVoteEligibility(), [checkVoteEligibility]);
+  const verifyVoteEligibility = voteEligibility.refresh;
 
   const removeVote = useCallback(async () => {
     const payload = await clearVote();
@@ -230,6 +253,10 @@ export function App() {
 
   const markVoteResumeHandled = useCallback(() => {
     setResumeVoteConfirmation(false);
+  }, []);
+
+  const dismissEligibilityPrompt = useCallback(() => {
+    setEligibilityPromptRequested(false);
   }, []);
 
   const signOut = useCallback(async () => {
@@ -258,6 +285,9 @@ export function App() {
                   recordedProject={recordedProject}
                   selectedProject={selectedProject}
                   session={session}
+                  eligibility={voteEligibility}
+                  selectionLock={selectionLock}
+                  eligibilityPromptRequested={eligibilityPromptRequested}
                   resumeConfirmation={resumeVoteConfirmation}
                   serviceError={session.error}
                   onOpenProject={(project) => {
@@ -266,6 +296,7 @@ export function App() {
                   }}
                   onSelectProject={selectProject}
                   onResumeHandled={markVoteResumeHandled}
+                  onEligibilityPromptHandled={dismissEligibilityPrompt}
                   onSignIn={beginVoteSignIn}
                   onCheckEligibility={verifyVoteEligibility}
                   onConfirm={confirmVote}
@@ -299,6 +330,7 @@ export function App() {
         }}
         selected={projectDialog?.id === selectedProject?.id}
         recorded={projectDialog?.id === recordedProject?.id}
+        selectionLock={selectionLock}
       />
       <Modal open={Boolean(authNotice)} onClose={() => setAuthNotice(null)} title={authNotice?.title || t('nav.signIn')} className="auth-notice-dialog">
         <p>{authNotice?.message}</p>

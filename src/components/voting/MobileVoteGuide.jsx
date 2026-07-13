@@ -24,6 +24,7 @@ export function MobileVoteGuide({
   project,
   recordedProject,
   canWrite,
+  selectionBlocked,
   submitting,
   errorMessage,
   statusText,
@@ -79,7 +80,7 @@ export function MobileVoteGuide({
                 {phase === 'selected' && displayProject ? (
                   <div className="mobile-vote-guide__selected">
                     <MobileProjectSummary project={displayProject} t={t} />
-                    <button className="button button--primary mobile-vote-guide__primary" type="button" onClick={onSubmit} disabled={!canWrite || submitting}>
+                    <button className="button button--primary mobile-vote-guide__primary" type="button" onClick={onSubmit} disabled={!canWrite || selectionBlocked || submitting}>
                       {submitting ? t('vote.checkingEligibility') : t('vote.submit')}
                     </button>
                     <button className="mobile-vote-guide__text-action" type="button" onClick={onClearSelection}>
@@ -100,7 +101,7 @@ export function MobileVoteGuide({
                       <button className="button button--secondary" type="button" onClick={onBack} disabled={submitting} aria-label={t('common.back')}>
                         <ArrowLeft aria-hidden="true" />
                       </button>
-                      <button className="button button--primary" type="button" onClick={onConfirm} disabled={submitting || !canWrite}>
+                      <button className="button button--primary" type="button" onClick={onConfirm} disabled={submitting || !canWrite || selectionBlocked}>
                         {submitting ? t('vote.recording') : t('vote.confirm')}
                       </button>
                     </div>

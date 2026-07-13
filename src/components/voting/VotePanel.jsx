@@ -2,37 +2,15 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { useI18n } from '../../i18n/I18nProvider.jsx';
 import { trackEligibleSbtVoter } from '../../lib/analytics.js';
+import { localizeVoteError, sbtEligibilityError } from '../../lib/voteEligibility.js';
 import { MobileVoteGuide } from './MobileVoteGuide.jsx';
-
-const KNOWN_ERROR_CODES = new Set([
-  'service_unreachable',
-  'auth_not_configured',
-  'sso_not_configured',
-  'session_required',
-  'safe_wallet_not_ready',
-  'sbt_vote_requirement_not_met',
-  'bscscan_not_configured',
-  'sbt_contract_not_configured',
-  'bscscan_request_failed',
-  'bscscan_request_timeout',
-  'bscscan_http_error',
-  'bscscan_invalid_response',
-  'bscscan_invalid_transfer_row',
-  'bscscan_pagination_limit',
-  'csrf_invalid',
-  'origin_not_allowed',
-  'voting_window_not_configured',
-  'voting_not_open',
-  'voting_closed',
-  'project_not_found',
-  'rate_limited',
-]);
 
 export function VotePanel({
   project,
   recordedProject,
   session,
   event,
+  selectionLock,
   resumeConfirmation,
   onResumeHandled,
   onSignIn,
@@ -57,6 +35,7 @@ export function VotePanel({
 
   const displayProject = phase === 'receipt' && !project ? recordedProject : project;
   const canWrite = event?.voting?.status === 'open';
+  const selectionBlocked = Boolean(selectionLock);
 
   useEffect(() => {
     setError(null);
@@ -95,7 +74,7 @@ export function VotePanel({
   }, [canWrite, onCheckEligibility, onResumeHandled, project, resumeConfirmation, session.authenticated]);
 
   const submit = async () => {
-    if (!project || !canWrite) return;
+    if (!project || !canWrite || selectionBlocked) return;
     setError(null);
     if (!session.authenticated) {
       onSignIn();
@@ -117,7 +96,7 @@ export function VotePanel({
   };
 
   const confirm = async () => {
-    if (!project || submitting || !canWrite) return;
+    if (!project || submitting || !canWrite || selectionBlocked) return;
     setSubmitting(true);
     setError(null);
     try {
@@ -159,8 +138,9 @@ export function VotePanel({
         project={project}
         recordedProject={recordedProject}
         canWrite={canWrite}
+        selectionBlocked={selectionBlocked}
         submitting={submitting}
-        errorMessage={error ? localizeError(error, event, t) : null}
+        errorMessage={error ? localizeVoteError(error, event, t) : null}
         statusText={eventStatusCopy(event, intlLocale, t)}
         recordedAt={receipt?.updatedAt ? t('vote.recordedAt', { date: formatReceiptTime(receipt.updatedAt, intlLocale) }) : null}
         t={t}
@@ -187,21 +167,4 @@ function formatReceiptTime(value, locale) {
     timeStyle: 'short',
     timeZone: 'Asia/Taipei',
   }).format(new Date(value));
-}
-
-function sbtEligibilityError(eligibility) {
-  const error = new Error('SBT eligibility requirement not met.');
-  error.code = 'sbt_vote_requirement_not_met';
-  error.minimumBadgeCount = eligibility.minimumBadgeCount;
-  return error;
-}
-
-function localizeError(error, event, t) {
-  if (!KNOWN_ERROR_CODES.has(error?.code)) return t('vote.error.generic');
-  if (error.code !== 'sbt_vote_requirement_not_met') return t(`vote.error.${error.code}`);
-
-  const minimum = error.minimumBadgeCount ?? event?.voteEligibility?.minimumSbtBadgeCount;
-  return Number.isInteger(minimum)
-    ? t('vote.error.sbt_vote_requirement_not_met', { minimum })
-    : t('vote.error.generic');
 }

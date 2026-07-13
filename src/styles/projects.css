@@ -137,26 +137,10 @@
 
 .project-list__entry {
   height: 100%;
-  animation: project-card-enter 520ms var(--entry-ease) var(--entry-delay, 0s) both;
-  will-change: opacity, transform, filter;
 }
 
 .project-list__entry > .project-card {
   height: 100%;
-}
-
-@keyframes project-card-enter {
-  from {
-    opacity: 0.82;
-    transform: translate3d(0, 10px, 0) scale(0.992);
-    filter: blur(0.75px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
-    filter: blur(0);
-  }
 }
 
 .project-card {
@@ -682,6 +666,82 @@ html:lang(zh-Hant) .project-card__heading strong {
   color: var(--text);
   border-color: var(--border-strong);
   background: rgba(82, 60, 155, 0.16);
+}
+
+.eligibility-gate {
+  margin: 0 0 16px;
+  border: 1px solid rgba(255, 176, 153, 0.34);
+  border-radius: 14px;
+  padding: 13px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  color: #ffd8d1;
+  background: rgba(108, 37, 53, 0.22);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.eligibility-gate--checking {
+  border-color: rgba(147, 205, 255, 0.3);
+  color: #d2ebff;
+  background: rgba(35, 76, 119, 0.2);
+}
+
+.eligibility-gate__icon {
+  width: 21px;
+  height: 21px;
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.eligibility-gate--checking .eligibility-gate__icon {
+  animation: eligibility-spin 900ms linear infinite;
+}
+
+.eligibility-gate strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.eligibility-gate p {
+  margin: 4px 0 0;
+  color: inherit;
+  font-size: 0.76rem;
+  line-height: 1.55;
+}
+
+.eligibility-dialog__body {
+  margin-bottom: 22px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: #ffd3d8;
+}
+
+.eligibility-dialog__body > svg {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+}
+
+.eligibility-dialog__body p {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.65;
+}
+
+.eligibility-dialog__body small {
+  display: block;
+  margin-top: 9px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.55;
+}
+
+@keyframes eligibility-spin {
+  to { transform: rotate(360deg); }
 }
 
 .empty-state {
@@ -1653,5 +1713,9 @@ html:lang(zh-Hant) .project-card__heading strong {
   .project-card:focus-within::before {
     animation: none;
     background-position: 50% 50%;
+  }
+
+  .eligibility-gate--checking .eligibility-gate__icon {
+    animation: none;
   }
 }

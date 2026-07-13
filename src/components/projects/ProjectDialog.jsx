@@ -14,11 +14,30 @@ import { MOTION_EASE, MOTION_EXIT_EASE } from '../motion/motionTokens.js';
 import { ProjectCover } from './ProjectCover.jsx';
 import { ProjectTeamIdentity } from './ProjectTeamIdentity.jsx';
 
-export function ProjectDialog({ project, open, onClose, onSelect, selected, recorded }) {
+export function ProjectDialog({ project, open, onClose, onSelect, selected, recorded, selectionLock }) {
   const { t } = useI18n();
   const reduceMotion = useReducedMotion();
   if (!project) return null;
   const securityBlocked = project.auditStatus === 'BLOCK';
+  const selectionBlocked = Boolean(selectionLock);
+  const actionLabel = securityBlocked
+    ? t('project.securityReview')
+    : selectionBlocked
+      ? t(`project.selectionLock.${selectionLock}`)
+      : recorded
+        ? t('project.voteRecorded')
+        : selected
+          ? t('project.selected')
+          : t('project.select');
+  const actionNotice = securityBlocked
+    ? t('project.securityReviewNotice')
+    : selectionBlocked
+      ? t(`project.selectionLockNotice.${selectionLock}`)
+      : recorded
+        ? t('project.recordedNotice')
+        : selected
+          ? t('project.selectedNotice')
+          : t('project.readyNotice');
   return (
     <Modal
       open={open}
@@ -74,16 +93,16 @@ export function ProjectDialog({ project, open, onClose, onSelect, selected, reco
           {project.judgeNotes ? <DetailSection title={t('project.notes')} text={project.judgeNotes} /> : null}
         </motion.div>
         <motion.div className="project-dialog__sticky-action" variants={CONTENT_ITEM}>
-          <span>{securityBlocked ? t('project.securityReviewNotice') : recorded ? t('project.recordedNotice') : selected ? t('project.selectedNotice') : t('project.readyNotice')}</span>
+          <span>{actionNotice}</span>
           <RenaissMetalButton
             className={`project-dialog__vote-action ${selected || recorded ? 'project-vote-action--selected' : ''}`}
             type="button"
             onClick={() => onSelect(project)}
-            disabled={securityBlocked || selected || recorded}
+            disabled={securityBlocked || selectionBlocked || selected || recorded}
             leading={selected || recorded ? <CheckCircle weight="fill" /> : null}
             trailing={selected || recorded ? null : <ArrowRight weight="bold" />}
           >
-            {securityBlocked ? t('project.securityReview') : recorded ? t('project.voteRecorded') : selected ? t('project.selected') : t('project.select')}
+            {actionLabel}
           </RenaissMetalButton>
         </motion.div>
       </motion.div>

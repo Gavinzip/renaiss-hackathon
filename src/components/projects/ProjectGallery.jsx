@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 
 import { useI18n } from '../../i18n/I18nProvider.jsx';
 import { Reveal } from '../motion/Reveal.jsx';
-import { MOTION_EASE, MOTION_EXIT_EASE, staggerDelay } from '../motion/motionTokens.js';
+import { MOTION_EASE, MOTION_EXIT_EASE } from '../motion/motionTokens.js';
 import { ProjectCard } from './ProjectCard.jsx';
 
 const TRACKS = [
@@ -15,7 +15,7 @@ const TRACKS = [
 ];
 const INITIAL_COUNT = 9;
 
-export function ProjectGallery({ projects, selectedId, recordedId, onOpen, onSelect, notice, votePanel }) {
+export function ProjectGallery({ projects, selectedId, recordedId, selectionLock, onOpen, onSelect, notice, votePanel }) {
   const { intlLocale, t } = useI18n();
   const reduceMotion = useReducedMotion();
   const [track, setTrack] = useState('All');
@@ -36,6 +36,7 @@ export function ProjectGallery({ projects, selectedId, recordedId, onOpen, onSel
   }, [intlLocale, projects, query, sortMode, track]);
 
   const visible = expanded || query || track !== 'All' ? filtered : filtered.slice(0, INITIAL_COUNT);
+  const revealingDeferredCards = expanded && !query && track === 'All';
 
   return (
     <section className="projects-section page-shell" id="projects">
@@ -71,32 +72,46 @@ export function ProjectGallery({ projects, selectedId, recordedId, onOpen, onSel
           <div>
             <div className="project-list" aria-live="polite">
               <AnimatePresence initial={false} mode="popLayout">
-                {visible.map((project, index) => (
+                {visible.map((project, index) => {
+                  const revealDelay = revealingDeferredCards && index >= INITIAL_COUNT
+                    ? Math.min((index - INITIAL_COUNT) * 0.045, 0.22)
+                    : 0;
+                  return (
                   <motion.div
                     className="project-list__item"
                     key={project.id}
                     layout="position"
+                    initial={reduceMotion || !revealingDeferredCards || index < INITIAL_COUNT
+                      ? false
+                      : { opacity: 0, y: 18, scale: 0.985, filter: 'blur(3px)' }}
+                    animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
                     exit={reduceMotion ? undefined : { opacity: 0.58, y: -6, scale: 0.994, filter: 'blur(2px)', transition: { duration: 0.18, ease: MOTION_EXIT_EASE } }}
                     transition={{
                       layout: { duration: reduceMotion ? 0 : 0.38, ease: MOTION_EASE },
+                      opacity: { duration: reduceMotion ? 0 : 0.36, delay: reduceMotion ? 0 : revealDelay, ease: MOTION_EASE },
+                      y: { duration: reduceMotion ? 0 : 0.42, delay: reduceMotion ? 0 : revealDelay, ease: MOTION_EASE },
+                      scale: { duration: reduceMotion ? 0 : 0.42, delay: reduceMotion ? 0 : revealDelay, ease: MOTION_EASE },
+                      filter: { duration: reduceMotion ? 0 : 0.3, delay: reduceMotion ? 0 : revealDelay, ease: MOTION_EASE },
                     }}
                   >
-                    <div className="project-list__entry" style={{ '--entry-delay': `${reduceMotion ? 0 : staggerDelay(index)}s` }}>
+                    <div className="project-list__entry">
                       <ProjectCard
                         project={project}
                         selected={selectedId === project.id}
                         recorded={recordedId === project.id}
+                        selectionLock={selectionLock}
                         onOpen={onOpen}
                         onSelect={onSelect}
                       />
                     </div>
                   </motion.div>
-                ))}
+                  );
+                })}
               </AnimatePresence>
             </div>
             {!visible.length ? <div className="empty-state"><h3>{t('gallery.emptyTitle')}</h3><p>{t('gallery.emptyBody')}</p></div> : null}
             {!expanded && !query && track === 'All' && filtered.length > INITIAL_COUNT ? (
-              <button className="show-all-button" type="button" onClick={() => setExpanded(true)}>{t('gallery.showAll', { count: filtered.length })}</button>
+              <button className="show-all-button" type="button" aria-expanded={expanded} onClick={() => setExpanded(true)}>{t('gallery.showAll', { count: filtered.length })}</button>
             ) : null}
           </div>
         </LayoutGroup>

@@ -12,11 +12,14 @@ import { RenaissMetalButton } from '../metal/RenaissMetalButton.jsx';
 import { ProjectCover } from './ProjectCover.jsx';
 import { ProjectTeamIdentity } from './ProjectTeamIdentity.jsx';
 
-export function ProjectCard({ project, selected, recorded, onOpen, onSelect }) {
+export function ProjectCard({ project, selected, recorded, selectionLock, onOpen, onSelect }) {
   const { t } = useI18n();
   const securityBlocked = project.auditStatus === 'BLOCK';
+  const selectionBlocked = Boolean(selectionLock);
   const actionLabel = securityBlocked
     ? t('project.securityReview')
+    : selectionBlocked
+      ? t(`project.selectionLock.${selectionLock}`)
     : recorded
       ? t('project.voteRecorded')
       : selected
@@ -65,7 +68,7 @@ export function ProjectCard({ project, selected, recorded, onOpen, onSelect }) {
             className={`button--vote ${selected || recorded ? 'project-vote-action--selected' : ''}`}
             type="button"
             onClick={() => onSelect(project)}
-            disabled={securityBlocked}
+            disabled={securityBlocked || selectionBlocked}
             leading={selected || recorded ? <CheckCircle weight="fill" /> : null}
             trailing={selected || recorded ? null : <ArrowRight weight="bold" />}
           >
