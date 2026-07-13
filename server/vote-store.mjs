@@ -256,6 +256,9 @@ export function createVoteStore({ database, config }) {
       opensAt: voting.opensAt,
       closesAt: voting.closesAt,
       voting,
+      voteEligibility: {
+        minimumSbtBadgeCount: config.sbtEligibility.minimumBadgeCount,
+      },
       resultsPublished,
     }
     delete event.results

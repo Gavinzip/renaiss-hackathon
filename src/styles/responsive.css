@@ -58,6 +58,21 @@
     text-align: left;
   }
 
+  .admin-leaderboard__project-link {
+    grid-template-columns: 46px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .admin-leaderboard__thumbnail {
+    width: 46px;
+    height: 34px;
+  }
+
+  .admin-leaderboard__open-project {
+    grid-column: 2;
+    justify-self: start;
+  }
+
   .rules-section__heading {
     grid-template-columns: 1fr;
     gap: 18px;

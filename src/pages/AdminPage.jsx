@@ -1,9 +1,11 @@
-import { ChartBar, CrownSimple, LockKey, ShieldCheck, SpinnerGap, UsersThree } from '@phosphor-icons/react';
+import { ArrowRight, ChartBar, CrownSimple, LockKey, ShieldCheck, SpinnerGap, UsersThree } from '@phosphor-icons/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import { RenaissMetalButton } from '../components/metal/RenaissMetalButton.jsx';
 import { ApiError, apiRequest } from '../lib/api.js';
 import { useI18n } from '../i18n/I18nProvider.jsx';
+import { staticAssetUrl } from '../lib/staticAssets.js';
 
 const REFRESH_INTERVAL_MS = 15_000;
 
@@ -12,7 +14,7 @@ export function AdminPage({ projects, session, onSignIn }) {
   const [dashboard, setDashboard] = useState(null);
   const [status, setStatus] = useState('idle');
   const [error, setError] = useState(null);
-  const projectNames = useMemo(() => new Map(projects.map((project) => [project.id, project.name])), [projects]);
+  const projectById = useMemo(() => new Map(projects.map((project) => [project.id, project])), [projects]);
 
   const refresh = useCallback(async ({ quiet = false } = {}) => {
     if (!session.authenticated) return;
@@ -37,6 +39,7 @@ export function AdminPage({ projects, session, onSignIn }) {
   }, [refresh, session.authenticated]);
 
   const leader = dashboard?.leaderboard.find((project) => project.votes > 0) || null;
+  const leaderProject = leader ? projectById.get(leader.projectId) : null;
   const number = new Intl.NumberFormat(intlLocale);
   const dateTime = new Intl.DateTimeFormat(intlLocale, { dateStyle: 'medium', timeStyle: 'medium' });
 
@@ -77,7 +80,7 @@ export function AdminPage({ projects, session, onSignIn }) {
             <article className="admin-metric-card admin-metric-card--leader">
               <span className="admin-metric-card__icon"><CrownSimple weight="fill" /></span>
               <span>{t('admin.currentLeader')}</span>
-              <strong>{leader ? projectNames.get(leader.projectId) || leader.projectId : t('admin.noLeader')}</strong>
+              <strong>{leader ? leaderProject?.name || leader.projectId : t('admin.noLeader')}</strong>
               <small>{leader ? t('admin.leaderVotes', { count: number.format(leader.votes) }) : t('admin.noLeaderBody')}</small>
             </article>
           </div>
@@ -94,11 +97,16 @@ export function AdminPage({ projects, session, onSignIn }) {
               {dashboard.leaderboard.map((entry) => {
                 const maxVotes = Math.max(1, dashboard.leaderboard[0]?.votes || 0);
                 const percentage = Math.round((entry.votes / maxVotes) * 100);
+                const project = projectById.get(entry.projectId);
                 return (
                   <li key={entry.projectId} className={entry.rank === 1 && entry.votes > 0 ? 'is-leading' : ''}>
                     <span className="admin-leaderboard__rank">{String(entry.rank).padStart(2, '0')}</span>
                     <div className="admin-leaderboard__project">
-                      <strong>{projectNames.get(entry.projectId) || entry.projectId}</strong>
+                      <Link className="admin-leaderboard__project-link" to={`/vote?project=${encodeURIComponent(entry.projectId)}#projects`}>
+                        <AdminProjectThumbnail project={project} />
+                        <strong>{project?.name || entry.projectId}</strong>
+                        <span className="admin-leaderboard__open-project">{t('admin.openProject')} <ArrowRight weight="bold" /></span>
+                      </Link>
                       <span className="admin-leaderboard__bar"><i style={{ width: `${percentage}%` }} /></span>
                     </div>
                     <strong className="admin-leaderboard__count">{number.format(entry.votes)} <small>{t('admin.votes')}</small></strong>
@@ -111,6 +119,14 @@ export function AdminPage({ projects, session, onSignIn }) {
       ) : null}
     </section>
   );
+}
+
+function AdminProjectThumbnail({ project }) {
+  if (project?.coverUrl) {
+    return <img className="admin-leaderboard__thumbnail" src={staticAssetUrl(project.coverUrl)} alt="" width="52" height="38" loading="lazy" decoding="async" />;
+  }
+
+  return <span className="admin-leaderboard__thumbnail admin-leaderboard__thumbnail--fallback" aria-hidden="true">{project?.track?.slice(0, 1) || 'R'}</span>;
 }
 
 function AdminStatus({ action, body, icon, title }) {

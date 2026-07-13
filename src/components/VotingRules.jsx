@@ -9,7 +9,7 @@ import {
 import { useI18n } from '../i18n/I18nProvider.jsx';
 import { Reveal } from './motion/Reveal.jsx';
 
-const RULES = [
+const STATIC_RULES = [
   {
     icon: ShieldCheck,
     titleKey: 'rules.signInTitle',
@@ -35,6 +35,11 @@ const RULES = [
 export function VotingRules({ event }) {
   const { t } = useI18n();
   const scoring = event.scoring;
+  const minimumSbtBadgeCount = event.voteEligibility?.minimumSbtBadgeCount;
+  const hasSbtEligibility = Number.isInteger(minimumSbtBadgeCount);
+  const rules = hasSbtEligibility
+    ? [{ icon: CheckCircle, titleKey: 'rules.sbtTitle', bodyKey: 'rules.sbtBody' }, ...STATIC_RULES]
+    : STATIC_RULES;
   return (
     <section className="rules-section" id="rules">
       <div className="rules-section__inner page-shell">
@@ -43,16 +48,16 @@ export function VotingRules({ event }) {
             <span className="section-kicker">{t('rules.kicker')}</span>
             <h2>{t('rules.title')}</h2>
           </div>
-          <p>{t('rules.intro')}</p>
+          <p>{hasSbtEligibility ? t('rules.intro', { minimum: minimumSbtBadgeCount }) : t('rules.introUnavailable')}</p>
         </Reveal>
 
         <div className="rules-layout">
           <div className="rules-list">
-            {RULES.map(({ icon: Icon, titleKey, bodyKey }, index) => (
+            {rules.map(({ icon: Icon, titleKey, bodyKey }, index) => (
               <Reveal as="article" delay={index * 0.08} distance={22} key={titleKey}>
                 <span className="rules-list__number">{String(index + 1).padStart(2, '0')}</span>
                 <span className="rules-list__icon"><Icon size={22} weight="duotone" /></span>
-                <div><h3>{t(titleKey)}</h3><p>{t(bodyKey)}</p></div>
+                <div><h3>{t(titleKey)}</h3><p>{t(bodyKey, { minimum: minimumSbtBadgeCount })}</p></div>
               </Reveal>
             ))}
           </div>

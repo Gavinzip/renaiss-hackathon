@@ -79,8 +79,8 @@ export function MobileVoteGuide({
                 {phase === 'selected' && displayProject ? (
                   <div className="mobile-vote-guide__selected">
                     <MobileProjectSummary project={displayProject} t={t} />
-                    <button className="button button--primary mobile-vote-guide__primary" type="button" onClick={onSubmit} disabled={!canWrite}>
-                      {t('vote.submit')}
+                    <button className="button button--primary mobile-vote-guide__primary" type="button" onClick={onSubmit} disabled={!canWrite || submitting}>
+                      {submitting ? t('vote.checkingEligibility') : t('vote.submit')}
                     </button>
                     <button className="mobile-vote-guide__text-action" type="button" onClick={onClearSelection}>
                       {t('vote.clearSelection')}

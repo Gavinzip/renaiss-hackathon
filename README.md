@@ -27,10 +27,15 @@ The public gallery remains available when SSO or the voting window is not config
 ## Production requirements
 
 - Publish public media to the dedicated Cloudflare R2 bucket with `npm run assets:publish`. It creates a content-addressed release and records it in `src/generated/staticAssetRelease.js`. The production build deliberately fails until `VITE_STATIC_ASSET_CDN_BASE_URL` is set to the active HTTPS asset origin. A custom R2 hostname is preferred; the existing approved R2 public origin is supported while a custom-domain migration is pending. The Dockerfile declares this as a build-stage `ARG`, so set the same variable in Zeabur before the multi-stage image is built. Validate live objects with `npm run assets:verify -- --base=https://media.example.com`.
+
+## Analytics
+
+Set `VITE_GA_MEASUREMENT_ID` in the Zeabur **build environment** to the Google Analytics 4 web-stream Measurement ID. The browser sends ordinary page views and one anonymous `sbt_eligible_vote_access` event per browser session only after the server confirms the SBT voting requirement. It never sends wallet addresses, Renaiss SSO subjects, project selections, vote writes, or raw SBT balances to Google Analytics. To report eligible visitors by country, use the `sbt_eligible_vote_access` event with the `Country` dimension in a GA exploration.
 - `public/assets/` is available only to Vite development. Production builds do not copy it into `dist`; all media URLs resolve to the published R2 release. Content images must be WebP or AVIF. Platform icons may remain PNG where WebP is not reliably supported.
 - Set `PUBLIC_APP_ORIGIN` to the exact HTTPS origin and allowlist `${PUBLIC_APP_ORIGIN}/auth/callback` with Renaiss.
 - Store `RENAISS_CLIENT_SECRET` and `AUTH_SESSION_SECRET` only in the server environment.
 - Set `ADMIN_SAFE_WALLET_ADDRESSES` to the comma-separated Safe wallets that may view the private live vote dashboard. The browser never receives this allowlist or individual voter identities.
+- Set `BSCSCAN_API_KEY`, `ONCHAIN_SBT_CONTRACT`, and the BNB Chain settings in `.env.example`. Every vote write verifies the Renaiss SSO Safe wallet against the official ERC-1155 transfer history and requires at least `VOTE_MINIMUM_SBT_BADGES=50` distinct token IDs with a positive balance. This is an environment variable: change it in Zeabur to adjust the live threshold without altering the rule text. BscScan errors, missing Safe-wallet claims, and missing configuration block a vote; there is no eligibility fallback.
 - Set exact `VOTING_OPENS_AT` and `VOTING_CLOSES_AT` timestamps before launch.
 - Mount `/data` as persistent storage and run a single application instance when using the bundled SQLite store. Move sessions and votes to shared Postgres/Redis-backed storage before horizontal scaling.
 - Keep `RESULTS_PUBLISHED=false` until the organizer intentionally publishes results.

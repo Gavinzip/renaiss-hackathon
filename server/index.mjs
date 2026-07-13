@@ -7,7 +7,7 @@ import compression from 'compression'
 import express from 'express'
 import helmet from 'helmet'
 
-import { requireAdministrator } from './admin-access.mjs'
+import { isAdministrator, requireAdministrator } from './admin-access.mjs'
 import { loadConfig } from './config.mjs'
 import { createDatabase } from './database.mjs'
 import { loadLocalEnv } from './env-loader.mjs'
@@ -36,15 +36,17 @@ import {
   verifyCookieValue,
 } from './security.mjs'
 import { createVoteStore } from './vote-store.mjs'
+import { createSbtEligibilityService } from './sbt-eligibility.mjs'
 import { runDatabaseBackup, runRepositoryCheck } from './backup/runner.mjs'
 
-function displayUser(session) {
+function displayUser(config, session) {
   if (!session) return null
   return {
     name: session.user.name,
     picture: session.user.picture,
     twitterUsername: session.user.twitterUsername,
     safeWalletAddress: session.user.safeWalletAddress,
+    isAdministrator: isAdministrator(config, session),
   }
 }
 
@@ -88,6 +90,7 @@ export function createApplication(options = {}) {
   const database = options.database || createDatabase(config)
   const oidc = options.oidc || createOidcClient(config)
   const voteStore = options.voteStore || createVoteStore({ database, config })
+  const sbtEligibility = options.sbtEligibility || createSbtEligibilityService({ config })
   const rateLimiter = options.rateLimiter || createMemoryRateLimiter()
   const app = express()
 
@@ -187,7 +190,7 @@ export function createApplication(options = {}) {
     sendNoStore(response, 200, {
       authenticated: Boolean(session),
       authConfigured: config.ssoConfigured,
-      user: displayUser(session),
+      user: displayUser(config, session),
       csrfToken: session ? csrfTokenForSession(config.sessionSecret, session) : null,
       vote: publicVoteState.vote,
       event: publicVoteState.event,
@@ -298,22 +301,28 @@ export function createApplication(options = {}) {
     sendNoStore(response, 200, voteStore.getPublicState(session.user.sub))
   })
 
+  app.get('/api/vote/eligibility', asyncRoute(async (request, response) => {
+    const session = requireSession(request)
+    sendNoStore(response, 200, await sbtEligibility.read(session))
+  }))
+
   app.get('/api/admin/votes', (request, response) => {
     const session = requireSession(request)
     requireAdministrator(config, session)
     sendNoStore(response, 200, voteStore.getAdminResults())
   })
 
-  app.post('/api/vote', (request, response) => {
+  app.post('/api/vote', asyncRoute(async (request, response) => {
     const session = requireSession(request)
     requireVoteWriteSecurity(request, session)
+    const eligibility = await sbtEligibility.requireEligible(session)
     const result = voteStore.castVote({
       voterSub: session.user.sub,
       projectId: request.body?.projectId,
       requestId: requestIdFrom(request),
     })
-    sendNoStore(response, 200, result)
-  })
+    sendNoStore(response, 200, { ...result, eligibility })
+  }))
 
   app.delete('/api/vote', (request, response) => {
     const session = requireSession(request)
@@ -387,6 +396,7 @@ export function createApplication(options = {}) {
     config,
     database,
     voteStore,
+    sbtEligibility,
   }
 }
 

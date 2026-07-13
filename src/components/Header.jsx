@@ -20,6 +20,9 @@ export function Header({ session, onSignIn, onLogout }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const userLabel = session.user?.name || session.user?.twitterUsername || t('nav.member');
+  const navigationItems = session.user?.isAdministrator
+    ? [...NAV_ITEMS, ['nav.admin', '/admin']]
+    : NAV_ITEMS;
 
   useEffect(() => {
     const updateHeader = () => {
@@ -40,7 +43,7 @@ export function Header({ session, onSignIn, onLogout }) {
       <div className="site-header__inner page-shell">
         <BrandLockup compact />
         <nav className="desktop-nav" aria-label={t('nav.primary')}>
-          {NAV_ITEMS.map(([labelKey, href]) => (
+          {navigationItems.map(([labelKey, href]) => (
             <NavLink key={href} to={href} end={href === '/'}>{t(labelKey)}</NavLink>
           ))}
         </nav>
@@ -99,7 +102,7 @@ export function Header({ session, onSignIn, onLogout }) {
             exit={reduceMotion ? undefined : { opacity: 0.56, y: -8, scale: 0.99, filter: 'blur(2px)', transition: { duration: 0.14 } }}
             transition={panelTransition}
           >
-            {NAV_ITEMS.map(([labelKey, href]) => <NavLink key={href} to={href} end={href === '/'} onClick={closeMenu}>{t(labelKey)}</NavLink>)}
+            {navigationItems.map(([labelKey, href]) => <NavLink key={href} to={href} end={href === '/'} onClick={closeMenu}>{t(labelKey)}</NavLink>)}
           </motion.nav>
         ) : null}
       </AnimatePresence>

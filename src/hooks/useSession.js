@@ -53,6 +53,8 @@ export function useSession() {
     return payload;
   }, [session.csrfToken]);
 
+  const checkVoteEligibility = useCallback(async () => apiRequest('/api/vote/eligibility'), []);
+
   const clearVote = useCallback(async () => {
     const requestId = crypto.randomUUID();
     const payload = await apiRequest('/api/vote', {
@@ -76,5 +78,5 @@ export function useSession() {
     await refresh();
   }, [refresh, session.csrfToken]);
 
-  return { session, refresh, recordVote, clearVote, logout };
+  return { session, refresh, recordVote, clearVote, checkVoteEligibility, logout };
 }

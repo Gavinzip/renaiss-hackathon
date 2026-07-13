@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { useI18n } from '../../i18n/I18nProvider.jsx';
+import { trackEligibleSbtVoter } from '../../lib/analytics.js';
 import { MobileVoteGuide } from './MobileVoteGuide.jsx';
 
 const KNOWN_ERROR_CODES = new Set([
@@ -8,6 +9,16 @@ const KNOWN_ERROR_CODES = new Set([
   'auth_not_configured',
   'sso_not_configured',
   'session_required',
+  'safe_wallet_not_ready',
+  'sbt_vote_requirement_not_met',
+  'bscscan_not_configured',
+  'sbt_contract_not_configured',
+  'bscscan_request_failed',
+  'bscscan_request_timeout',
+  'bscscan_http_error',
+  'bscscan_invalid_response',
+  'bscscan_invalid_transfer_row',
+  'bscscan_pagination_limit',
   'csrf_invalid',
   'origin_not_allowed',
   'voting_window_not_configured',
@@ -25,6 +36,7 @@ export function VotePanel({
   resumeConfirmation,
   onResumeHandled,
   onSignIn,
+  onCheckEligibility,
   onConfirm,
   onClear,
   onClearSelection,
@@ -53,20 +65,55 @@ export function VotePanel({
 
   useEffect(() => {
     if (!resumeConfirmation || !project) return;
-    if (session.authenticated && canWrite) {
-      setInteraction({ projectId: project.id, phase: 'confirm' });
+    if (!session.authenticated || !canWrite) {
+      onResumeHandled();
+      return;
     }
-    onResumeHandled();
-  }, [canWrite, onResumeHandled, project, resumeConfirmation, session.authenticated]);
 
-  const submit = () => {
+    let active = true;
+    setSubmitting(true);
+    setError(null);
+    onCheckEligibility()
+      .then((eligibility) => {
+        if (!active) return;
+        if (eligibility.status !== 'eligible') {
+          setError(sbtEligibilityError(eligibility));
+          return;
+        }
+        trackEligibleSbtVoter();
+        setInteraction({ projectId: project.id, phase: 'confirm' });
+      })
+      .catch((caught) => {
+        if (active) setError(caught);
+      })
+      .finally(() => {
+        if (!active) return;
+        setSubmitting(false);
+        onResumeHandled();
+      });
+    return () => { active = false; };
+  }, [canWrite, onCheckEligibility, onResumeHandled, project, resumeConfirmation, session.authenticated]);
+
+  const submit = async () => {
     if (!project || !canWrite) return;
     setError(null);
     if (!session.authenticated) {
       onSignIn();
       return;
     }
-    setInteraction({ projectId: project.id, phase: 'confirm' });
+    setSubmitting(true);
+    try {
+      const eligibility = await onCheckEligibility();
+      if (eligibility.status !== 'eligible') {
+        throw sbtEligibilityError(eligibility);
+      }
+      trackEligibleSbtVoter();
+      setInteraction({ projectId: project.id, phase: 'confirm' });
+    } catch (caught) {
+      setError(caught);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const confirm = async () => {
@@ -113,7 +160,7 @@ export function VotePanel({
         recordedProject={recordedProject}
         canWrite={canWrite}
         submitting={submitting}
-        errorMessage={error ? localizeError(error, t) : null}
+        errorMessage={error ? localizeError(error, event, t) : null}
         statusText={eventStatusCopy(event, intlLocale, t)}
         recordedAt={receipt?.updatedAt ? t('vote.recordedAt', { date: formatReceiptTime(receipt.updatedAt, intlLocale) }) : null}
         t={t}
@@ -142,6 +189,19 @@ function formatReceiptTime(value, locale) {
   }).format(new Date(value));
 }
 
-function localizeError(error, t) {
-  return KNOWN_ERROR_CODES.has(error?.code) ? t(`vote.error.${error.code}`) : t('vote.error.generic');
+function sbtEligibilityError(eligibility) {
+  const error = new Error('SBT eligibility requirement not met.');
+  error.code = 'sbt_vote_requirement_not_met';
+  error.minimumBadgeCount = eligibility.minimumBadgeCount;
+  return error;
+}
+
+function localizeError(error, event, t) {
+  if (!KNOWN_ERROR_CODES.has(error?.code)) return t('vote.error.generic');
+  if (error.code !== 'sbt_vote_requirement_not_met') return t(`vote.error.${error.code}`);
+
+  const minimum = error.minimumBadgeCount ?? event?.voteEligibility?.minimumSbtBadgeCount;
+  return Number.isInteger(minimum)
+    ? t('vote.error.sbt_vote_requirement_not_met', { minimum })
+    : t('vote.error.generic');
 }

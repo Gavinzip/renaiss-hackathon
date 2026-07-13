@@ -13,6 +13,7 @@ import { ProjectDialog } from './components/projects/ProjectDialog.jsx';
 import { useSession } from './hooks/useSession.js';
 import { useI18n } from './i18n/I18nProvider.jsx';
 import { localizeProjects } from './i18n/localizeProjects.js';
+import { initializeAnalytics, trackPageView } from './lib/analytics.js';
 import { staticAssetCssUrl } from './lib/staticAssets.js';
 import { HomePage } from './pages/HomePage.jsx';
 import { AdminPage } from './pages/AdminPage.jsx';
@@ -31,7 +32,7 @@ export function App() {
   const { locale, t } = useI18n();
   const location = useLocation();
   const navigate = useNavigate();
-  const { session, recordVote, clearVote, logout } = useSession();
+  const { session, recordVote, clearVote, checkVoteEligibility, logout } = useSession();
   const [selectedId, setSelectedId] = useState(readPendingProjectForAuthResume);
   const [projectDialogId, setProjectDialogId] = useState(null);
   const [projectDialogOpen, setProjectDialogOpen] = useState(false);
@@ -64,6 +65,28 @@ export function App() {
   useEffect(() => {
     setProjectDialogOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    initializeAnalytics();
+    trackPageView({
+      // Do not forward query strings: they can contain an auth state or a
+      // project deep-link and are not needed for aggregate page reporting.
+      path: location.pathname,
+      title: document.title,
+    });
+  }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    if (location.pathname !== '/vote') return;
+    const projectId = new URLSearchParams(location.search).get('project');
+    if (!projectId) return;
+
+    const project = projects.find((candidate) => candidate.id === projectId);
+    if (!project) return;
+
+    setProjectDialogId(project.id);
+    setProjectDialogOpen(true);
+  }, [location.pathname, location.search, projects]);
 
   useEffect(() => {
     let active = true;
@@ -191,6 +214,8 @@ export function App() {
     return payload;
   }, [recordVote]);
 
+  const verifyVoteEligibility = useCallback(async () => checkVoteEligibility(), [checkVoteEligibility]);
+
   const removeVote = useCallback(async () => {
     const payload = await clearVote();
     setSelectedId(null);
@@ -201,6 +226,10 @@ export function App() {
   const clearLocalSelection = useCallback(() => {
     setSelectedId(null);
     sessionStorage.removeItem(PENDING_PROJECT_KEY);
+  }, []);
+
+  const markVoteResumeHandled = useCallback(() => {
+    setResumeVoteConfirmation(false);
   }, []);
 
   const signOut = useCallback(async () => {
@@ -236,8 +265,9 @@ export function App() {
                     setProjectDialogOpen(true);
                   }}
                   onSelectProject={selectProject}
-                  onResumeHandled={() => setResumeVoteConfirmation(false)}
+                  onResumeHandled={markVoteResumeHandled}
                   onSignIn={beginVoteSignIn}
+                  onCheckEligibility={verifyVoteEligibility}
                   onConfirm={confirmVote}
                   onClear={removeVote}
                   onClearSelection={clearLocalSelection}
@@ -245,7 +275,14 @@ export function App() {
               )}
             />
             <Route path="/rules" element={<Navigate to="/#rules" replace />} />
-            <Route path="/admin" element={<AdminPage projects={projects} session={session} onSignIn={beginHeaderSignIn} />} />
+            <Route
+              path="/admin"
+              element={session.loading
+                ? null
+                : session.user?.isAdministrator
+                  ? <AdminPage projects={projects} session={session} onSignIn={beginHeaderSignIn} />
+                  : <Navigate to="/" replace />}
+            />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </PageTransition>

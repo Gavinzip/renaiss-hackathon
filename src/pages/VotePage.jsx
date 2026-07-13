@@ -18,6 +18,7 @@ export function VotePage({
   onSelectProject,
   onResumeHandled,
   onSignIn,
+  onCheckEligibility,
   onConfirm,
   onClear,
   onClearSelection,
@@ -53,6 +54,7 @@ export function VotePage({
             resumeConfirmation={resumeConfirmation}
             onResumeHandled={onResumeHandled}
             onSignIn={onSignIn}
+            onCheckEligibility={onCheckEligibility}
             onConfirm={onConfirm}
             onClear={onClear}
             onClearSelection={onClearSelection}
