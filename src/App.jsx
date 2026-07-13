@@ -5,6 +5,7 @@ import { EVENT } from '../shared/event.mjs';
 import { PROJECTS } from '../shared/projects.mjs';
 import { Footer } from './components/Footer.jsx';
 import { Header } from './components/Header.jsx';
+import { InitialExperienceLoader } from './components/InitialExperienceLoader.jsx';
 import { Modal } from './components/Modal.jsx';
 import { RouteScrollManager } from './components/RouteScrollManager.jsx';
 import { PageTransition } from './components/motion/PageTransition.jsx';
@@ -18,6 +19,12 @@ import { NotFoundPage } from './pages/NotFoundPage.jsx';
 import { VotePage } from './pages/VotePage.jsx';
 
 const PENDING_PROJECT_KEY = 'renaiss-hackathon-pending-project';
+const INITIAL_LOADER_MIN_VISIBLE_MS = 900;
+const INITIAL_LOADER_EXIT_MS = 440;
+const INITIAL_HOME_ASSETS = Object.freeze([
+  '/assets/renaiss-lab-mark.webp',
+  '/assets/hackathon-vote-hero-crt-4a48559f.webp',
+]);
 
 export function App() {
   const { locale, t } = useI18n();
@@ -29,6 +36,11 @@ export function App() {
   const [projectDialogOpen, setProjectDialogOpen] = useState(false);
   const [resumeVoteConfirmation, setResumeVoteConfirmation] = useState(false);
   const [authNotice, setAuthNotice] = useState(null);
+  const [initialAssetsReady, setInitialAssetsReady] = useState(false);
+  const [initialPaintReady, setInitialPaintReady] = useState(false);
+  const [initialLoaderVisible, setInitialLoaderVisible] = useState(true);
+  const [initialLoaderMounted, setInitialLoaderMounted] = useState(true);
+  const [initialLoaderStartedAt] = useState(() => Date.now());
 
   const projects = useMemo(() => localizeProjects(PROJECTS, locale), [locale]);
   const recordedProject = useMemo(
@@ -51,6 +63,68 @@ export function App() {
   useEffect(() => {
     setProjectDialogOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    let active = true;
+
+    Promise.all(INITIAL_HOME_ASSETS.map(preloadStaticImage)).finally(() => {
+      if (active) setInitialAssetsReady(true);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!initialAssetsReady) return undefined;
+
+    let active = true;
+    let firstFrame = 0;
+    let secondFrame = 0;
+    const markReadyAfterPaint = () => {
+      firstFrame = window.requestAnimationFrame(() => {
+        secondFrame = window.requestAnimationFrame(() => {
+          if (active) setInitialPaintReady(true);
+        });
+      });
+    };
+
+    if (document.fonts?.ready) {
+      document.fonts.ready.catch(() => undefined).finally(markReadyAfterPaint);
+    } else {
+      markReadyAfterPaint();
+    }
+
+    return () => {
+      active = false;
+      window.cancelAnimationFrame(firstFrame);
+      window.cancelAnimationFrame(secondFrame);
+    };
+  }, [initialAssetsReady]);
+
+  const initialExperienceReady = initialPaintReady && !session.loading;
+
+  useEffect(() => {
+    if (!initialExperienceReady) return undefined;
+
+    const elapsed = Date.now() - initialLoaderStartedAt;
+    const timeoutId = window.setTimeout(() => {
+      setInitialLoaderVisible(false);
+    }, Math.max(0, INITIAL_LOADER_MIN_VISIBLE_MS - elapsed));
+
+    return () => window.clearTimeout(timeoutId);
+  }, [initialExperienceReady, initialLoaderStartedAt]);
+
+  useEffect(() => {
+    if (initialLoaderVisible) return undefined;
+
+    const timeoutId = window.setTimeout(() => {
+      setInitialLoaderMounted(false);
+    }, INITIAL_LOADER_EXIT_MS);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [initialLoaderVisible]);
 
   useEffect(() => {
     if (session.loading) return;
@@ -138,6 +212,7 @@ export function App() {
 
   return (
     <div className="site-frame" style={{ '--vote-ribbon-asset': staticAssetCssUrl('/assets/backgrounds/renaiss-vote-ribbon-field.webp') }}>
+      {initialLoaderMounted ? <InitialExperienceLoader isLeaving={!initialLoaderVisible} /> : null}
       <RouteScrollManager />
       <Header session={session} onSignIn={beginHeaderSignIn} onLogout={signOut} />
       <main>
@@ -193,6 +268,19 @@ export function App() {
       </Modal>
     </div>
   );
+}
+
+function preloadStaticImage(path) {
+  return new Promise((resolve) => {
+    const image = new Image();
+    const finish = () => resolve();
+    image.onload = finish;
+    image.onerror = finish;
+    image.decoding = 'async';
+    image.src = staticAssetUrl(path);
+
+    if (image.complete) finish();
+  });
 }
 
 function readPendingProjectForAuthResume() {
