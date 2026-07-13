@@ -17,10 +17,11 @@ export const EVENT = Object.freeze({
   prizePool: Object.freeze({
     total: 4_000,
     currency: "USDT",
-    label: "$4,000 USDT",
+    label: "$4,000+ USDT",
     awards: Object.freeze([
-      Object.freeze({ name: "Champion", amount: 2_000, count: 1 }),
-      Object.freeze({ name: "Excellence Award", amount: 1_000, count: 2 }),
+      Object.freeze({ id: "champion", amount: 2_000, count: 1 }),
+      Object.freeze({ id: "excellence", amount: 1_000, count: 2 }),
+      Object.freeze({ id: "participation", minimumAmount: 100, maximumAmount: 500, count: 1, perTeam: true }),
     ]),
   }),
   winnerAnnouncement: "2026-07-17",

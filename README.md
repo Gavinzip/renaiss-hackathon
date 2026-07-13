@@ -54,4 +54,4 @@ The live service stores its SQLite database in the Zeabur Volume mounted at `/da
 
 The temporary SQLite snapshot is deleted after each successful or failed upload. Restic retains 48 hourly, 14 daily, 8 weekly, and 12 monthly snapshots by default, while the scheduled workflow asks the repository to verify 5% of encrypted data monthly. Neither operation uses a sync fallback or blindly deletes Google Drive files.
 
-Official results use Community Vote at 40% and Renaiss Team Evaluation at 60%. The prize structure has three recipients: one Champion at $2,000 USDT and two Excellence Awards at $1,000 USDT each.
+Official results use Community Vote at 40% and Renaiss Team Evaluation at 60%. Prize awards include one Champion at $2,000 USDT, two Excellence Awards at $1,000 USDT each, and a $100 to $500 USDT participation award for every team.

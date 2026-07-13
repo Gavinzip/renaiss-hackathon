@@ -1305,7 +1305,7 @@ html:lang(zh-Hant) .hero h1 {
 
 .award-grid {
   display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr;
+  grid-template-columns: 1.4fr 1fr 1fr 1.2fr;
   gap: 16px;
 }
 
@@ -1374,6 +1374,23 @@ html:lang(zh-Hant) .hero h1 {
 
 .award-card:nth-child(3)::after {
   content: '03';
+}
+
+.award-card--participation {
+  --award-accent: #78e0bc;
+}
+
+.award-card--participation::after {
+  content: '+';
+  opacity: 0.075;
+}
+
+.award-card--participation p {
+  max-width: calc(100% - 6px);
+  margin: 0;
+  color: color-mix(in srgb, var(--muted) 88%, white);
+  font-size: 0.7rem;
+  line-height: 1.48;
 }
 
 .award-card svg {

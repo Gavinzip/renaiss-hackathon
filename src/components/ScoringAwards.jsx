@@ -8,7 +8,7 @@ export function ScoringAwards({ event }) {
   const communityWeight = event.scoring.communityWeight;
   const renaissTeamWeight = event.scoring.renaissTeamWeight;
   const awards = event.prizePool.awards.flatMap((award) => (
-    Array.from({ length: award.count }, (_, index) => ({ ...award, key: `${award.name}-${index}` }))
+    Array.from({ length: award.count }, (_, index) => ({ ...award, key: `${award.id}-${index}` }))
   ));
 
   return (
@@ -48,19 +48,23 @@ export function ScoringAwards({ event }) {
         </Reveal>
         <div className="award-grid">
           {awards.map((award, index) => {
-            const Icon = award.name === 'Champion' ? Trophy : Star;
+            const champion = award.id === 'champion';
+            const participation = award.id === 'participation';
+            const Icon = champion ? Trophy : participation ? UsersThree : Star;
+            const amount = formatAwardAmount(award, event.prizePool.currency, intlLocale, t);
             return (
               <Reveal
                 as="article"
-                className={`award-card ${award.name === 'Champion' ? 'award-card--champion' : ''}`}
+                className={`award-card award-card--${award.id}`}
                 delay={index * 0.09}
                 distance={22}
                 key={award.key}
                 scale={0.97}
               >
-                <Icon size={award.name === 'Champion' ? 44 : 40} weight="duotone" />
-                <span>{award.name === 'Champion' ? t('awards.champion') : t('awards.excellence')}</span>
-                <strong>${new Intl.NumberFormat(intlLocale).format(award.amount)} {event.prizePool.currency}</strong>
+                <Icon size={champion ? 44 : 40} weight="duotone" />
+                <span>{t(`awards.${award.id}`)}</span>
+                <strong>{amount}</strong>
+                {participation ? <p>{t('awards.participationBody')}</p> : null}
               </Reveal>
             );
           })}
@@ -69,6 +73,19 @@ export function ScoringAwards({ event }) {
       </section>
     </>
   );
+}
+
+function formatAwardAmount(award, currency, locale, t) {
+  const number = new Intl.NumberFormat(locale);
+  const amount = award.perTeam
+    ? t('awards.amountRange', {
+      minimum: `$${number.format(award.minimumAmount)}`,
+      maximum: `$${number.format(award.maximumAmount)}`,
+      currency,
+    })
+    : `$${number.format(award.amount)} ${currency}`;
+
+  return award.perTeam ? t('awards.perTeamAmount', { amount }) : amount;
 }
 
 function formatLongDate(value, locale) {
