@@ -7,6 +7,7 @@ Official project gallery and Renaiss-authenticated community voting surface for 
 - `/` — official event home and primary entry points.
 - `/vote` — dedicated project gallery, filtering, project detail, selection, and vote confirmation flow.
 - `/rules` — redirects to the official rules section at `/#rules`.
+- `/admin` — private live vote dashboard; requires Renaiss SSO plus a server-side Safe wallet allowlist.
 
 ## Local development
 
@@ -29,6 +30,7 @@ The public gallery remains available when SSO or the voting window is not config
 - `public/assets/` is available only to Vite development. Production builds do not copy it into `dist`; all media URLs resolve to the published R2 release. Content images must be WebP or AVIF. Platform icons may remain PNG where WebP is not reliably supported.
 - Set `PUBLIC_APP_ORIGIN` to the exact HTTPS origin and allowlist `${PUBLIC_APP_ORIGIN}/auth/callback` with Renaiss.
 - Store `RENAISS_CLIENT_SECRET` and `AUTH_SESSION_SECRET` only in the server environment.
+- Set `ADMIN_SAFE_WALLET_ADDRESSES` to the comma-separated Safe wallets that may view the private live vote dashboard. The browser never receives this allowlist or individual voter identities.
 - Set exact `VOTING_OPENS_AT` and `VOTING_CLOSES_AT` timestamps before launch.
 - Mount `/data` as persistent storage and run a single application instance when using the bundled SQLite store. Move sessions and votes to shared Postgres/Redis-backed storage before horizontal scaling.
 - Keep `RESULTS_PUBLISHED=false` until the organizer intentionally publishes results.

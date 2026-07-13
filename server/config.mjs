@@ -3,6 +3,7 @@ import { dirname, isAbsolute, resolve } from 'node:path'
 import { EVENT } from '../shared/event.mjs'
 
 export const RENAISS_PRODUCTION_ISSUER = 'https://www.renaiss.xyz/api/auth'
+const WALLET_ADDRESS_PATTERN = /^0x[a-fA-F0-9]{40}$/
 
 function envString(env, name, fallback = '') {
   const value = String(env[name] ?? '').trim()
@@ -50,6 +51,26 @@ function assertSecret(secret, production) {
     const prefix = production ? 'Production requires' : 'Local authentication requires'
     throw new Error(`${prefix} AUTH_SESSION_SECRET with at least 32 characters.`)
   }
+}
+
+function adminWalletAllowlist(env) {
+  const entries = envString(env, 'ADMIN_SAFE_WALLET_ADDRESSES')
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+
+  const normalized = entries.map((address) => {
+    if (!WALLET_ADDRESS_PATTERN.test(address)) {
+      throw new Error('ADMIN_SAFE_WALLET_ADDRESSES must contain comma-separated 0x wallet addresses.')
+    }
+    return address.toLowerCase()
+  })
+
+  if (new Set(normalized).size !== normalized.length) {
+    throw new Error('ADMIN_SAFE_WALLET_ADDRESSES must not contain duplicate wallet addresses.')
+  }
+
+  return Object.freeze(normalized)
 }
 
 function backupConfiguration(env, databasePath) {
@@ -133,6 +154,7 @@ export function loadConfig(env = process.env, options = {}) {
 
   const sessionSecret = envString(env, 'AUTH_SESSION_SECRET')
   assertSecret(sessionSecret, production)
+  const adminSafeWalletAddresses = adminWalletAllowlist(env)
 
   const configuredDatabasePath = envString(env, 'DATABASE_PATH')
   if (production && !configuredDatabasePath) {
@@ -210,6 +232,7 @@ export function loadConfig(env = process.env, options = {}) {
     backup,
     distDir: resolve(cwd, 'dist'),
     sessionSecret,
+    adminSafeWalletAddresses,
     cookieSecure: publicOrigin.startsWith('https://'),
     sessionCookieName: envString(env, 'SESSION_COOKIE_NAME', 'renaiss_hackathon_session'),
     challengeCookieName: envString(env, 'OAUTH_CHALLENGE_COOKIE_NAME', 'renaiss_hackathon_oauth'),

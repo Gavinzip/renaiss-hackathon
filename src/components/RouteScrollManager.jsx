@@ -7,7 +7,7 @@ export function RouteScrollManager() {
   const { hash, pathname } = useLocation();
   const { locale, t } = useI18n();
   useEffect(() => {
-    const titleKeys = { '/': 'meta.homeTitle', '/vote': 'meta.voteTitle', '/rules': 'meta.rulesTitle' };
+    const titleKeys = { '/': 'meta.homeTitle', '/vote': 'meta.voteTitle', '/rules': 'meta.rulesTitle', '/admin': 'meta.adminTitle' };
     document.title = t(titleKeys[pathname] || 'meta.notFoundTitle');
     let frame = 0;
     const timer = window.setTimeout(() => {

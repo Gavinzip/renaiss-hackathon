@@ -7,6 +7,7 @@ import compression from 'compression'
 import express from 'express'
 import helmet from 'helmet'
 
+import { requireAdministrator } from './admin-access.mjs'
 import { loadConfig } from './config.mjs'
 import { createDatabase } from './database.mjs'
 import { loadLocalEnv } from './env-loader.mjs'
@@ -295,6 +296,12 @@ export function createApplication(options = {}) {
   app.get('/api/vote', (request, response) => {
     const session = requireSession(request)
     sendNoStore(response, 200, voteStore.getPublicState(session.user.sub))
+  })
+
+  app.get('/api/admin/votes', (request, response) => {
+    const session = requireSession(request)
+    requireAdministrator(config, session)
+    sendNoStore(response, 200, voteStore.getAdminResults())
   })
 
   app.post('/api/vote', (request, response) => {

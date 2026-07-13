@@ -15,6 +15,7 @@ import { useI18n } from './i18n/I18nProvider.jsx';
 import { localizeProjects } from './i18n/localizeProjects.js';
 import { staticAssetCssUrl } from './lib/staticAssets.js';
 import { HomePage } from './pages/HomePage.jsx';
+import { AdminPage } from './pages/AdminPage.jsx';
 import { NotFoundPage } from './pages/NotFoundPage.jsx';
 import { VotePage } from './pages/VotePage.jsx';
 
@@ -244,6 +245,7 @@ export function App() {
               )}
             />
             <Route path="/rules" element={<Navigate to="/#rules" replace />} />
+            <Route path="/admin" element={<AdminPage projects={projects} session={session} onSignIn={beginHeaderSignIn} />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </PageTransition>

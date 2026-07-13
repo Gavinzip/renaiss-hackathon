@@ -188,6 +188,11 @@ export function createVoteStore({ database, config }) {
     WHERE event_id = ?
     GROUP BY project_id
   `)
+  const selectLatestVote = db.prepare(`
+    SELECT MAX(updated_at) AS updated_at
+    FROM vote_allocations
+    WHERE event_id = ?
+  `)
 
   function idempotentResult(requestId, voterSub, fingerprint) {
     const event = selectEventByRequestId.get(EVENT_ID, requestId)
@@ -214,6 +219,30 @@ export function createVoteStore({ database, config }) {
     return {
       totalVotes: projects.reduce((sum, project) => sum + project.votes, 0),
       projects,
+    }
+  }
+
+  function adminResults() {
+    const counts = new Map(countVotes.all(EVENT_ID).map((row) => [row.project_id, Number(row.votes)]))
+    const ordered = PROJECTS
+      .filter((project) => VOTABLE_PROJECT_ID_SET.has(project.id))
+      .map((project) => ({ projectId: project.id, votes: counts.get(project.id) || 0 }))
+      .sort((left, right) => right.votes - left.votes || left.projectId.localeCompare(right.projectId))
+
+    let previousVotes = null
+    let rank = 0
+    const leaderboard = ordered.map((project, index) => {
+      if (project.votes !== previousVotes) rank = index + 1
+      previousVotes = project.votes
+      return { ...project, rank }
+    })
+    const latestVote = selectLatestVote.get(EVENT_ID)
+
+    return {
+      totalVotes: leaderboard.reduce((total, project) => total + project.votes, 0),
+      leaderboard,
+      lastUpdatedAt: latestVote?.updated_at ? iso(latestVote.updated_at) : null,
+      serverTime: iso(nowMs()),
     }
   }
 
@@ -327,6 +356,7 @@ export function createVoteStore({ database, config }) {
     eventId: EVENT_ID,
     getPublicEvent: publicEvent,
     getPublicState: publicState,
+    getAdminResults: adminResults,
     castVote,
     withdrawVote,
   }

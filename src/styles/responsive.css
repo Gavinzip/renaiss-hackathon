@@ -41,6 +41,23 @@
     width: min(590px, 58%);
   }
 
+  .admin-page {
+    padding-top: 122px;
+  }
+
+  .admin-page__heading,
+  .admin-leaderboard__header {
+    flex-direction: column;
+  }
+
+  .admin-dashboard__metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-leaderboard__header p {
+    text-align: left;
+  }
+
   .rules-section__heading {
     grid-template-columns: 1fr;
     gap: 18px;
