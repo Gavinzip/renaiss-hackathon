@@ -92,29 +92,6 @@
   animation: initial-loader-breathe 2.2s ease-in-out infinite;
 }
 
-.initial-experience-loader__spark {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #dbf8ff;
-  box-shadow: 0 0 16px 5px rgba(108, 224, 255, 0.55);
-}
-
-.initial-experience-loader__spark--one {
-  top: 3%;
-  left: 50%;
-  animation: initial-loader-spark 2.1s ease-in-out infinite;
-}
-
-.initial-experience-loader__spark--two {
-  right: 8%;
-  bottom: 12%;
-  background: #e6c9ff;
-  box-shadow: 0 0 16px 5px rgba(202, 136, 255, 0.48);
-  animation: initial-loader-spark 2.1s 0.78s ease-in-out infinite;
-}
-
 .initial-experience-loader__label {
   position: absolute;
   inset: auto 0 calc(50% - clamp(142px, 23vw, 188px));
@@ -136,15 +113,10 @@
   50% { transform: scale(1.055); filter: drop-shadow(0 12px 28px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 28px rgba(166, 129, 255, 0.42)); }
 }
 
-@keyframes initial-loader-spark {
-  50% { transform: scale(0.58); opacity: 0.34; }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .initial-experience-loader,
   .initial-experience-loader__orbit,
   .initial-experience-loader__logo,
-  .initial-experience-loader__spark,
   .initial-experience-loader::after {
     animation-duration: 1ms;
     transition-duration: 1ms;

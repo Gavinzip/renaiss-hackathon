@@ -25,7 +25,7 @@ export const zhHant = Object.freeze({
   'common.back': '返回',
   'common.soon': '即將公布',
   'common.utc8': 'UTC+8',
-  'common.loadingExperience': '正在準備官方投票現場',
+  'common.loadingExperience': 'Loading',
   'auth.failedTitle': '無法完成 Renaiss 登入',
   'auth.notConfiguredTitle': '尚未設定 Renaiss 登入',
   'auth.notConfiguredBody': '此環境尚未設定專用的 Renaiss 用戶端憑證。公開作品庫是真實資料，但登入與投票寫入會維持停用；本站不提供模擬登入或驗證替代方案。',

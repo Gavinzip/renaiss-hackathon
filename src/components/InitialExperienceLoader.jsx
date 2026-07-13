@@ -17,8 +17,6 @@ export function InitialExperienceLoader({ isLeaving }) {
       <div className="initial-experience-loader__mark" aria-hidden="true">
         <span className="initial-experience-loader__orbit initial-experience-loader__orbit--outer" />
         <span className="initial-experience-loader__orbit initial-experience-loader__orbit--inner" />
-        <span className="initial-experience-loader__spark initial-experience-loader__spark--one" />
-        <span className="initial-experience-loader__spark initial-experience-loader__spark--two" />
         <img
           className="initial-experience-loader__logo"
           src={staticAssetUrl('/assets/renaiss-lab-mark.webp')}

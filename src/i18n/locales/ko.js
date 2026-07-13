@@ -25,7 +25,7 @@ export const ko = Object.freeze({
   'common.back': '돌아가기',
   'common.soon': '곧 공개',
   'common.utc8': 'UTC+8',
-  'common.loadingExperience': '공식 투표 공간을 준비하고 있습니다',
+  'common.loadingExperience': 'Loading',
   'auth.failedTitle': 'Renaiss 로그인을 완료하지 못했습니다',
   'auth.notConfiguredTitle': 'Renaiss 로그인이 설정되지 않았습니다',
   'auth.notConfiguredBody': '이 환경에는 전용 Renaiss 클라이언트 자격 증명이 없습니다. 공개 프로젝트 갤러리는 실제 데이터이지만 로그인과 투표 기록은 비활성화되어 있으며, 모의 로그인이나 인증 대체 수단은 제공하지 않습니다.',

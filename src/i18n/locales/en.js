@@ -25,7 +25,7 @@ export const en = Object.freeze({
   'common.back': 'Go back',
   'common.soon': 'soon',
   'common.utc8': 'UTC+8',
-  'common.loadingExperience': 'Preparing the official voting room',
+  'common.loadingExperience': 'Loading',
   'auth.failedTitle': 'Renaiss sign-in could not be completed',
   'auth.notConfiguredTitle': 'Renaiss sign-in is not configured',
   'auth.notConfiguredBody': 'This environment has no dedicated Renaiss client credentials. The public project gallery is real, but sign-in and vote writes stay disabled—there is no mock login or authentication fallback.',
