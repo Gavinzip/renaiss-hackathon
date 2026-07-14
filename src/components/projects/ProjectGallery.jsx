@@ -35,9 +35,9 @@ export function ProjectGallery({ projects, selectedId, recordedId, authenticated
       const textMatch = !needle || [project.name, project.team, project.pitch].some((value) => value.toLocaleLowerCase().includes(needle));
       return trackMatch && textMatch;
     });
-    return [...result].sort(sortMode === 'alpha'
-      ? (left, right) => left.name.localeCompare(right.name, intlLocale)
-      : (left, right) => stableHash(left.id) - stableHash(right.id));
+    return sortMode === 'alpha'
+      ? [...result].sort((left, right) => left.name.localeCompare(right.name, intlLocale))
+      : result;
   }, [intlLocale, projects, query, sortMode, track]);
 
   const visible = expanded || query || track !== 'All' ? filtered : filtered.slice(0, INITIAL_COUNT);
@@ -128,13 +128,4 @@ export function ProjectGallery({ projects, selectedId, recordedId, authenticated
       </div>
     </section>
   );
-}
-
-function stableHash(value) {
-  let hash = 2166136261;
-  for (let index = 0; index < value.length; index += 1) {
-    hash ^= value.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
-  }
-  return hash >>> 0;
 }

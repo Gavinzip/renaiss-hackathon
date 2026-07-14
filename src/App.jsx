@@ -18,6 +18,7 @@ import { useI18n } from './i18n/I18nProvider.jsx';
 import { localizeProjects } from './i18n/localizeProjects.js';
 import { initializeAnalytics, trackPageView } from './lib/analytics.js';
 import { warmProjectCoverCache } from './lib/projectCoverPreload.js';
+import { orderProjectsByPublicVoteOrder } from './lib/projectOrder.js';
 import { staticAssetCssUrl, staticAssetUrl } from './lib/staticAssets.js';
 import { voteSelectionLockStatus } from './lib/voteEligibility.js';
 import { HomePage } from './pages/HomePage.jsx';
@@ -28,6 +29,7 @@ import initialLoaderLogoUrl from 'virtual:initial-loader-logo';
 
 const INITIAL_LOADER_MIN_VISIBLE_MS = 900;
 const INITIAL_LOADER_EXIT_MS = 440;
+const VOTE_RANKING_REFRESH_MS = 60_000;
 const INITIAL_HOME_ASSETS = Object.freeze([
   initialLoaderLogoUrl,
   staticAssetUrl('/assets/hackathon-vote-hero-crt-4a48559f.webp'),
@@ -37,7 +39,7 @@ export function App() {
   const { locale, t } = useI18n();
   const location = useLocation();
   const navigate = useNavigate();
-  const { session, recordVote, checkVoteEligibility, logout } = useSession();
+  const { session, refresh, recordVote, checkVoteEligibility, logout } = useSession();
   const [selectedId, setSelectedId] = useState(null);
   const [projectDialogId, setProjectDialogId] = useState(null);
   const [projectDialogOpen, setProjectDialogOpen] = useState(false);
@@ -68,6 +70,10 @@ export function App() {
     ...EVENT,
     voting: { status: session.loading ? 'loading' : 'configuration_required', opensAt: null, closesAt: null },
   };
+  const votingProjects = useMemo(
+    () => orderProjectsByPublicVoteOrder(projects, event.projectOrder),
+    [event.projectOrder, projects],
+  );
   const voteEligibility = useVoteEligibility({
     enabled: location.pathname === '/vote',
     authenticated: session.authenticated,
@@ -169,6 +175,21 @@ export function App() {
   }, [initialLoaderMounted, location.pathname, projects]);
 
   useEffect(() => {
+    if (location.pathname !== '/vote') return undefined;
+
+    const refreshVoteRanking = () => {
+      if (document.visibilityState === 'visible') refresh();
+    };
+    const intervalId = window.setInterval(refreshVoteRanking, VOTE_RANKING_REFRESH_MS);
+    document.addEventListener('visibilitychange', refreshVoteRanking);
+
+    return () => {
+      window.clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', refreshVoteRanking);
+    };
+  }, [location.pathname, refresh]);
+
+  useEffect(() => {
     if (session.loading) return;
     const params = new URLSearchParams(location.search);
     const authStatus = params.get('auth');
@@ -228,10 +249,6 @@ export function App() {
     beginSignIn(`${location.pathname}${search}${location.hash}`);
   }, [beginSignIn, location.hash, location.pathname, location.search]);
 
-  const beginVoteSignIn = useCallback(() => {
-    beginSignIn('/vote#projects');
-  }, [beginSignIn]);
-
   const confirmVote = useCallback(async (projectId) => {
     const payload = await recordVote(projectId);
     setSelectedId(projectId);
@@ -279,7 +296,7 @@ export function App() {
                 element={(
                   <VotePage
                     event={event}
-                    projects={projects}
+                    projects={votingProjects}
                     recordedProject={recordedProject}
                     selectedProject={selectedProject}
                     session={session}
@@ -296,7 +313,7 @@ export function App() {
                     onSelectProject={selectProject}
                     onShare={showShareToast}
                     onEligibilityPromptHandled={dismissEligibilityPrompt}
-                    onSignIn={beginVoteSignIn}
+                    onSignIn={beginHeaderSignIn}
                     onCheckEligibility={verifyVoteEligibility}
                     onConfirm={confirmVote}
                     onClearSelection={clearLocalSelection}
@@ -328,7 +345,7 @@ export function App() {
           recorded={projectDialog?.id === recordedProject?.id}
           authenticated={session.authenticated}
           selectionLock={selectionLock}
-          onSignIn={beginVoteSignIn}
+          onSignIn={beginHeaderSignIn}
           onShare={showShareToast}
         />
       </LayoutGroup>

@@ -788,11 +788,17 @@
     padding: 13px 20px;
   }
 
-  .project-dialog__sticky-action span {
+  .project-dialog__sticky-action > span:first-child {
     display: none;
   }
 
-  .project-dialog__sticky-action .button {
+  .project-dialog__sticky-action > .renaiss-metal-button__magnet {
+    width: 100%;
+    display: flex;
+    flex: 1 1 auto;
+  }
+
+  .project-dialog__sticky-action .project-dialog__vote-action {
     width: 100%;
   }
 

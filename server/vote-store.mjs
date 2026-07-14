@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto'
 
 import { EVENT } from '../shared/event.mjs'
+import { orderProjectsByVotes } from '../shared/project-order.mjs'
 import { PROJECTS, PROJECT_IDS, VOTABLE_PROJECT_IDS } from '../shared/projects.mjs'
 
 import { HttpError } from './http.mjs'
@@ -189,6 +190,10 @@ export function createVoteStore({ database, config }) {
     WHERE event_id = ?
   `)
 
+  function voteCountsByProject() {
+    return new Map(countVotes.all(EVENT_ID).map((row) => [row.project_id, Number(row.votes)]))
+  }
+
   function idempotentResult(requestId, voterSub, fingerprint) {
     const event = selectEventByRequestId.get(EVENT_ID, requestId)
     if (!event) return null
@@ -206,7 +211,7 @@ export function createVoteStore({ database, config }) {
   }
 
   function results() {
-    const counts = new Map(countVotes.all(EVENT_ID).map((row) => [row.project_id, Number(row.votes)]))
+    const counts = voteCountsByProject()
     const projects = PROJECTS.map((project) => ({
       projectId: project.id,
       votes: counts.get(project.id) || 0,
@@ -218,11 +223,11 @@ export function createVoteStore({ database, config }) {
   }
 
   function adminResults() {
-    const counts = new Map(countVotes.all(EVENT_ID).map((row) => [row.project_id, Number(row.votes)]))
-    const ordered = PROJECTS
-      .filter((project) => VOTABLE_PROJECT_ID_SET.has(project.id))
-      .map((project) => ({ projectId: project.id, votes: counts.get(project.id) || 0 }))
-      .sort((left, right) => right.votes - left.votes || left.projectId.localeCompare(right.projectId))
+    const counts = voteCountsByProject()
+    const ordered = orderProjectsByVotes(
+      PROJECTS.filter((project) => VOTABLE_PROJECT_ID_SET.has(project.id)),
+      counts,
+    )
 
     let previousVotes = null
     let rank = 0
@@ -255,6 +260,7 @@ export function createVoteStore({ database, config }) {
         minimumSbtBadgeCount: config.sbtEligibility.minimumBadgeCount,
       },
       resultsPublished,
+      projectOrder: orderProjectsByVotes(PROJECTS, voteCountsByProject()).map((project) => project.projectId),
     }
     delete event.results
     delete event.totalVotes

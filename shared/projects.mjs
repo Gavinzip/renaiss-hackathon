@@ -381,7 +381,7 @@ const PROJECT_DATA = [
     "demoUrls": [
       "https://youtube.com/shorts/pQobmyCMXOE?feature=share"
     ],
-    "auditStatus": "BLOCK",
+    "auditStatus": "PASS",
     "votingAccess": "READY",
     "pitch": "面向 Renaiss RWA 生态的 AI 资金情报系统，用于发现低估资产、追踪巨鲸并生成实时 Alpha 预警。",
     "description": "Renaiss Alpha Radar 是一款专为 Renaiss RWA 生态系统打造的 AI 智能资金情报系统。\n\n它监控市场活动、收藏品走势和市场信号，以发现被低估的资产、追踪巨鲸的行为，并为收藏家、交易者和社群生成实时 Alpha 预警。",
