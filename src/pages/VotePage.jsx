@@ -25,7 +25,6 @@ export function VotePage({
   onSignIn,
   onCheckEligibility,
   onConfirm,
-  onClear,
   onClearSelection,
 }) {
   const { t } = useI18n();
@@ -70,7 +69,6 @@ export function VotePage({
             onSignIn={onSignIn}
             onCheckEligibility={onCheckEligibility}
             onConfirm={onConfirm}
-            onClear={onClear}
             onClearSelection={onClearSelection}
           />
         )}

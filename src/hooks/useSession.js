@@ -55,19 +55,6 @@ export function useSession() {
 
   const checkVoteEligibility = useCallback(async () => apiRequest('/api/vote/eligibility'), []);
 
-  const clearVote = useCallback(async () => {
-    const requestId = crypto.randomUUID();
-    const payload = await apiRequest('/api/vote', {
-      method: 'DELETE',
-      headers: {
-        'X-CSRF-Token': session.csrfToken,
-      },
-      body: JSON.stringify({ requestId }),
-    });
-    setSession((current) => ({ ...current, ...payload, vote: payload.vote || null }));
-    return payload;
-  }, [session.csrfToken]);
-
   const logout = useCallback(async () => {
     await apiRequest('/api/auth/logout', {
       method: 'POST',
@@ -78,5 +65,5 @@ export function useSession() {
     await refresh();
   }, [refresh, session.csrfToken]);
 
-  return { session, refresh, recordVote, clearVote, checkVoteEligibility, logout };
+  return { session, refresh, recordVote, checkVoteEligibility, logout };
 }

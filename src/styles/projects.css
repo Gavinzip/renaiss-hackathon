@@ -1102,19 +1102,6 @@ html:lang(zh-Hant) .project-card__heading strong {
     white-space: nowrap;
   }
 
-  .mobile-vote-guide__text-action--danger {
-    grid-column: 2;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    color: var(--danger);
-  }
-
-  .mobile-vote-guide__text-action--danger svg {
-    width: 14px;
-    height: 14px;
-  }
-
   .mobile-vote-guide__error {
     margin: 9px 0 0;
     display: flex;
@@ -1352,24 +1339,6 @@ html:lang(zh-Hant) .project-card__heading strong {
   color: var(--muted);
   font-size: 0.74rem;
   line-height: 1.62;
-}
-
-.vote-panel__replacement {
-  margin-top: 15px;
-  border: 1px solid rgba(255, 188, 120, 0.3);
-  border-radius: 9px;
-  padding: 11px;
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  color: #ffdbb5;
-  background: rgba(120, 74, 34, 0.19);
-  font-size: 0.68rem;
-  line-height: 1.5;
-}
-
-.vote-panel__replacement svg {
-  flex: 0 0 auto;
 }
 
 .vote-panel__confirm-actions {

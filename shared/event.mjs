@@ -24,7 +24,7 @@ export const EVENT = Object.freeze({
       Object.freeze({ id: "participation", minimumAmount: 100, maximumAmount: 500, count: 1, perTeam: true }),
     ]),
   }),
-  winnerAnnouncement: "2026-07-17",
+  winnerAnnouncement: "2026-07-19",
   judgingCriteria: Object.freeze([
     "Usability",
     "Innovation",

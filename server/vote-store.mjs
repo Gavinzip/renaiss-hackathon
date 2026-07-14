@@ -164,14 +164,9 @@ export function createVoteStore({ database, config }) {
     FROM vote_events
     WHERE event_id = ? AND request_id = ?
   `)
-  const upsertVote = db.prepare(`
+  const insertVote = db.prepare(`
     INSERT INTO vote_allocations (event_id, voter_sub, project_id, created_at, updated_at)
     VALUES (@eventId, @voterSub, @projectId, @createdAt, @updatedAt)
-    ON CONFLICT(event_id, voter_sub)
-    DO UPDATE SET project_id = excluded.project_id, updated_at = excluded.updated_at
-  `)
-  const deleteVote = db.prepare(`
-    DELETE FROM vote_allocations WHERE event_id = ? AND voter_sub = ?
   `)
   const insertEvent = db.prepare(`
     INSERT INTO vote_events (
@@ -286,18 +281,15 @@ export function createVoteStore({ database, config }) {
       assertVotingOpen(config)
 
       const existing = selectVote.get(EVENT_ID, voterSub)
+      if (existing) {
+        throw new HttpError(409, 'vote_already_recorded', 'A vote is already recorded for this identity.')
+      }
       const timestamp = nowMs()
-      const action = !existing
-        ? 'cast'
-        : existing.project_id === projectId
-          ? 'confirm'
-          : 'change'
-      const createdAt = existing?.created_at || timestamp
-      upsertVote.run({
+      insertVote.run({
         eventId: EVENT_ID,
         voterSub,
         projectId,
-        createdAt,
+        createdAt: timestamp,
         updatedAt: timestamp,
       })
       const vote = rowToVote(selectVote.get(EVENT_ID, voterSub))
@@ -306,42 +298,9 @@ export function createVoteStore({ database, config }) {
         id: randomUUID(),
         eventId: EVENT_ID,
         voterSub,
-        action,
-        previousProjectId: existing?.project_id || null,
+        action: 'cast',
+        previousProjectId: null,
         projectId,
-        requestId,
-        requestFingerprint: fingerprint,
-        resultJson: JSON.stringify(storedResult),
-        createdAt: timestamp,
-      })
-      return storedResult
-    })
-
-    return {
-      ...publicState(voterSub),
-    }
-  }
-
-  function withdrawVote({ voterSub, requestId: rawRequestId }) {
-    const requestId = normalizeRequestId(rawRequestId)
-    const fingerprint = requestFingerprint('withdraw')
-
-    database.immediateTransaction(() => {
-      const replay = idempotentResult(requestId, voterSub, fingerprint)
-      if (replay) return replay
-      assertVotingOpen(config)
-
-      const existing = selectVote.get(EVENT_ID, voterSub)
-      const timestamp = nowMs()
-      if (existing) deleteVote.run(EVENT_ID, voterSub)
-      const storedResult = { vote: null }
-      insertEvent.run({
-        id: randomUUID(),
-        eventId: EVENT_ID,
-        voterSub,
-        action: existing ? 'withdraw' : 'withdraw_noop',
-        previousProjectId: existing?.project_id || null,
-        projectId: null,
         requestId,
         requestFingerprint: fingerprint,
         resultJson: JSON.stringify(storedResult),
@@ -361,6 +320,5 @@ export function createVoteStore({ database, config }) {
     getPublicState: publicState,
     getAdminResults: adminResults,
     castVote,
-    withdrawVote,
   }
 }

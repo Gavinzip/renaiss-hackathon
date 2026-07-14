@@ -428,19 +428,6 @@
     white-space: nowrap;
   }
 
-  .mobile-vote-guide__text-action--danger {
-    grid-column: 2;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    color: var(--danger);
-  }
-
-  .mobile-vote-guide__text-action--danger svg {
-    width: 14px;
-    height: 14px;
-  }
-
   .mobile-vote-guide__error {
     margin: 8px 0 0;
     display: flex;

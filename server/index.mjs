@@ -324,16 +324,6 @@ export function createApplication(options = {}) {
     sendNoStore(response, 200, { ...result, eligibility })
   }))
 
-  app.delete('/api/vote', (request, response) => {
-    const session = requireSession(request)
-    requireVoteWriteSecurity(request, session)
-    const result = voteStore.withdrawVote({
-      voterSub: session.user.sub,
-      requestId: requestIdFrom(request),
-    })
-    sendNoStore(response, 200, result)
-  })
-
   app.post('/api/internal/backup', asyncRoute(async (request, response) => {
     requireBackupTrigger(request)
     try {

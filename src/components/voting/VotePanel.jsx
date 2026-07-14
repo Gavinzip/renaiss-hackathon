@@ -16,7 +16,6 @@ export function VotePanel({
   onSignIn,
   onCheckEligibility,
   onConfirm,
-  onClear,
   onClearSelection,
 }) {
   const { intlLocale, t } = useI18n();
@@ -110,21 +109,6 @@ export function VotePanel({
     }
   };
 
-  const clearVote = async () => {
-    if (submitting) return;
-    setSubmitting(true);
-    setError(null);
-    try {
-      await onClear();
-      setInteraction(null);
-      setReceipt(null);
-    } catch (caught) {
-      setError(caught);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
   const clearSelection = () => {
     setInteraction(null);
     setError(null);
@@ -148,7 +132,6 @@ export function VotePanel({
         onConfirm={confirm}
         onBack={() => setInteraction({ projectId: displayProject?.id, phase: 'selected' })}
         onClearSelection={clearSelection}
-        onClearVote={clearVote}
       />
     </aside>
   );

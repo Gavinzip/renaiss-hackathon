@@ -18,11 +18,13 @@ const KNOWN_ERROR_CODES = new Set([
   'voting_window_not_configured',
   'voting_not_open',
   'voting_closed',
+  'vote_already_recorded',
   'project_not_found',
   'rate_limited',
 ]);
 
 export function voteSelectionLockStatus(session, eligibility) {
+  if (session?.vote) return 'submitted';
   if (!session?.authenticated || eligibility?.status === 'eligible') return null;
   return eligibility?.status || 'idle';
 }

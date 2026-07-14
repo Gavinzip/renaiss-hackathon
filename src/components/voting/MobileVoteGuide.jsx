@@ -4,7 +4,6 @@ import {
   Compass,
   CursorClick,
   SignIn,
-  Trash,
   WarningCircle,
 } from '@phosphor-icons/react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
@@ -34,16 +33,10 @@ export function MobileVoteGuide({
   onConfirm,
   onBack,
   onClearSelection,
-  onClearVote,
 }) {
   const reduceMotion = useReducedMotion();
 
   const displayProject = phase === 'receipt' && !project ? recordedProject : project;
-  const isReplacing = phase === 'confirm'
-    && recordedProject
-    && displayProject
-    && recordedProject.id !== displayProject.id;
-
   const guide = (
     <AnimatePresence initial={false}>
       <motion.section
@@ -95,7 +88,6 @@ export function MobileVoteGuide({
                     <div className="mobile-vote-guide__confirm-copy">
                       <strong>{t('vote.confirmTitle')}</strong>
                       <span>{t('vote.confirmBody', { project: displayProject.name })}</span>
-                      {isReplacing ? <small>{t('vote.replacement', { project: recordedProject.name })}</small> : null}
                     </div>
                     <div className="mobile-vote-guide__actions">
                       <button className="button button--secondary" type="button" onClick={onBack} disabled={submitting} aria-label={t('common.back')}>
@@ -129,12 +121,6 @@ export function MobileVoteGuide({
                       <CheckCircle size={20} weight="fill" aria-hidden="true" />
                       <strong>{t('vote.receiptTitle')}</strong>
                     </div>
-                    {canWrite ? (
-                      <button className="mobile-vote-guide__text-action mobile-vote-guide__text-action--danger" type="button" onClick={onClearVote} disabled={submitting}>
-                        <Trash aria-hidden="true" />
-                        {submitting ? t('vote.removing') : t('vote.remove')}
-                      </button>
-                    ) : null}
                   </div>
                 ) : null}
 

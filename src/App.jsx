@@ -34,7 +34,7 @@ export function App() {
   const { locale, t } = useI18n();
   const location = useLocation();
   const navigate = useNavigate();
-  const { session, recordVote, clearVote, checkVoteEligibility, logout } = useSession();
+  const { session, recordVote, checkVoteEligibility, logout } = useSession();
   const [selectedId, setSelectedId] = useState(readPendingProjectForAuthResume);
   const [projectDialogId, setProjectDialogId] = useState(null);
   const [projectDialogOpen, setProjectDialogOpen] = useState(false);
@@ -239,13 +239,6 @@ export function App() {
 
   const verifyVoteEligibility = voteEligibility.refresh;
 
-  const removeVote = useCallback(async () => {
-    const payload = await clearVote();
-    setSelectedId(null);
-    sessionStorage.removeItem(PENDING_PROJECT_KEY);
-    return payload;
-  }, [clearVote]);
-
   const clearLocalSelection = useCallback(() => {
     setSelectedId(null);
     sessionStorage.removeItem(PENDING_PROJECT_KEY);
@@ -300,7 +293,6 @@ export function App() {
                   onSignIn={beginVoteSignIn}
                   onCheckEligibility={verifyVoteEligibility}
                   onConfirm={confirmVote}
-                  onClear={removeVote}
                   onClearSelection={clearLocalSelection}
                 />
               )}
