@@ -77,7 +77,7 @@ function setStaticCacheHeaders(response, filePath) {
     response.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
     return
   }
-  if (/-[A-Za-z0-9_]{8,}\.[^.]+$/.test(filePath)) {
+  if (/-[A-Za-z0-9_-]{8,}\.[^.]+$/.test(filePath)) {
     response.setHeader('Cache-Control', 'public, max-age=31536000, immutable')
     return
   }
