@@ -1,12 +1,9 @@
 import { ArrowRight, CheckCircle, GithubLogo, GlobeSimple, XLogo } from '@phosphor-icons/react';
 import { motion, useReducedMotion } from 'motion/react';
-import { useRef, useState } from 'react';
 
 import { useI18n } from '../../i18n/I18nProvider.jsx';
 import {
-  PROJECT_DIALOG_EXPAND_TRANSITION,
-  PROJECT_DIALOG_RETURN_TRANSITION,
-  projectDialogReturnPose,
+  PROJECT_DIALOG_SHARED_TRANSITION,
   projectDialogLayoutId,
   projectDialogTitleLayoutId,
   projectDialogImageLayoutId,
@@ -17,12 +14,9 @@ import { MOTION_EASE } from '../motion/motionTokens.js';
 import { ProjectCover } from './ProjectCover.jsx';
 import { ProjectTeamIdentity } from './ProjectTeamIdentity.jsx';
 
-export function ProjectDialog({ project, open, onClose, onSelect, selected, recorded, returnTarget, selectionLock }) {
+export function ProjectDialog({ project, open, onClose, onSelect, selected, recorded, selectionLock }) {
   const { t } = useI18n();
   const reduceMotion = useReducedMotion();
-  const [returnPose, setReturnPose] = useState(null);
-  const [returning, setReturning] = useState(false);
-  const afterReturnRef = useRef(null);
   if (!project) return null;
   const securityBlocked = project.auditStatus === 'BLOCK';
   const selectionBlocked = Boolean(selectionLock);
@@ -44,55 +38,21 @@ export function ProjectDialog({ project, open, onClose, onSelect, selected, reco
         : selected
           ? t('project.selectedNotice')
           : t('project.readyNotice');
-  const layoutTransition = open
-    ? PROJECT_DIALOG_EXPAND_TRANSITION
-    : PROJECT_DIALOG_RETURN_TRANSITION;
-  const startReturn = (afterReturn) => {
-    if (returning) return;
-    const sourceRect = document.querySelector('.modal-panel--linear')?.getBoundingClientRect();
-    const pose = projectDialogReturnPose(sourceRect, returnTarget);
-    if (!pose || reduceMotion) {
-      afterReturn();
-      return;
-    }
-    afterReturnRef.current = afterReturn;
-    setReturnPose(pose);
-    setReturning(true);
-  };
-  const closeDialog = () => {
-    startReturn(onClose);
-  };
-  const selectProject = () => {
-    startReturn(() => onSelect(project));
-  };
-  const completeReturn = () => {
-    if (!returning) return;
-    const afterReturn = afterReturnRef.current;
-    afterReturnRef.current = null;
-    setReturning(false);
-    afterReturn?.();
-  };
-
   return (
     <Modal
       open={open}
-      onClose={closeDialog}
+      onClose={onClose}
       title={project.name}
       className="project-dialog"
       layoutId={projectDialogLayoutId(project.id)}
       titleLayoutId={projectDialogTitleLayoutId(project.id)}
-      layoutDependency={open}
-      returnPose={returnPose}
-      returning={returning}
-      onReturnComplete={completeReturn}
-      transition={layoutTransition}
+      transition={PROJECT_DIALOG_SHARED_TRANSITION}
     >
       <ProjectCover
         project={project}
         context="dialog"
-        layoutId={returning ? undefined : projectDialogImageLayoutId(project.id)}
-        layoutDependency={open}
-        transition={layoutTransition}
+        layoutId={projectDialogImageLayoutId(project.id)}
+        transition={PROJECT_DIALOG_SHARED_TRANSITION}
       />
       <motion.div
         className="project-dialog__revealed-content"
@@ -131,7 +91,7 @@ export function ProjectDialog({ project, open, onClose, onSelect, selected, reco
           <RenaissMetalButton
             className={`project-dialog__vote-action ${selected || recorded ? 'project-vote-action--selected' : ''}`}
             type="button"
-            onClick={selectProject}
+            onClick={() => onSelect(project)}
             disabled={securityBlocked || selectionBlocked || selected || recorded}
             leading={selected || recorded ? <CheckCircle weight="fill" /> : null}
             trailing={selected || recorded ? null : <ArrowRight weight="bold" />}

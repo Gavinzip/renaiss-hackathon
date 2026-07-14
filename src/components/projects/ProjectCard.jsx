@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 
 import { useI18n } from '../../i18n/I18nProvider.jsx';
 import {
-  PROJECT_DIALOG_RETURN_TRANSITION,
+  PROJECT_DIALOG_SHARED_TRANSITION,
   projectDialogLayoutId,
   projectDialogTitleLayoutId,
   projectDialogImageLayoutId,
@@ -34,13 +34,14 @@ export function ProjectCard({ project, coverLoading, coverFetchPriority, selecte
       data-project-dialog-card-id={project.id}
       layoutId={projectDialogLayoutId(project.id)}
       layoutDependency={layoutDependency}
-      transition={PROJECT_DIALOG_RETURN_TRANSITION}
+      transition={PROJECT_DIALOG_SHARED_TRANSITION}
+      style={{ borderRadius: 18 }}
     >
       <article>
         <button
           className="project-card__main"
           type="button"
-          onClick={(event) => onOpen(project, event.currentTarget.closest('[data-project-dialog-card-id]')?.getBoundingClientRect())}
+          onClick={() => onOpen(project)}
           aria-label={t('project.view', { name: project.name })}
         >
           <span className="project-card__cover">
@@ -51,13 +52,13 @@ export function ProjectCard({ project, coverLoading, coverFetchPriority, selecte
               fetchPriority={coverFetchPriority}
               layoutId={projectDialogImageLayoutId(project.id)}
               layoutDependency={layoutDependency}
-              transition={PROJECT_DIALOG_RETURN_TRANSITION}
+              transition={PROJECT_DIALOG_SHARED_TRANSITION}
             />
             <span className={`track-badge track-badge--${project.track.toLowerCase()}`}>{trackLabel}</span>
           </span>
           <span className="project-card__content">
             <span className="project-card__heading">
-              <motion.strong layoutId={projectDialogTitleLayoutId(project.id)} layoutDependency={layoutDependency} transition={PROJECT_DIALOG_RETURN_TRANSITION}>{project.name}</motion.strong>
+              <motion.strong layoutId={projectDialogTitleLayoutId(project.id)} layoutDependency={layoutDependency} transition={PROJECT_DIALOG_SHARED_TRANSITION}>{project.name}</motion.strong>
             </span>
             <ProjectTeamIdentity project={project} className="project-card__team" />
             <span className="project-card__pitch">{project.pitch}</span>

@@ -41,7 +41,6 @@ export function App() {
   const [selectedId, setSelectedId] = useState(readPendingProjectForAuthResume);
   const [projectDialogId, setProjectDialogId] = useState(null);
   const [projectDialogOpen, setProjectDialogOpen] = useState(false);
-  const [projectDialogOrigin, setProjectDialogOrigin] = useState(null);
   const [resumeVoteConfirmation, setResumeVoteConfirmation] = useState(false);
   const [eligibilityPromptRequested, setEligibilityPromptRequested] = useState(false);
   const [authNotice, setAuthNotice] = useState(null);
@@ -294,9 +293,8 @@ export function App() {
                     resumeConfirmation={resumeVoteConfirmation}
                     serviceError={session.error}
                     openProjectId={projectDialogOpen ? projectDialogId : null}
-                    onOpenProject={(project, originRect) => {
+                    onOpenProject={(project) => {
                       setProjectDialogId(project.id);
-                      setProjectDialogOrigin(originRect);
                       setProjectDialogOpen(true);
                     }}
                     onSelectProject={selectProject}
@@ -325,7 +323,6 @@ export function App() {
         <ProjectDialog
           project={projectDialog}
           open={projectDialogOpen}
-          returnTarget={projectDialogOrigin}
           onClose={() => setProjectDialogOpen(false)}
           onSelect={(project) => {
             selectProject(project);

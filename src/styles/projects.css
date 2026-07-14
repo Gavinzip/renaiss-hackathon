@@ -1479,6 +1479,20 @@ html:lang(zh-Hant) .project-card__heading strong {
   animation: none;
 }
 
+.modal-layer--linear {
+  position: fixed;
+  z-index: 101;
+  inset: 0;
+  padding: 24px;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.modal-layer--linear .modal-panel--linear {
+  pointer-events: auto;
+}
+
 .modal-panel--linear {
   transform-origin: center;
 }
