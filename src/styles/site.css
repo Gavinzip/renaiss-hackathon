@@ -943,7 +943,7 @@
 }
 
 html:lang(zh-Hant) .hero h1,
-html:lang(zh-Hant) .hero__copy > p {
+html:lang(zh-Hant) .hero__entry--summary {
   white-space: pre-line;
 }
 
@@ -953,7 +953,7 @@ html:lang(zh-Hant) .hero h1 {
   letter-spacing: -0.055em;
 }
 
-.hero__copy > p {
+.hero__entry--summary {
   max-width: 520px;
   margin-bottom: 30px;
   color: #d2d5e8;
