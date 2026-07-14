@@ -26,7 +26,7 @@ The public gallery remains available when SSO or the voting window is not config
 
 ## Production requirements
 
-- Publish public media to the dedicated Cloudflare R2 bucket with `npm run assets:publish`. It creates a content-addressed release and records it in `src/generated/staticAssetRelease.js`. The production build deliberately fails until `VITE_STATIC_ASSET_CDN_BASE_URL` is set to the active HTTPS asset origin. A custom R2 hostname is preferred; the existing approved R2 public origin is supported while a custom-domain migration is pending. The Dockerfile declares this as a build-stage `ARG`, so set the same variable in Zeabur before the multi-stage image is built. Validate live objects with `npm run assets:verify -- --base=https://media.example.com`.
+- Publish public media to the dedicated Cloudflare R2 bucket with `npm run assets:publish`. It creates a content-addressed release and records it in `src/generated/staticAssetRelease.js`. The production build deliberately fails until `VITE_STATIC_ASSET_CDN_BASE_URL` is set to the active HTTPS R2 asset origin. Use the enabled public R2 URL for approved public media; a custom R2 hostname is optional when branded URLs, Cloudflare cache rules, WAF, or similar controls are needed. The Dockerfile declares this as a build-stage `ARG`, so set the same variable in Zeabur before the multi-stage image is built. Validate live objects with `npm run assets:verify -- --base=https://pub-8bdb536dc8a0416b965c03a1493f1b29.r2.dev`.
 
 ## Analytics
 

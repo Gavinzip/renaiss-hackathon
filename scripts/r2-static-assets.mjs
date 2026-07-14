@@ -62,7 +62,7 @@ if (command === 'publish') {
   await publish(bucket, inventory);
   await writeReleaseFile(inventory);
   console.log(`Published ${inventory.files.length} immutable objects to r2://${bucket}/${inventory.release}/`);
-  console.log(`Updated ${relative(projectRoot, releaseFile)}. Rebuild the frontend with VITE_STATIC_ASSET_CDN_BASE_URL set to the custom CDN hostname.`);
+  console.log(`Updated ${relative(projectRoot, releaseFile)}. Rebuild the frontend with VITE_STATIC_ASSET_CDN_BASE_URL set to the active HTTPS R2 asset origin.`);
   process.exit(0);
 }
 

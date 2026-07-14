@@ -148,8 +148,22 @@ export function createApplication(options = {}) {
       {
         scope: 'vote_ip',
         key: clientIp(request),
-        limit: config.voteRateLimit.limit * 2,
-        windowMs: config.voteRateLimit.windowMs,
+        ...config.voteIpRateLimit,
+      },
+    ])
+  }
+
+  function requireVoteEligibilityReadSecurity(request, session) {
+    rateLimiter.consume([
+      {
+        scope: 'vote_eligibility_subject',
+        key: session.user.sub,
+        ...config.voteRateLimit,
+      },
+      {
+        scope: 'vote_eligibility_ip',
+        key: clientIp(request),
+        ...config.voteIpRateLimit,
       },
     ])
   }
@@ -303,6 +317,7 @@ export function createApplication(options = {}) {
 
   app.get('/api/vote/eligibility', asyncRoute(async (request, response) => {
     const session = requireSession(request)
+    requireVoteEligibilityReadSecurity(request, session)
     sendNoStore(response, 200, await sbtEligibility.read(session))
   }))
 

@@ -1,5 +1,5 @@
 import { useI18n } from '../i18n/I18nProvider.jsx';
-import { staticAssetUrl } from '../lib/staticAssets.js';
+import initialLoaderLogoUrl from 'virtual:initial-loader-logo';
 
 import './InitialExperienceLoader.css';
 
@@ -19,11 +19,11 @@ export function InitialExperienceLoader({ isLeaving }) {
         <span className="initial-experience-loader__orbit initial-experience-loader__orbit--inner" />
         <img
           className="initial-experience-loader__logo"
-          src={staticAssetUrl('/assets/renaiss-lab-mark.webp')}
+          src={initialLoaderLogoUrl}
           alt=""
           width="96"
           height="96"
-          decoding="async"
+          decoding="sync"
         />
       </div>
       <p className="initial-experience-loader__label">{t('common.loadingExperience')}</p>

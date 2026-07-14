@@ -9,6 +9,7 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { createPortal } from 'react-dom';
 
+import { staticAssetUrl } from '../../lib/staticAssets.js';
 import { VoteProgress } from './VoteProgress.jsx';
 import { MOTION_EASE, MOTION_EXIT_EASE, SURFACE_HIDDEN, SURFACE_VISIBLE } from '../motion/motionTokens.js';
 
@@ -168,7 +169,7 @@ function VoteGuidePrompt({ t }) {
 function MobileProjectSummary({ project, t }) {
   return (
     <div className="mobile-vote-guide__project">
-      <img src={project.coverUrl} alt="" width="1200" height="675" />
+      {project.coverUrl ? <img src={staticAssetUrl(project.coverUrl)} alt="" width="1200" height="675" decoding="async" /> : null}
       <div>
         <span>{t('vote.selectedLabel')}</span>
         <strong>{project.name}</strong>

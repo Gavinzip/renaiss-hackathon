@@ -12,7 +12,7 @@ import { RenaissMetalButton } from '../metal/RenaissMetalButton.jsx';
 import { ProjectCover } from './ProjectCover.jsx';
 import { ProjectTeamIdentity } from './ProjectTeamIdentity.jsx';
 
-export function ProjectCard({ project, selected, recorded, selectionLock, onOpen, onSelect }) {
+export function ProjectCard({ project, coverLoading, coverFetchPriority, selected, recorded, selectionLock, dialogOpen, onOpen, onSelect }) {
   const { t } = useI18n();
   const securityBlocked = project.auditStatus === 'BLOCK';
   const selectionBlocked = Boolean(selectionLock);
@@ -26,29 +26,38 @@ export function ProjectCard({ project, selected, recorded, selectionLock, onOpen
         ? t('project.selected')
         : t('project.select');
   const trackLabel = t(`tracks.${project.track.toLowerCase()}`);
+  const layoutDependency = `${project.id}:${dialogOpen ? 'open' : 'closed'}`;
 
   return (
     <motion.div
       className={`project-card project-card--${project.track.toLowerCase()} ${selected || recorded ? 'project-card--selected' : ''}`}
+      data-project-dialog-card-id={project.id}
       layoutId={projectDialogLayoutId(project.id)}
-      layoutDependency={project.id}
+      layoutDependency={layoutDependency}
       transition={PROJECT_DIALOG_RETURN_TRANSITION}
     >
       <article>
-        <button className="project-card__main" type="button" onClick={() => onOpen(project)} aria-label={t('project.view', { name: project.name })}>
+        <button
+          className="project-card__main"
+          type="button"
+          onClick={(event) => onOpen(project, event.currentTarget.closest('[data-project-dialog-card-id]')?.getBoundingClientRect())}
+          aria-label={t('project.view', { name: project.name })}
+        >
           <span className="project-card__cover">
             <ProjectCover
               project={project}
               context="card"
+              loading={coverLoading}
+              fetchPriority={coverFetchPriority}
               layoutId={projectDialogImageLayoutId(project.id)}
-              layoutDependency={project.id}
+              layoutDependency={layoutDependency}
               transition={PROJECT_DIALOG_RETURN_TRANSITION}
             />
             <span className={`track-badge track-badge--${project.track.toLowerCase()}`}>{trackLabel}</span>
           </span>
           <span className="project-card__content">
             <span className="project-card__heading">
-              <motion.strong layoutId={projectDialogTitleLayoutId(project.id)} layoutDependency={project.id} transition={PROJECT_DIALOG_RETURN_TRANSITION}>{project.name}</motion.strong>
+              <motion.strong layoutId={projectDialogTitleLayoutId(project.id)} layoutDependency={layoutDependency} transition={PROJECT_DIALOG_RETURN_TRANSITION}>{project.name}</motion.strong>
             </span>
             <ProjectTeamIdentity project={project} className="project-card__team" />
             <span className="project-card__pitch">{project.pitch}</span>

@@ -1,7 +1,28 @@
+import { readFileSync } from 'node:fs';
+
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 
 import { STATIC_ASSET_RELEASE } from './src/generated/staticAssetRelease.js';
+
+const INITIAL_LOADER_LOGO_MODULE_ID = 'virtual:initial-loader-logo';
+const RESOLVED_INITIAL_LOADER_LOGO_MODULE_ID = `\0${INITIAL_LOADER_LOGO_MODULE_ID}`;
+const initialLoaderLogoPath = new URL('./public/assets/renaiss-lab-mark.webp', import.meta.url);
+
+function initialLoaderLogoPlugin() {
+  return {
+    name: 'initial-loader-logo',
+    resolveId(id) {
+      return id === INITIAL_LOADER_LOGO_MODULE_ID ? RESOLVED_INITIAL_LOADER_LOGO_MODULE_ID : null;
+    },
+    load(id) {
+      if (id !== RESOLVED_INITIAL_LOADER_LOGO_MODULE_ID) return null;
+
+      const source = `data:image/webp;base64,${readFileSync(initialLoaderLogoPath).toString('base64')}`;
+      return `export default ${JSON.stringify(source)};`;
+    },
+  };
+}
 
 function staticAssetBase(value) {
   const rawValue = String(value || '').trim().replace(/\/+$/, '');
@@ -61,6 +82,7 @@ export default defineConfig(({ command, mode }) => {
     },
     plugins: [
       react(),
+      initialLoaderLogoPlugin(),
       {
         name: 'static-asset-cdn-html',
         transformIndexHtml(html) {

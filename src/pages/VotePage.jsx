@@ -18,6 +18,7 @@ export function VotePage({
   eligibilityPromptRequested,
   resumeConfirmation,
   serviceError,
+  openProjectId,
   onOpenProject,
   onSelectProject,
   onResumeHandled,
@@ -54,6 +55,7 @@ export function VotePage({
         selectedId={selectedProject?.id || null}
         recordedId={recordedProject?.id || null}
         selectionLock={selectionLock}
+        openProjectId={openProjectId}
         onOpen={onOpenProject}
         onSelect={onSelectProject}
         notice={notices}

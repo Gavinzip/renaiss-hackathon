@@ -447,7 +447,7 @@
 
 .text-type__character {
   opacity: 0.3;
-  animation: typewriter-character-in 180ms ease-out both;
+  animation: typewriter-character-in 240ms ease-out both;
 }
 
 .text-type__caret {
@@ -456,7 +456,7 @@
   margin-right: -0.11em;
   border-right: 0.09em solid #d9ceff;
   vertical-align: -0.08em;
-  animation: typewriter-caret-blink 750ms step-end infinite;
+  animation: typewriter-caret-blink 900ms step-end infinite;
 }
 
 @keyframes typewriter-character-in {
@@ -487,7 +487,8 @@
   .site-header--entry,
   .entry-reveal,
   .entry-reveal--visible,
-  .hero__entry {
+  .hero__entry,
+  .hero__action {
     animation: none;
     opacity: 1;
     transform: none;
@@ -891,28 +892,36 @@
   min-height: 31px;
 }
 
-.hero__entry {
-  animation: hero-copy-enter 620ms var(--entry-ease) both;
+.hero__entry,
+.hero__action {
   will-change: opacity, transform, filter;
 }
 
-.hero__entry--kicker {
-  animation-delay: 30ms;
+.hero__kicker-slot:not(.is-ready) .hero__entry,
+.hero__content-slot:not(.is-ready) .hero__entry,
+.hero__content-slot:not(.is-ready) .hero__action {
+  visibility: hidden;
 }
 
-.hero__entry--summary {
-  animation-delay: 100ms;
+.hero__kicker-slot.is-ready .hero__entry,
+.hero__content-slot.is-ready .hero__entry,
+.hero__content-slot.is-ready .hero__action {
+  animation: hero-content-enter 760ms var(--entry-ease) both;
+  visibility: visible;
 }
 
-.hero__entry--actions {
-  animation-delay: 190ms;
+.hero__entry--kicker,
+.hero__entry--summary,
+.hero__action--vote,
+.hero__action--rules {
+  animation-delay: 0ms;
 }
 
-@keyframes hero-copy-enter {
+@keyframes hero-content-enter {
   from {
-    opacity: 0.7;
-    transform: translate3d(0, 12px, 0);
-    filter: blur(2px);
+    opacity: 0.82;
+    transform: translate3d(0, 8px, 0);
+    filter: blur(1.5px);
   }
 
   to {
@@ -931,6 +940,11 @@
   line-height: 0.95;
   letter-spacing: -0.07em;
   text-wrap: balance;
+}
+
+html:lang(zh-Hant) .hero h1,
+html:lang(zh-Hant) .hero__copy > p {
+  white-space: pre-line;
 }
 
 html:lang(zh-Hant) .hero h1 {

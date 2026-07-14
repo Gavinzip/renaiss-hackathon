@@ -109,6 +109,9 @@ function sbtEligibilityConfiguration(env) {
     minimumBadgeCount: envInteger(env, 'VOTE_MINIMUM_SBT_BADGES', 10, 1, 1000000),
     cacheTtlMs: envInteger(env, 'VOTE_SBT_CACHE_TTL_SECONDS', 60, 15, 3600) * 1000,
     requestTimeoutMs: envInteger(env, 'BSCSCAN_TIMEOUT_MS', 8000, 1000, 30000),
+    requestsPerSecond: envInteger(env, 'BSCSCAN_REQUESTS_PER_SECOND', 3, 1, 100),
+    maxConcurrentRequests: envInteger(env, 'BSCSCAN_MAX_CONCURRENT_REQUESTS', 3, 1, 100),
+    maxQueuedRequests: envInteger(env, 'BSCSCAN_MAX_QUEUED_REQUESTS', 360, 10, 10000),
   })
 }
 
@@ -302,6 +305,10 @@ export function loadConfig(env = process.env, options = {}) {
     voteRateLimit: Object.freeze({
       limit: envInteger(env, 'VOTE_RATE_LIMIT', 12, 1, 500),
       windowMs: envInteger(env, 'VOTE_RATE_WINDOW_SECONDS', 60, 10, 3600) * 1000,
+    }),
+    voteIpRateLimit: Object.freeze({
+      limit: envInteger(env, 'VOTE_IP_RATE_LIMIT', 360, 1, 10000),
+      windowMs: envInteger(env, 'VOTE_IP_RATE_WINDOW_SECONDS', 60, 10, 3600) * 1000,
     }),
   })
 }

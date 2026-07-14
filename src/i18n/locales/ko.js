@@ -181,6 +181,7 @@ export const ko = Object.freeze({
   'vote.error.sbt_contract_not_configured': '공식 Renaiss SBT 컨트랙트가 아직 설정되지 않았습니다. 투표는 기록되지 않았습니다.',
   'vote.error.bscscan_request_failed': '공식 SBT 검증 서비스에 연결할 수 없습니다. 투표는 기록되지 않았습니다.',
   'vote.error.bscscan_request_timeout': '공식 SBT 검증 시간이 초과되었습니다. 투표는 기록되지 않았습니다.',
+  'vote.error.bscscan_capacity_exceeded': '공식 SBT 검증 서비스가 많은 요청을 처리하고 있습니다. 잠시 후 다시 시도해 주세요. 투표는 기록되지 않았습니다.',
   'vote.error.bscscan_http_error': '공식 SBT 검증 서비스가 오류를 반환했습니다. 투표는 기록되지 않았습니다.',
   'vote.error.bscscan_invalid_response': '공식 SBT 검증 응답을 확인할 수 없습니다. 투표는 기록되지 않았습니다.',
   'vote.error.bscscan_invalid_transfer_row': '공식 SBT 검증 데이터를 확인할 수 없습니다. 투표는 기록되지 않았습니다.',

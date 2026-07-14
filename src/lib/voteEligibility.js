@@ -9,6 +9,7 @@ const KNOWN_ERROR_CODES = new Set([
   'sbt_contract_not_configured',
   'bscscan_request_failed',
   'bscscan_request_timeout',
+  'bscscan_capacity_exceeded',
   'bscscan_http_error',
   'bscscan_invalid_response',
   'bscscan_invalid_transfer_row',

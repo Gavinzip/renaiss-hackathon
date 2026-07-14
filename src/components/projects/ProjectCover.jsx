@@ -6,8 +6,10 @@ import { staticAssetUrl } from '../../lib/staticAssets.js';
 export function ProjectCover({
   project,
   context,
+  fetchPriority,
   layoutId,
   layoutDependency,
+  loading,
   transition,
 }) {
   const { t } = useI18n();
@@ -27,7 +29,8 @@ export function ProjectCover({
         alt={alt}
         width="1200"
         height="675"
-        loading={context === 'card' ? 'lazy' : undefined}
+        loading={loading ?? (context === 'card' ? 'lazy' : undefined)}
+        fetchPriority={fetchPriority}
         decoding="async"
       />
     );

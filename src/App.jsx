@@ -1,3 +1,4 @@
+import { LayoutGroup } from 'motion/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
@@ -15,19 +16,21 @@ import { useVoteEligibility } from './hooks/useVoteEligibility.js';
 import { useI18n } from './i18n/I18nProvider.jsx';
 import { localizeProjects } from './i18n/localizeProjects.js';
 import { initializeAnalytics, trackPageView } from './lib/analytics.js';
+import { warmProjectCoverCache } from './lib/projectCoverPreload.js';
 import { staticAssetCssUrl, staticAssetUrl } from './lib/staticAssets.js';
 import { voteSelectionLockStatus } from './lib/voteEligibility.js';
 import { HomePage } from './pages/HomePage.jsx';
 import { AdminPage } from './pages/AdminPage.jsx';
 import { NotFoundPage } from './pages/NotFoundPage.jsx';
 import { VotePage } from './pages/VotePage.jsx';
+import initialLoaderLogoUrl from 'virtual:initial-loader-logo';
 
 const PENDING_PROJECT_KEY = 'renaiss-hackathon-pending-project';
 const INITIAL_LOADER_MIN_VISIBLE_MS = 900;
 const INITIAL_LOADER_EXIT_MS = 440;
 const INITIAL_HOME_ASSETS = Object.freeze([
-  '/assets/renaiss-lab-mark.webp',
-  '/assets/hackathon-vote-hero-crt-4a48559f.webp',
+  initialLoaderLogoUrl,
+  staticAssetUrl('/assets/hackathon-vote-hero-crt-4a48559f.webp'),
 ]);
 
 export function App() {
@@ -38,6 +41,7 @@ export function App() {
   const [selectedId, setSelectedId] = useState(readPendingProjectForAuthResume);
   const [projectDialogId, setProjectDialogId] = useState(null);
   const [projectDialogOpen, setProjectDialogOpen] = useState(false);
+  const [projectDialogOrigin, setProjectDialogOrigin] = useState(null);
   const [resumeVoteConfirmation, setResumeVoteConfirmation] = useState(false);
   const [eligibilityPromptRequested, setEligibilityPromptRequested] = useState(false);
   const [authNotice, setAuthNotice] = useState(null);
@@ -160,6 +164,11 @@ export function App() {
   }, [initialLoaderVisible]);
 
   useEffect(() => {
+    if (initialLoaderMounted || location.pathname !== '/') return;
+    warmProjectCoverCache(projects);
+  }, [initialLoaderMounted, location.pathname, projects]);
+
+  useEffect(() => {
     if (session.loading) return;
     const params = new URLSearchParams(location.search);
     const authStatus = params.get('auth');
@@ -265,65 +274,69 @@ export function App() {
       {initialLoaderMounted ? <InitialExperienceLoader isLeaving={!initialLoaderVisible} /> : null}
       <RouteScrollManager />
       <Header session={session} onSignIn={beginHeaderSignIn} onLogout={signOut} />
-      <main>
-        <PageTransition key={location.pathname}>
-          <Routes location={location}>
-            <Route path="/" element={<HomePage event={event} projectCount={projects.length} serviceError={session.error} />} />
-            <Route
-              path="/vote"
-              element={(
-                <VotePage
-                  event={event}
-                  projects={projects}
-                  recordedProject={recordedProject}
-                  selectedProject={selectedProject}
-                  session={session}
-                  eligibility={voteEligibility}
-                  selectionLock={selectionLock}
-                  eligibilityPromptRequested={eligibilityPromptRequested}
-                  resumeConfirmation={resumeVoteConfirmation}
-                  serviceError={session.error}
-                  onOpenProject={(project) => {
-                    setProjectDialogId(project.id);
-                    setProjectDialogOpen(true);
-                  }}
-                  onSelectProject={selectProject}
-                  onResumeHandled={markVoteResumeHandled}
-                  onEligibilityPromptHandled={dismissEligibilityPrompt}
-                  onSignIn={beginVoteSignIn}
-                  onCheckEligibility={verifyVoteEligibility}
-                  onConfirm={confirmVote}
-                  onClearSelection={clearLocalSelection}
-                />
-              )}
-            />
-            <Route path="/rules" element={<Navigate to="/#rules" replace />} />
-            <Route
-              path="/admin"
-              element={session.loading
-                ? null
-                : session.user?.isAdministrator
-                  ? <AdminPage projects={projects} session={session} onSignIn={beginHeaderSignIn} />
-                  : <Navigate to="/" replace />}
-            />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </PageTransition>
-      </main>
+      <LayoutGroup id="project-dialog">
+        <main>
+          <PageTransition key={location.pathname}>
+            <Routes location={location}>
+              <Route path="/" element={<HomePage event={event} projectCount={projects.length} serviceError={session.error} />} />
+              <Route
+                path="/vote"
+                element={(
+                  <VotePage
+                    event={event}
+                    projects={projects}
+                    recordedProject={recordedProject}
+                    selectedProject={selectedProject}
+                    session={session}
+                    eligibility={voteEligibility}
+                    selectionLock={selectionLock}
+                    eligibilityPromptRequested={eligibilityPromptRequested}
+                    resumeConfirmation={resumeVoteConfirmation}
+                    serviceError={session.error}
+                    openProjectId={projectDialogOpen ? projectDialogId : null}
+                    onOpenProject={(project, originRect) => {
+                      setProjectDialogId(project.id);
+                      setProjectDialogOrigin(originRect);
+                      setProjectDialogOpen(true);
+                    }}
+                    onSelectProject={selectProject}
+                    onResumeHandled={markVoteResumeHandled}
+                    onEligibilityPromptHandled={dismissEligibilityPrompt}
+                    onSignIn={beginVoteSignIn}
+                    onCheckEligibility={verifyVoteEligibility}
+                    onConfirm={confirmVote}
+                    onClearSelection={clearLocalSelection}
+                  />
+                )}
+              />
+              <Route path="/rules" element={<Navigate to="/#rules" replace />} />
+              <Route
+                path="/admin"
+                element={session.loading
+                  ? null
+                  : session.user?.isAdministrator
+                    ? <AdminPage projects={projects} session={session} onSignIn={beginHeaderSignIn} />
+                    : <Navigate to="/" replace />}
+              />
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </PageTransition>
+        </main>
+        <ProjectDialog
+          project={projectDialog}
+          open={projectDialogOpen}
+          returnTarget={projectDialogOrigin}
+          onClose={() => setProjectDialogOpen(false)}
+          onSelect={(project) => {
+            selectProject(project);
+            setProjectDialogOpen(false);
+          }}
+          selected={projectDialog?.id === selectedProject?.id}
+          recorded={projectDialog?.id === recordedProject?.id}
+          selectionLock={selectionLock}
+        />
+      </LayoutGroup>
       <Footer />
-
-      <ProjectDialog
-        project={projectDialog}
-        open={projectDialogOpen}
-        onClose={() => setProjectDialogOpen(false)}
-        onSelect={(project) => {
-          selectProject(project);
-          setProjectDialogOpen(false);
-        }}
-        selected={projectDialog?.id === selectedProject?.id}
-        recorded={projectDialog?.id === recordedProject?.id}
-        selectionLock={selectionLock}
-      />
       <Modal open={Boolean(authNotice)} onClose={() => setAuthNotice(null)} title={authNotice?.title || t('nav.signIn')} className="auth-notice-dialog">
         <p>{authNotice?.message}</p>
         {authNotice?.type === 'notConfigured' ? <p>{t('auth.setupBody', { callback: `${window.location.origin}/auth/callback` })}</p> : null}
@@ -333,14 +346,14 @@ export function App() {
   );
 }
 
-function preloadStaticImage(path) {
+function preloadStaticImage(source) {
   return new Promise((resolve) => {
     const image = new Image();
     const finish = () => resolve();
     image.onload = finish;
     image.onerror = finish;
     image.decoding = 'async';
-    image.src = staticAssetUrl(path);
+    image.src = source;
 
     if (image.complete) finish();
   });

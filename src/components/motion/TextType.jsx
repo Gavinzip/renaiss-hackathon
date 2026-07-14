@@ -11,13 +11,14 @@ function segmentText(value, locale) {
 export function TextType({
   as: Element = 'span',
   className,
+  completionDelay = 0,
   cursorClassName,
   initialDelay = 120,
   locale,
   onComplete,
   showCursor = true,
   text,
-  typingSpeed = 35,
+  typingSpeed = 72,
 }) {
   const characters = useMemo(() => segmentText(text, locale), [locale, text]);
   const completeRef = useRef(onComplete);
@@ -31,6 +32,7 @@ export function TextType({
     const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     let cancelled = false;
     let interval = 0;
+    let completionTimer = 0;
     let completed = false;
 
     setCharacterCount(reducedMotion ? characters.length : 0);
@@ -38,6 +40,12 @@ export function TextType({
     const finish = () => {
       if (cancelled || completed) return;
       completed = true;
+      if (completionDelay > 0) {
+        completionTimer = window.setTimeout(() => {
+          if (!cancelled) completeRef.current?.();
+        }, completionDelay);
+        return;
+      }
       completeRef.current?.();
     };
 
@@ -65,8 +73,9 @@ export function TextType({
     return () => {
       cancelled = true;
       if (interval) window.clearInterval(interval);
+      if (completionTimer) window.clearTimeout(completionTimer);
     };
-  }, [characters, initialDelay, typingSpeed]);
+  }, [characters, completionDelay, initialDelay, typingSpeed]);
 
   return (
     <Element className={`text-type${className ? ` ${className}` : ''}`} aria-label={text}>

@@ -181,6 +181,7 @@ export const en = Object.freeze({
   'vote.error.sbt_contract_not_configured': 'The official Renaiss SBT contract is not configured yet. No vote was recorded.',
   'vote.error.bscscan_request_failed': 'The official SBT verification service could not be reached. No vote was recorded.',
   'vote.error.bscscan_request_timeout': 'The official SBT verification check timed out. No vote was recorded.',
+  'vote.error.bscscan_capacity_exceeded': 'The official SBT verification service is processing a high volume of requests. Please try again shortly; no vote was recorded.',
   'vote.error.bscscan_http_error': 'The official SBT verification service returned an error. No vote was recorded.',
   'vote.error.bscscan_invalid_response': 'The official SBT verification response could not be verified. No vote was recorded.',
   'vote.error.bscscan_invalid_transfer_row': 'The official SBT verification data could not be verified. No vote was recorded.',
