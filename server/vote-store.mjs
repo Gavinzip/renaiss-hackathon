@@ -260,7 +260,6 @@ export function createVoteStore({ database, config }) {
         minimumSbtBadgeCount: config.sbtEligibility.minimumBadgeCount,
       },
       resultsPublished,
-      projectOrder: orderProjectsByVotes(PROJECTS, voteCountsByProject()).map((project) => project.projectId),
     }
     delete event.results
     delete event.totalVotes

@@ -21,8 +21,14 @@ export function ProjectGallery({ projects, selectedId, recordedId, authenticated
   const reduceMotion = useReducedMotion();
   const [track, setTrack] = useState('All');
   const [query, setQuery] = useState('');
-  const [sortMode, setSortMode] = useState('discover');
+  const [sortMode, setSortMode] = useState('default');
+  const [defaultProjectOrder] = useState(() => shuffleProjectIds(projects));
   const [expanded, setExpanded] = useState(false);
+
+  const defaultProjectOrderIndex = useMemo(
+    () => new Map(defaultProjectOrder.map((projectId, index) => [projectId, index])),
+    [defaultProjectOrder],
+  );
 
   useEffect(() => {
     warmProjectCoverCache(projects);
@@ -35,10 +41,13 @@ export function ProjectGallery({ projects, selectedId, recordedId, authenticated
       const textMatch = !needle || [project.name, project.team, project.pitch].some((value) => value.toLocaleLowerCase().includes(needle));
       return trackMatch && textMatch;
     });
-    return sortMode === 'alpha'
-      ? [...result].sort((left, right) => left.name.localeCompare(right.name, intlLocale))
-      : result;
-  }, [intlLocale, projects, query, sortMode, track]);
+    if (sortMode === 'alpha') {
+      return [...result].sort((left, right) => left.name.localeCompare(right.name, intlLocale));
+    }
+    return [...result].sort((left, right) => (
+      defaultProjectOrderIndex.get(left.id) - defaultProjectOrderIndex.get(right.id)
+    ));
+  }, [defaultProjectOrderIndex, intlLocale, projects, query, sortMode, track]);
 
   const visible = expanded || query || track !== 'All' ? filtered : filtered.slice(0, INITIAL_COUNT);
   const revealingDeferredCards = expanded && !query && track === 'All';
@@ -67,7 +76,7 @@ export function ProjectGallery({ projects, selectedId, recordedId, authenticated
         <label className="sort-field">
           <span>{t('gallery.sort')}</span>
           <select value={sortMode} onChange={(event) => setSortMode(event.target.value)}>
-            <option value="discover">{t('gallery.discover')}</option>
+            <option value="default">{t('gallery.default')}</option>
             <option value="alpha">{t('gallery.alpha')}</option>
           </select>
         </label>
@@ -128,4 +137,13 @@ export function ProjectGallery({ projects, selectedId, recordedId, authenticated
       </div>
     </section>
   );
+}
+
+function shuffleProjectIds(projects) {
+  const ids = projects.map((project) => project.id);
+  for (let index = ids.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    [ids[index], ids[randomIndex]] = [ids[randomIndex], ids[index]];
+  }
+  return ids;
 }
