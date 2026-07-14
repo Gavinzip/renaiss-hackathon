@@ -21,6 +21,7 @@ export function VotePage({
   openProjectId,
   onOpenProject,
   onSelectProject,
+  onShare,
   onResumeHandled,
   onEligibilityPromptHandled,
   onSignIn,
@@ -58,6 +59,7 @@ export function VotePage({
         openProjectId={openProjectId}
         onOpen={onOpenProject}
         onSelect={onSelectProject}
+        onShare={onShare}
         notice={notices}
         votePanel={(
           <VotePanel

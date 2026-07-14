@@ -12,9 +12,10 @@ import { Modal } from '../Modal.jsx';
 import { RenaissMetalButton } from '../metal/RenaissMetalButton.jsx';
 import { MOTION_EASE } from '../motion/motionTokens.js';
 import { ProjectCover } from './ProjectCover.jsx';
+import { ProjectShareButton } from './ProjectShareButton.jsx';
 import { ProjectTeamIdentity } from './ProjectTeamIdentity.jsx';
 
-export function ProjectDialog({ project, open, onClose, onSelect, selected, recorded, selectionLock }) {
+export function ProjectDialog({ project, open, onClose, onSelect, selected, recorded, selectionLock, onShare }) {
   const { t } = useI18n();
   const reduceMotion = useReducedMotion();
   if (!project) return null;
@@ -69,17 +70,21 @@ export function ProjectDialog({ project, open, onClose, onSelect, selected, reco
         <motion.p className="project-dialog__lead" variants={CONTENT_ITEM}>{project.pitch}</motion.p>
         {securityBlocked ? (
           <motion.p className="project-security-notice" variants={CONTENT_ITEM}>{t('project.securityReviewNotice')}</motion.p>
-        ) : (
-          <motion.div className="project-dialog__links" variants={CONTENT_ITEM}>
-            {project.demoUrls.map((url, index) => (
-              <a className="text-link project-dialog__site-link" key={url} href={url} target="_blank" rel="noreferrer">
-                <GlobeSimple weight="duotone" aria-hidden="true" />
-                {index === 0 ? t('project.demo') : t('project.demoLink', { number: index + 1 })}
-              </a>
-            ))}
-            {project.repoUrl ? <a className="text-link" href={project.repoUrl} target="_blank" rel="noreferrer"><GithubLogo weight="fill" /> {t('project.viewRepository')}</a> : null}
-          </motion.div>
-        )}
+        ) : null}
+        <motion.div className="project-dialog__links" variants={CONTENT_ITEM}>
+          {securityBlocked ? null : (
+            <>
+              {project.demoUrls.map((url, index) => (
+                <a className="text-link project-dialog__site-link" key={url} href={url} target="_blank" rel="noreferrer">
+                  <GlobeSimple weight="duotone" aria-hidden="true" />
+                  {index === 0 ? t('project.demo') : t('project.demoLink', { number: index + 1 })}
+                </a>
+              ))}
+              {project.repoUrl ? <a className="text-link" href={project.repoUrl} target="_blank" rel="noreferrer"><GithubLogo weight="fill" /> {t('project.viewRepository')}</a> : null}
+            </>
+          )}
+          <ProjectShareButton projectId={project.id} variant="dialog" onShare={onShare} />
+        </motion.div>
         <motion.div className="project-dialog__body" variants={CONTENT_ITEM}>
           <DetailSection title={t('project.about')} text={project.description} />
           <DetailSection title={t('project.forRenaiss')} text={project.renaissRelation} />

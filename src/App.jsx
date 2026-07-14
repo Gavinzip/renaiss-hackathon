@@ -1,5 +1,5 @@
 import { LayoutGroup } from 'motion/react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 
 import { EVENT } from '../shared/event.mjs';
@@ -11,6 +11,7 @@ import { Modal } from './components/Modal.jsx';
 import { RouteScrollManager } from './components/RouteScrollManager.jsx';
 import { PageTransition } from './components/motion/PageTransition.jsx';
 import { ProjectDialog } from './components/projects/ProjectDialog.jsx';
+import { ProjectShareToast } from './components/projects/ProjectShareToast.jsx';
 import { useSession } from './hooks/useSession.js';
 import { useVoteEligibility } from './hooks/useVoteEligibility.js';
 import { useI18n } from './i18n/I18nProvider.jsx';
@@ -44,6 +45,8 @@ export function App() {
   const [resumeVoteConfirmation, setResumeVoteConfirmation] = useState(false);
   const [eligibilityPromptRequested, setEligibilityPromptRequested] = useState(false);
   const [authNotice, setAuthNotice] = useState(null);
+  const [shareToastStatus, setShareToastStatus] = useState(null);
+  const shareToastTimerRef = useRef(null);
   const [initialAssetsReady, setInitialAssetsReady] = useState(false);
   const [initialPaintReady, setInitialPaintReady] = useState(false);
   const [initialLoaderVisible, setInitialLoaderVisible] = useState(true);
@@ -260,6 +263,14 @@ export function App() {
     setEligibilityPromptRequested(false);
   }, []);
 
+  const showShareToast = useCallback((status) => {
+    window.clearTimeout(shareToastTimerRef.current);
+    setShareToastStatus(status);
+    shareToastTimerRef.current = window.setTimeout(() => setShareToastStatus(null), 2600);
+  }, []);
+
+  useEffect(() => () => window.clearTimeout(shareToastTimerRef.current), []);
+
   const signOut = useCallback(async () => {
     try {
       await logout();
@@ -298,6 +309,7 @@ export function App() {
                       setProjectDialogOpen(true);
                     }}
                     onSelectProject={selectProject}
+                    onShare={showShareToast}
                     onResumeHandled={markVoteResumeHandled}
                     onEligibilityPromptHandled={dismissEligibilityPrompt}
                     onSignIn={beginVoteSignIn}
@@ -331,8 +343,10 @@ export function App() {
           selected={projectDialog?.id === selectedProject?.id}
           recorded={projectDialog?.id === recordedProject?.id}
           selectionLock={selectionLock}
+          onShare={showShareToast}
         />
       </LayoutGroup>
+      <ProjectShareToast status={shareToastStatus} />
       <Footer />
       <Modal open={Boolean(authNotice)} onClose={() => setAuthNotice(null)} title={authNotice?.title || t('nav.signIn')} className="auth-notice-dialog">
         <p>{authNotice?.message}</p>

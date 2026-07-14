@@ -16,7 +16,7 @@ const TRACKS = [
 ];
 const INITIAL_COUNT = 9;
 
-export function ProjectGallery({ projects, selectedId, recordedId, selectionLock, openProjectId, onOpen, onSelect, notice, votePanel }) {
+export function ProjectGallery({ projects, selectedId, recordedId, selectionLock, openProjectId, onOpen, onSelect, onShare, notice, votePanel }) {
   const { intlLocale, t } = useI18n();
   const reduceMotion = useReducedMotion();
   const [track, setTrack] = useState('All');
@@ -109,6 +109,7 @@ export function ProjectGallery({ projects, selectedId, recordedId, selectionLock
                         dialogOpen={openProjectId === project.id}
                         onOpen={onOpen}
                         onSelect={onSelect}
+                        onShare={onShare}
                       />
                     </div>
                   </motion.div>

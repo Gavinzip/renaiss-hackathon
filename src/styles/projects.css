@@ -553,6 +553,7 @@ html:lang(zh-Hant) .project-card__heading strong {
 .project-links {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 20px;
 }
 
@@ -591,6 +592,54 @@ html:lang(zh-Hant) .project-card__heading strong {
   text-decoration-color: rgba(172, 160, 235, 0.44);
 }
 
+.project-share-button {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+
+.project-links .project-share-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  gap: 8px;
+  padding: 4px 0;
+  color: #e4e5f4;
+  font-size: 0.86rem;
+  font-weight: 720;
+  letter-spacing: -0.01em;
+  text-decoration-line: underline;
+  text-decoration-color: rgba(172, 160, 235, 0.44);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 6px;
+  transition: color 180ms ease, text-decoration-color 180ms ease, transform 180ms ease;
+}
+
+.project-links .project-share-button:hover {
+  color: var(--text);
+  text-decoration-color: rgba(132, 228, 247, 0.96);
+  transform: translateY(-1px);
+}
+
+.project-links .project-share-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.project-links .project-share-button--copied,
+.project-dialog__links .project-share-button--copied {
+  color: #d9f6ff;
+  text-decoration: none;
+}
+
+.project-share-button:focus-visible {
+  outline: 2px solid rgba(132, 228, 247, 0.96);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
 .project-security-note {
   color: #ffd49c;
   font-family: var(--font-display);
@@ -621,6 +670,7 @@ html:lang(zh-Hant) .project-card__heading strong {
   min-height: 43px;
   border-radius: 12px;
   padding-inline: 16px;
+  color: #ffffff;
   background:
     radial-gradient(120% 100% at 13% 10%, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0) 54%),
     linear-gradient(136deg, #111b2d 0%, #40526a 24%, #b4c0cd 49%, #485a71 68%, #111a2b 100%);
@@ -630,6 +680,13 @@ html:lang(zh-Hant) .project-card__heading strong {
     0 0 16px rgba(207, 108, 255, 0.15),
     inset 0 1px rgba(255, 255, 255, 0.56),
     inset 0 -1px rgba(15, 24, 38, 0.82);
+  text-shadow:
+    0 1px 2px rgba(8, 13, 24, 0.76),
+    0 0 10px rgba(255, 255, 255, 0.32);
+}
+
+.renaiss-metal-button.button--vote:disabled {
+  opacity: 0.72;
 }
 
 .renaiss-metal-button.button--vote::before,

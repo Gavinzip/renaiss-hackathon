@@ -1,7 +1,6 @@
 import {
   CheckCircle,
   EyeSlash,
-  Info,
   ShieldCheck,
   Swap,
 } from '@phosphor-icons/react';
@@ -34,7 +33,6 @@ const STATIC_RULES = [
 
 export function VotingRules({ event }) {
   const { t } = useI18n();
-  const scoring = event.scoring;
   const minimumSbtBadgeCount = event.voteEligibility?.minimumSbtBadgeCount;
   const hasSbtEligibility = Number.isInteger(minimumSbtBadgeCount);
   const rules = hasSbtEligibility
@@ -62,11 +60,6 @@ export function VotingRules({ event }) {
             ))}
           </div>
         </div>
-
-        <Reveal className="rules-boundary" delay={0.18} distance={18} role="note">
-          <Info size={21} weight="fill" />
-          <p><strong>{t('rules.boundary', { community: scoring.communityWeight, team: scoring.renaissTeamWeight })}</strong></p>
-        </Reveal>
       </div>
     </section>
   );

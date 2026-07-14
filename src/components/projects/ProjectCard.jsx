@@ -10,9 +10,10 @@ import {
 } from '../../lib/dialogMotion.js';
 import { RenaissMetalButton } from '../metal/RenaissMetalButton.jsx';
 import { ProjectCover } from './ProjectCover.jsx';
+import { ProjectShareButton } from './ProjectShareButton.jsx';
 import { ProjectTeamIdentity } from './ProjectTeamIdentity.jsx';
 
-export function ProjectCard({ project, coverLoading, coverFetchPriority, selected, recorded, selectionLock, dialogOpen, onOpen, onSelect }) {
+export function ProjectCard({ project, coverLoading, coverFetchPriority, selected, recorded, selectionLock, dialogOpen, onOpen, onSelect, onShare }) {
   const { t } = useI18n();
   const securityBlocked = project.auditStatus === 'BLOCK';
   const selectionBlocked = Boolean(selectionLock);
@@ -66,12 +67,16 @@ export function ProjectCard({ project, coverLoading, coverFetchPriority, selecte
         </button>
         <div className="project-card__footer">
           {securityBlocked ? (
-            <span className="project-security-note">{t('project.securityReview')}</span>
+            <div className="project-links project-links--security" aria-label={t('project.linksLabel', { name: project.name })}>
+              <span className="project-security-note">{t('project.securityReview')}</span>
+              <ProjectShareButton projectId={project.id} onShare={onShare} />
+            </div>
           ) : (
             <div className="project-links" aria-label={t('project.linksLabel', { name: project.name })}>
               {project.demoUrls.slice(0, 1).map((url) => <a className="project-link" key={url} href={url} target="_blank" rel="noreferrer">{t('project.demo')} <ArrowSquareOut /></a>)}
               {project.repoUrl ? <a className="project-link" href={project.repoUrl} target="_blank" rel="noreferrer">{t('project.github')} <GithubLogo weight="fill" /></a> : null}
               {project.xUrl ? <a className="project-link project-link--icon" href={project.xUrl} target="_blank" rel="noreferrer" aria-label={t('project.xProfile', { name: project.name })}><XLogo weight="fill" /></a> : null}
+              <ProjectShareButton projectId={project.id} onShare={onShare} />
             </div>
           )}
           <RenaissMetalButton
