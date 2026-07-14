@@ -13,16 +13,15 @@ export function VotePage({
   recordedProject,
   selectedProject,
   session,
+  authenticated,
   eligibility,
   selectionLock,
   eligibilityPromptRequested,
-  resumeConfirmation,
   serviceError,
   openProjectId,
   onOpenProject,
   onSelectProject,
   onShare,
-  onResumeHandled,
   onEligibilityPromptHandled,
   onSignIn,
   onCheckEligibility,
@@ -55,10 +54,12 @@ export function VotePage({
         projects={projects}
         selectedId={selectedProject?.id || null}
         recordedId={recordedProject?.id || null}
+        authenticated={authenticated}
         selectionLock={selectionLock}
         openProjectId={openProjectId}
         onOpen={onOpenProject}
         onSelect={onSelectProject}
+        onSignIn={onSignIn}
         onShare={onShare}
         notice={notices}
         votePanel={(
@@ -68,8 +69,6 @@ export function VotePage({
             session={{ ...session, event }}
             event={event}
             selectionLock={selectionLock}
-            resumeConfirmation={resumeConfirmation}
-            onResumeHandled={onResumeHandled}
             onSignIn={onSignIn}
             onCheckEligibility={onCheckEligibility}
             onConfirm={onConfirm}

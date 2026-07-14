@@ -15,14 +15,17 @@ import { ProjectCover } from './ProjectCover.jsx';
 import { ProjectShareButton } from './ProjectShareButton.jsx';
 import { ProjectTeamIdentity } from './ProjectTeamIdentity.jsx';
 
-export function ProjectDialog({ project, open, onClose, onSelect, selected, recorded, selectionLock, onShare }) {
+export function ProjectDialog({ project, open, onClose, onSelect, selected, recorded, authenticated, selectionLock, onSignIn, onShare }) {
   const { t } = useI18n();
   const reduceMotion = useReducedMotion();
   if (!project) return null;
   const securityBlocked = project.auditStatus === 'BLOCK';
+  const loginRequired = !authenticated;
   const selectionBlocked = Boolean(selectionLock);
   const actionLabel = securityBlocked
     ? t('project.securityReview')
+    : loginRequired
+      ? t('project.signIn')
     : selectionBlocked
       ? t(`project.selectionLock.${selectionLock}`)
       : recorded
@@ -32,6 +35,8 @@ export function ProjectDialog({ project, open, onClose, onSelect, selected, reco
           : t('project.select');
   const actionNotice = securityBlocked
     ? t('project.securityReviewNotice')
+    : loginRequired
+      ? t('project.signInNotice')
     : selectionBlocked
       ? t(`project.selectionLockNotice.${selectionLock}`)
       : recorded
@@ -96,8 +101,8 @@ export function ProjectDialog({ project, open, onClose, onSelect, selected, reco
           <RenaissMetalButton
             className={`project-dialog__vote-action ${selected || recorded ? 'project-vote-action--selected' : ''}`}
             type="button"
-            onClick={() => onSelect(project)}
-            disabled={securityBlocked || selectionBlocked || selected || recorded}
+            onClick={() => (loginRequired ? onSignIn() : onSelect(project))}
+            disabled={securityBlocked || (!loginRequired && (selectionBlocked || selected || recorded))}
             leading={selected || recorded ? <CheckCircle weight="fill" /> : null}
             trailing={selected || recorded ? null : <ArrowRight weight="bold" />}
           >

@@ -26,7 +26,6 @@ import { NotFoundPage } from './pages/NotFoundPage.jsx';
 import { VotePage } from './pages/VotePage.jsx';
 import initialLoaderLogoUrl from 'virtual:initial-loader-logo';
 
-const PENDING_PROJECT_KEY = 'renaiss-hackathon-pending-project';
 const INITIAL_LOADER_MIN_VISIBLE_MS = 900;
 const INITIAL_LOADER_EXIT_MS = 440;
 const INITIAL_HOME_ASSETS = Object.freeze([
@@ -39,10 +38,9 @@ export function App() {
   const location = useLocation();
   const navigate = useNavigate();
   const { session, recordVote, checkVoteEligibility, logout } = useSession();
-  const [selectedId, setSelectedId] = useState(readPendingProjectForAuthResume);
+  const [selectedId, setSelectedId] = useState(null);
   const [projectDialogId, setProjectDialogId] = useState(null);
   const [projectDialogOpen, setProjectDialogOpen] = useState(false);
-  const [resumeVoteConfirmation, setResumeVoteConfirmation] = useState(false);
   const [eligibilityPromptRequested, setEligibilityPromptRequested] = useState(false);
   const [authNotice, setAuthNotice] = useState(null);
   const [shareToastStatus, setShareToastStatus] = useState(null);
@@ -182,14 +180,11 @@ export function App() {
       });
     } else if (authStatus === 'success' && location.pathname === '/vote') {
       setEligibilityPromptRequested(true);
-    } else if (location.pathname === '/vote' && params.get('reviewVote') === '1' && selectedProject) {
-      setResumeVoteConfirmation(true);
     }
 
-    if (authStatus || params.has('reason') || params.has('reviewVote')) {
+    if (authStatus || params.has('reason')) {
       params.delete('auth');
       params.delete('reason');
-      params.delete('reviewVote');
       navigate({
         pathname: location.pathname,
         search: params.size ? `?${params.toString()}` : '',
@@ -201,8 +196,6 @@ export function App() {
   useEffect(() => {
     if (voteEligibility.status !== 'unqualified') return;
     setSelectedId(null);
-    setResumeVoteConfirmation(false);
-    sessionStorage.removeItem(PENDING_PROJECT_KEY);
   }, [voteEligibility.status]);
 
   useEffect(() => {
@@ -211,9 +204,9 @@ export function App() {
   }, [eligibilityPromptRequested, voteEligibility.status]);
 
   const selectProject = useCallback((project) => {
-    if (project.auditStatus === 'BLOCK' || selectionLock) return;
+    if (!session.authenticated || project.auditStatus === 'BLOCK' || selectionLock) return;
     setSelectedId(project.id);
-  }, [selectionLock]);
+  }, [selectionLock, session.authenticated]);
 
   const beginSignIn = useCallback((returnTo) => {
     if (!session.authConfigured) {
@@ -224,27 +217,24 @@ export function App() {
       });
       return;
     }
-    if (selectedProject) sessionStorage.setItem(PENDING_PROJECT_KEY, selectedProject.id);
     window.location.assign(`/api/auth/renaiss/start?return_to=${encodeURIComponent(returnTo)}`);
-  }, [selectedProject, session.authConfigured, t]);
+  }, [session.authConfigured, t]);
 
   const beginHeaderSignIn = useCallback(() => {
     const params = new URLSearchParams(location.search);
     params.delete('auth');
     params.delete('reason');
-    params.delete('reviewVote');
     const search = params.size ? `?${params.toString()}` : '';
     beginSignIn(`${location.pathname}${search}${location.hash}`);
   }, [beginSignIn, location.hash, location.pathname, location.search]);
 
   const beginVoteSignIn = useCallback(() => {
-    beginSignIn('/vote?reviewVote=1#projects');
+    beginSignIn('/vote#projects');
   }, [beginSignIn]);
 
   const confirmVote = useCallback(async (projectId) => {
     const payload = await recordVote(projectId);
     setSelectedId(projectId);
-    sessionStorage.removeItem(PENDING_PROJECT_KEY);
     return payload;
   }, [recordVote]);
 
@@ -252,11 +242,6 @@ export function App() {
 
   const clearLocalSelection = useCallback(() => {
     setSelectedId(null);
-    sessionStorage.removeItem(PENDING_PROJECT_KEY);
-  }, []);
-
-  const markVoteResumeHandled = useCallback(() => {
-    setResumeVoteConfirmation(false);
   }, []);
 
   const dismissEligibilityPrompt = useCallback(() => {
@@ -298,10 +283,10 @@ export function App() {
                     recordedProject={recordedProject}
                     selectedProject={selectedProject}
                     session={session}
+                    authenticated={session.authenticated}
                     eligibility={voteEligibility}
                     selectionLock={selectionLock}
                     eligibilityPromptRequested={eligibilityPromptRequested}
-                    resumeConfirmation={resumeVoteConfirmation}
                     serviceError={session.error}
                     openProjectId={projectDialogOpen ? projectDialogId : null}
                     onOpenProject={(project) => {
@@ -310,7 +295,6 @@ export function App() {
                     }}
                     onSelectProject={selectProject}
                     onShare={showShareToast}
-                    onResumeHandled={markVoteResumeHandled}
                     onEligibilityPromptHandled={dismissEligibilityPrompt}
                     onSignIn={beginVoteSignIn}
                     onCheckEligibility={verifyVoteEligibility}
@@ -342,7 +326,9 @@ export function App() {
           }}
           selected={projectDialog?.id === selectedProject?.id}
           recorded={projectDialog?.id === recordedProject?.id}
+          authenticated={session.authenticated}
           selectionLock={selectionLock}
+          onSignIn={beginVoteSignIn}
           onShare={showShareToast}
         />
       </LayoutGroup>
@@ -368,14 +354,6 @@ function preloadStaticImage(source) {
 
     if (image.complete) finish();
   });
-}
-
-function readPendingProjectForAuthResume() {
-  const params = new URLSearchParams(window.location.search);
-  const shouldResume = window.location.pathname === '/vote' && params.get('reviewVote') === '1';
-  if (shouldResume) return sessionStorage.getItem(PENDING_PROJECT_KEY);
-  sessionStorage.removeItem(PENDING_PROJECT_KEY);
-  return null;
 }
 
 function authErrorMessage(reason, t) {

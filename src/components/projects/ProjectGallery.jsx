@@ -16,7 +16,7 @@ const TRACKS = [
 ];
 const INITIAL_COUNT = 9;
 
-export function ProjectGallery({ projects, selectedId, recordedId, selectionLock, openProjectId, onOpen, onSelect, onShare, notice, votePanel }) {
+export function ProjectGallery({ projects, selectedId, recordedId, authenticated, selectionLock, openProjectId, onOpen, onSelect, onSignIn, onShare, notice, votePanel }) {
   const { intlLocale, t } = useI18n();
   const reduceMotion = useReducedMotion();
   const [track, setTrack] = useState('All');
@@ -105,10 +105,12 @@ export function ProjectGallery({ projects, selectedId, recordedId, selectionLock
                         coverFetchPriority={index < 3 ? 'high' : 'auto'}
                         selected={selectedId === project.id}
                         recorded={recordedId === project.id}
+                        authenticated={authenticated}
                         selectionLock={selectionLock}
                         dialogOpen={openProjectId === project.id}
                         onOpen={onOpen}
                         onSelect={onSelect}
+                        onSignIn={onSignIn}
                         onShare={onShare}
                       />
                     </div>

@@ -13,12 +13,15 @@ import { ProjectCover } from './ProjectCover.jsx';
 import { ProjectShareButton } from './ProjectShareButton.jsx';
 import { ProjectTeamIdentity } from './ProjectTeamIdentity.jsx';
 
-export function ProjectCard({ project, coverLoading, coverFetchPriority, selected, recorded, selectionLock, dialogOpen, onOpen, onSelect, onShare }) {
+export function ProjectCard({ project, coverLoading, coverFetchPriority, selected, recorded, authenticated, selectionLock, dialogOpen, onOpen, onSelect, onSignIn, onShare }) {
   const { t } = useI18n();
   const securityBlocked = project.auditStatus === 'BLOCK';
+  const loginRequired = !authenticated;
   const selectionBlocked = Boolean(selectionLock);
   const actionLabel = securityBlocked
     ? t('project.securityReview')
+    : loginRequired
+      ? t('project.signIn')
     : selectionBlocked
       ? t(`project.selectionLock.${selectionLock}`)
     : recorded
@@ -82,8 +85,8 @@ export function ProjectCard({ project, coverLoading, coverFetchPriority, selecte
           <RenaissMetalButton
             className={`button--vote ${selected || recorded ? 'project-vote-action--selected' : ''}`}
             type="button"
-            onClick={() => onSelect(project)}
-            disabled={securityBlocked || selectionBlocked}
+            onClick={() => (loginRequired ? onSignIn() : onSelect(project))}
+            disabled={securityBlocked || (!loginRequired && selectionBlocked)}
             leading={selected || recorded ? <CheckCircle weight="fill" /> : null}
             trailing={selected || recorded ? null : <ArrowRight weight="bold" />}
           >

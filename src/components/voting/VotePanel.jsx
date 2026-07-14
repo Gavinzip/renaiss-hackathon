@@ -11,8 +11,6 @@ export function VotePanel({
   session,
   event,
   selectionLock,
-  resumeConfirmation,
-  onResumeHandled,
   onSignIn,
   onCheckEligibility,
   onConfirm,
@@ -40,37 +38,6 @@ export function VotePanel({
     setError(null);
     setReceipt(null);
   }, [project?.id]);
-
-  useEffect(() => {
-    if (!resumeConfirmation || !project) return;
-    if (!session.authenticated || !canWrite) {
-      onResumeHandled();
-      return;
-    }
-
-    let active = true;
-    setSubmitting(true);
-    setError(null);
-    onCheckEligibility()
-      .then((eligibility) => {
-        if (!active) return;
-        if (eligibility.status !== 'eligible') {
-          setError(sbtEligibilityError(eligibility));
-          return;
-        }
-        trackEligibleSbtVoter();
-        setInteraction({ projectId: project.id, phase: 'confirm' });
-      })
-      .catch((caught) => {
-        if (active) setError(caught);
-      })
-      .finally(() => {
-        if (!active) return;
-        setSubmitting(false);
-        onResumeHandled();
-      });
-    return () => { active = false; };
-  }, [canWrite, onCheckEligibility, onResumeHandled, project, resumeConfirmation, session.authenticated]);
 
   const submit = async () => {
     if (!project || !canWrite || selectionBlocked) return;
