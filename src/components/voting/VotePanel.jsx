@@ -23,14 +23,16 @@ export function VotePanel({
   const [receipt, setReceipt] = useState(null);
   const selectedProjectIds = selectedProjects.map((project) => project.id).join(',');
   const selectionLimit = event.votePolicy.selectionsPerVoter;
+  const recordedSelectionCount = Number(session.vote?.selectionCount || recordedProjects.length);
   const readyToSubmit = selectedProjects.length === selectionLimit;
+  const isComplete = recordedSelectionCount >= selectionLimit;
 
   const phase = useMemo(() => {
     if (interaction?.phase === 'confirm' || interaction?.phase === 'success') return interaction.phase;
-    if (recordedProjects.length) return 'receipt';
+    if (isComplete) return 'receipt';
     if (selectedProjects.length) return 'selected';
     return 'choose';
-  }, [interaction?.phase, recordedProjects.length, selectedProjects.length]);
+  }, [interaction?.phase, isComplete, selectedProjects.length]);
 
   const displayedProjects = phase === 'receipt' ? recordedProjects : selectedProjects;
   const canWrite = event?.voting?.status === 'open';

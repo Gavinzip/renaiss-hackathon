@@ -90,7 +90,7 @@ export function ProjectCard({ project, coverLoading, coverFetchPriority, selecte
             className={`button--vote ${selected || recorded ? 'project-vote-action--selected' : ''}`}
             type="button"
             onClick={() => (loginRequired ? onSignIn() : onSelect(project))}
-            disabled={securityBlocked || (!loginRequired && (selectionBlocked || (!selected && (selectionLimitReached || teamAlreadySelected))))}
+            disabled={securityBlocked || (!loginRequired && (selectionBlocked || recorded || (!selected && (selectionLimitReached || teamAlreadySelected))))}
             leading={selected || recorded ? <CheckCircle weight="fill" /> : null}
             trailing={selected || recorded ? null : <ArrowRight weight="bold" />}
           >

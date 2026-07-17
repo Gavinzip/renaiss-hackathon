@@ -52,10 +52,14 @@ export function App() {
   const [initialLoaderStartedAt] = useState(() => Date.now());
 
   const projects = useMemo(() => localizeProjects(PROJECTS, locale), [locale]);
+  const selectionLimit = Number(session.event?.votePolicy?.selectionsPerVoter || EVENT.votePolicy.selectionsPerVoter);
+  const recordedVoteIds = useMemo(() => session.vote?.projectIds || [], [session.vote?.projectIds]);
+  const recordedVoteSignature = recordedVoteIds.join(',');
+  const recordedVoteCount = Number(session.vote?.selectionCount || recordedVoteIds.length);
   const recordedProjects = useMemo(() => {
-    const recordedIds = new Set(session.vote?.projectIds || []);
-    return projects.filter((project) => recordedIds.has(project.id));
-  }, [projects, session.vote?.projectIds]);
+    const projectById = new Map(projects.map((project) => [project.id, project]));
+    return recordedVoteIds.map((projectId) => projectById.get(projectId)).filter(Boolean);
+  }, [projects, recordedVoteSignature]);
   const selectedProjects = useMemo(() => {
     const projectById = new Map(projects.map((project) => [project.id, project]));
     return selectedIds
@@ -201,6 +205,27 @@ export function App() {
   }, [voteEligibility.status]);
 
   useEffect(() => {
+    if (!session.vote) {
+      setSelectedIds([]);
+      return;
+    }
+
+    setSelectedIds((current) => {
+      const recordedIds = [...recordedVoteIds];
+      const isComplete = recordedVoteCount >= selectionLimit;
+      const next = isComplete
+        ? recordedIds
+        : [
+          ...recordedIds,
+          ...current.filter((projectId) => !recordedIds.includes(projectId)),
+        ].slice(0, selectionLimit);
+      return next.length === current.length && next.every((projectId, index) => projectId === current[index])
+        ? current
+        : next;
+    });
+  }, [recordedVoteCount, recordedVoteIds, recordedVoteSignature, selectionLimit, session.vote]);
+
+  useEffect(() => {
     if (!eligibilityPromptRequested || voteEligibility.status === 'checking' || voteEligibility.status === 'idle') return;
     if (voteEligibility.status !== 'unqualified') setEligibilityPromptRequested(false);
   }, [eligibilityPromptRequested, voteEligibility.status]);
@@ -209,15 +234,16 @@ export function App() {
     if (!session.authenticated || project.auditStatus === 'BLOCK' || selectionLock) return;
     setSelectedIds((current) => {
       if (current.includes(project.id)) {
+        if (recordedVoteIds.includes(project.id)) return current;
         return current.filter((projectId) => projectId !== project.id);
       }
-      if (current.length >= EVENT.votePolicy.selectionsPerVoter) return current;
+      if (current.length >= selectionLimit) return current;
       if (current.some((projectId) => sameTeam(projects.find((candidate) => candidate.id === projectId), project))) {
         return current;
       }
       return [...current, project.id];
     });
-  }, [projects, selectionLock, session.authenticated]);
+  }, [projects, recordedVoteIds, selectionLimit, selectionLock, session.authenticated]);
 
   const beginSignIn = useCallback((returnTo) => {
     if (!session.authConfigured) {
@@ -248,8 +274,8 @@ export function App() {
   const verifyVoteEligibility = voteEligibility.refresh;
 
   const clearLocalSelection = useCallback(() => {
-    setSelectedIds([]);
-  }, []);
+    setSelectedIds(recordedVoteCount < selectionLimit ? recordedVoteIds : []);
+  }, [recordedVoteCount, recordedVoteIds, selectionLimit]);
 
   const dismissEligibilityPrompt = useCallback(() => {
     setEligibilityPromptRequested(false);
@@ -333,7 +359,7 @@ export function App() {
           }}
           selected={selectedIds.includes(projectDialog?.id)}
           recorded={recordedProjects.some((project) => project.id === projectDialog?.id)}
-          selectionLimitReached={selectedIds.length >= event.votePolicy.selectionsPerVoter}
+          selectionLimitReached={selectedIds.length >= selectionLimit}
           teamAlreadySelected={!selectedIds.includes(projectDialog?.id) && selectedProjects.some((project) => sameTeam(project, projectDialog))}
           authenticated={session.authenticated}
           selectionLock={selectionLock}

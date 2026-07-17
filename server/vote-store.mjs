@@ -312,9 +312,16 @@ export function createVoteStore({ database, config }) {
     GROUP BY project_id
   `)
   const selectLatestVote = db.prepare(`
-    SELECT MAX(updated_at) AS updated_at
-    FROM vote_ballots
-    WHERE event_id = ?
+    SELECT MAX(recorded_at) AS updated_at
+    FROM (
+      SELECT updated_at AS recorded_at
+      FROM vote_ballots
+      WHERE event_id = ?
+      UNION ALL
+      SELECT created_at AS recorded_at
+      FROM vote_events
+      WHERE event_id = ?
+    )
   `)
 
   database.immediateTransaction(() => {
@@ -337,15 +344,18 @@ export function createVoteStore({ database, config }) {
     const ballot = selectBallot.get(EVENT_ID, voterSub)
     if (!ballot) return null
     const choices = selectChoices.all(EVENT_ID, voterSub)
-    if (choices.length !== ballot.selection_count) {
+    if (choices.length < 1 || choices.length > SELECTIONS_PER_VOTER) {
       throw new HttpError(500, 'stored_vote_incomplete')
     }
     return {
       eventId: ballot.event_id,
       projectIds: choices.map((choice) => choice.project_id),
-      selectionCount: ballot.selection_count,
+      // The initial ballot row stays immutable. A legacy one-vote ballot can
+      // receive its two additional, append-only choices after the policy
+      // changes to three votes, so the authoritative count is the choices.
+      selectionCount: choices.length,
       createdAt: iso(ballot.created_at),
-      updatedAt: iso(ballot.updated_at),
+      updatedAt: iso(choices.at(-1)?.created_at || ballot.updated_at),
     }
   }
 
@@ -395,7 +405,7 @@ export function createVoteStore({ database, config }) {
       previousVotes = project.votes
       return { ...project, rank }
     })
-    const latestVote = selectLatestVote.get(EVENT_ID)
+    const latestVote = selectLatestVote.get(EVENT_ID, EVENT_ID)
 
     return {
       totalVotes: leaderboard.reduce((total, project) => total + project.votes, 0),
@@ -437,7 +447,7 @@ export function createVoteStore({ database, config }) {
   function castVote({ voterSub, projectIds: rawProjectIds, requestId: rawRequestId }) {
     const projectIds = normalizeProjectIds(rawProjectIds)
     const requestId = normalizeRequestId(rawRequestId)
-    const fingerprint = requestFingerprint('cast', projectIds)
+    const fingerprint = requestFingerprint('submit', projectIds)
 
     database.immediateTransaction(() => {
       const replay = idempotentResult(requestId, voterSub, fingerprint)
@@ -445,23 +455,39 @@ export function createVoteStore({ database, config }) {
       assertVotingOpen(config)
 
       const existing = readVote(voterSub)
-      if (existing) {
+      if (existing && existing.selectionCount >= SELECTIONS_PER_VOTER) {
         throw new HttpError(409, 'vote_already_recorded', 'A vote is already recorded for this identity.')
       }
 
       const timestamp = nowMs()
-      insertBallot.run({
-        eventId: EVENT_ID,
-        voterSub,
-        selectionCount: projectIds.length,
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      })
-      projectIds.forEach((projectId, index) => {
+      const existingProjectIds = new Set(existing?.projectIds || [])
+      if (existing && [...existingProjectIds].some((projectId) => !projectIds.includes(projectId))) {
+        throw new HttpError(
+          409,
+          'vote_existing_selection_required',
+          'Keep every recorded selection when completing a legacy ballot.',
+        )
+      }
+
+      const addedProjectIds = projectIds.filter((projectId) => !existingProjectIds.has(projectId))
+      if (existing && addedProjectIds.length !== SELECTIONS_PER_VOTER - existing.selectionCount) {
+        throw new HttpError(409, 'vote_completion_invalid', 'Complete the remaining selections for this ballot.')
+      }
+
+      if (!existing) {
+        insertBallot.run({
+          eventId: EVENT_ID,
+          voterSub,
+          selectionCount: projectIds.length,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        })
+      }
+      addedProjectIds.forEach((projectId, index) => {
         insertChoice.run({
           eventId: EVENT_ID,
           voterSub,
-          selectionIndex: index + 1,
+          selectionIndex: (existing?.selectionCount || 0) + index + 1,
           projectId,
           teamKey: TEAM_KEY_BY_PROJECT_ID.get(projectId),
           createdAt: timestamp,
@@ -474,8 +500,8 @@ export function createVoteStore({ database, config }) {
         id: randomUUID(),
         eventId: EVENT_ID,
         voterSub,
-        action: 'cast',
-        previousProjectId: null,
+        action: existing ? 'complete' : 'cast',
+        previousProjectId: existing?.projectIds[0] || null,
         projectId: null,
         projectIdsJson: JSON.stringify(projectIds),
         requestId,

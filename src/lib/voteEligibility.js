@@ -23,12 +23,16 @@ const KNOWN_ERROR_CODES = new Set([
   'vote_selection_count_invalid',
   'vote_project_duplicate',
   'vote_team_duplicate',
+  'vote_existing_selection_required',
+  'vote_completion_invalid',
   'project_not_found',
   'rate_limited',
 ]);
 
 export function voteSelectionLockStatus(session, eligibility) {
-  if (session?.vote) return 'submitted';
+  const selectionCount = Number(session?.vote?.selectionCount || 0);
+  const selectionLimit = Number(session?.event?.votePolicy?.selectionsPerVoter || 1);
+  if (selectionCount >= selectionLimit) return 'submitted';
   if (!session?.authenticated || eligibility?.status === 'eligible') return null;
   return eligibility?.status || 'idle';
 }

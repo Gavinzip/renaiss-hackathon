@@ -76,6 +76,7 @@ export function MobileVoteGuide({
                   <VoteProjectList projects={projects} t={t} />
                   <div className="mobile-vote-guide__selection-actions">
                     <strong>{t('vote.selectionProgress', { count: selectionCount, total: selectionLimit })}</strong>
+                    <strong className="mobile-vote-guide__remaining-votes">{t('vote.votesRemaining', { count: Math.max(0, selectionLimit - selectionCount) })}</strong>
                     <span>{readyToSubmit ? t('vote.selectionReady') : t('vote.selectionRemaining', { count: selectionLimit - selectionCount })}</span>
                     <button className="button button--primary mobile-vote-guide__primary" type="button" onClick={onSubmit} disabled={!readyToSubmit || !canWrite || selectionBlocked || submitting}>
                       {submitting ? t('vote.checkingEligibility') : t('vote.submit')}
@@ -124,7 +125,10 @@ export function MobileVoteGuide({
                   <VoteProjectList projects={projects} t={t} />
                   <div className="mobile-vote-guide__receipt-state">
                     <CheckCircle size={20} weight="fill" aria-hidden="true" />
-                    <strong>{t('vote.receiptTitle')}</strong>
+                    <div>
+                      <strong>{t('vote.receiptTitle')}</strong>
+                      <small>{t('vote.votesRemaining', { count: Math.max(0, selectionLimit - selectionCount) })}</small>
+                    </div>
                   </div>
                 </div>
               ) : null}

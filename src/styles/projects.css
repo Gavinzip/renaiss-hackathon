@@ -911,6 +911,11 @@ html:lang(zh-Hant) .project-card__heading strong {
   font-size: 0.71rem;
 }
 
+.mobile-vote-guide__selection-actions .mobile-vote-guide__remaining-votes {
+  color: var(--purple-light);
+  text-align: right;
+}
+
 .mobile-vote-guide__selection-actions > span {
   grid-column: 1 / -1;
   color: var(--muted);
@@ -1041,6 +1046,13 @@ html:lang(zh-Hant) .project-card__heading strong {
     gap: 6px;
     color: #ede7ff;
     font-size: 0.65rem;
+  }
+
+  .mobile-vote-guide__receipt-state small {
+    display: block;
+    margin-top: 2px;
+    color: var(--purple-light);
+    font-size: 0.56rem;
   }
 
   .mobile-vote-guide__status,
