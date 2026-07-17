@@ -38,7 +38,7 @@ export function App() {
   const location = useLocation();
   const navigate = useNavigate();
   const { session, recordVote, checkVoteEligibility, logout } = useSession();
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedIds, setSelectedIds] = useState([]);
   const [projectDialogId, setProjectDialogId] = useState(null);
   const [projectDialogOpen, setProjectDialogOpen] = useState(false);
   const [eligibilityPromptRequested, setEligibilityPromptRequested] = useState(false);
@@ -52,14 +52,16 @@ export function App() {
   const [initialLoaderStartedAt] = useState(() => Date.now());
 
   const projects = useMemo(() => localizeProjects(PROJECTS, locale), [locale]);
-  const recordedProject = useMemo(
-    () => projects.find((project) => project.id === session.vote?.projectId) || null,
-    [projects, session.vote?.projectId],
-  );
-  const selectedProject = useMemo(
-    () => projects.find((project) => project.id === selectedId && project.auditStatus !== 'BLOCK') || null,
-    [projects, selectedId],
-  );
+  const recordedProjects = useMemo(() => {
+    const recordedIds = new Set(session.vote?.projectIds || []);
+    return projects.filter((project) => recordedIds.has(project.id));
+  }, [projects, session.vote?.projectIds]);
+  const selectedProjects = useMemo(() => {
+    const projectById = new Map(projects.map((project) => [project.id, project]));
+    return selectedIds
+      .map((projectId) => projectById.get(projectId))
+      .filter((project) => project && project.auditStatus !== 'BLOCK');
+  }, [projects, selectedIds]);
   const projectDialog = useMemo(
     () => projects.find((project) => project.id === projectDialogId) || null,
     [projectDialogId, projects],
@@ -191,11 +193,11 @@ export function App() {
         hash: location.hash,
       }, { replace: true });
     }
-  }, [location.hash, location.pathname, location.search, navigate, selectedProject, session.loading, t]);
+  }, [location.hash, location.pathname, location.search, navigate, session.loading, t]);
 
   useEffect(() => {
     if (voteEligibility.status !== 'unqualified') return;
-    setSelectedId(null);
+    setSelectedIds([]);
   }, [voteEligibility.status]);
 
   useEffect(() => {
@@ -205,8 +207,17 @@ export function App() {
 
   const selectProject = useCallback((project) => {
     if (!session.authenticated || project.auditStatus === 'BLOCK' || selectionLock) return;
-    setSelectedId(project.id);
-  }, [selectionLock, session.authenticated]);
+    setSelectedIds((current) => {
+      if (current.includes(project.id)) {
+        return current.filter((projectId) => projectId !== project.id);
+      }
+      if (current.length >= EVENT.votePolicy.selectionsPerVoter) return current;
+      if (current.some((projectId) => sameTeam(projects.find((candidate) => candidate.id === projectId), project))) {
+        return current;
+      }
+      return [...current, project.id];
+    });
+  }, [projects, selectionLock, session.authenticated]);
 
   const beginSignIn = useCallback((returnTo) => {
     if (!session.authConfigured) {
@@ -228,16 +239,16 @@ export function App() {
     beginSignIn(`${location.pathname}${search}${location.hash}`);
   }, [beginSignIn, location.hash, location.pathname, location.search]);
 
-  const confirmVote = useCallback(async (projectId) => {
-    const payload = await recordVote(projectId);
-    setSelectedId(projectId);
+  const confirmVote = useCallback(async (projectIds) => {
+    const payload = await recordVote(projectIds);
+    setSelectedIds(projectIds);
     return payload;
   }, [recordVote]);
 
   const verifyVoteEligibility = voteEligibility.refresh;
 
   const clearLocalSelection = useCallback(() => {
-    setSelectedId(null);
+    setSelectedIds([]);
   }, []);
 
   const dismissEligibilityPrompt = useCallback(() => {
@@ -276,8 +287,8 @@ export function App() {
                   <VotePage
                     event={event}
                     projects={projects}
-                    recordedProject={recordedProject}
-                    selectedProject={selectedProject}
+                    recordedProjects={recordedProjects}
+                    selectedProjects={selectedProjects}
                     session={session}
                     authenticated={session.authenticated}
                     eligibility={voteEligibility}
@@ -320,8 +331,10 @@ export function App() {
             selectProject(project);
             setProjectDialogOpen(false);
           }}
-          selected={projectDialog?.id === selectedProject?.id}
-          recorded={projectDialog?.id === recordedProject?.id}
+          selected={selectedIds.includes(projectDialog?.id)}
+          recorded={recordedProjects.some((project) => project.id === projectDialog?.id)}
+          selectionLimitReached={selectedIds.length >= event.votePolicy.selectionsPerVoter}
+          teamAlreadySelected={!selectedIds.includes(projectDialog?.id) && selectedProjects.some((project) => sameTeam(project, projectDialog))}
           authenticated={session.authenticated}
           selectionLock={selectionLock}
           onSignIn={beginHeaderSignIn}
@@ -360,4 +373,16 @@ function authErrorMessage(reason, t) {
     sso_callback_failed: 'auth.error.sso_callback_failed',
   };
   return t(messages[reason] || 'auth.error.default');
+}
+
+function sameTeam(left, right) {
+  return normalizeTeamKey(left?.team) === normalizeTeamKey(right?.team);
+}
+
+function normalizeTeamKey(value) {
+  return String(value || '')
+    .normalize('NFKC')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .toLocaleLowerCase('en-US');
 }

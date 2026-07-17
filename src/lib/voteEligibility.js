@@ -20,6 +20,9 @@ const KNOWN_ERROR_CODES = new Set([
   'voting_not_open',
   'voting_closed',
   'vote_already_recorded',
+  'vote_selection_count_invalid',
+  'vote_project_duplicate',
+  'vote_team_duplicate',
   'project_not_found',
   'rate_limited',
 ]);

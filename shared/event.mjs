@@ -33,9 +33,13 @@ export const EVENT = Object.freeze({
     "Safety",
   ]),
   scoring: OFFICIAL_SCORING,
+  votePolicy: Object.freeze({
+    selectionsPerVoter: 3,
+    requireDistinctTeams: true,
+  }),
   voteWindow: Object.freeze({
     startsAt: null,
-    endsAt: null,
+    endsAt: "2026-07-20T23:59:59+08:00",
     prelaunchStartsAt: "2026-07-12T21:00:00+08:00",
     timezone: "Asia/Taipei",
   }),

@@ -13,7 +13,7 @@ import { ProjectCover } from './ProjectCover.jsx';
 import { ProjectShareButton } from './ProjectShareButton.jsx';
 import { ProjectTeamIdentity } from './ProjectTeamIdentity.jsx';
 
-export function ProjectCard({ project, coverLoading, coverFetchPriority, selected, recorded, authenticated, selectionLock, dialogOpen, onOpen, onSelect, onSignIn, onShare }) {
+export function ProjectCard({ project, coverLoading, coverFetchPriority, selected, recorded, selectionLimitReached, teamAlreadySelected, authenticated, selectionLock, dialogOpen, onOpen, onSelect, onSignIn, onShare }) {
   const { t } = useI18n();
   const securityBlocked = project.auditStatus === 'BLOCK';
   const loginRequired = !authenticated;
@@ -27,7 +27,11 @@ export function ProjectCard({ project, coverLoading, coverFetchPriority, selecte
     : recorded
       ? t('project.voteRecorded')
       : selected
-        ? t('project.selected')
+        ? t('project.removeSelection')
+        : selectionLimitReached
+          ? t('project.selectionLimitReached')
+          : teamAlreadySelected
+            ? t('project.teamAlreadySelected')
         : t('project.select');
   const trackLabel = t(`tracks.${project.track.toLowerCase()}`);
   const layoutDependency = `${project.id}:${dialogOpen ? 'open' : 'closed'}`;
@@ -86,7 +90,7 @@ export function ProjectCard({ project, coverLoading, coverFetchPriority, selecte
             className={`button--vote ${selected || recorded ? 'project-vote-action--selected' : ''}`}
             type="button"
             onClick={() => (loginRequired ? onSignIn() : onSelect(project))}
-            disabled={securityBlocked || (!loginRequired && selectionBlocked)}
+            disabled={securityBlocked || (!loginRequired && (selectionBlocked || (!selected && (selectionLimitReached || teamAlreadySelected))))}
             leading={selected || recorded ? <CheckCircle weight="fill" /> : null}
             trailing={selected || recorded ? null : <ArrowRight weight="bold" />}
           >

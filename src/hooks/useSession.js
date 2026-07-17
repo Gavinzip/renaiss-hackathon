@@ -40,14 +40,14 @@ export function useSession() {
     refresh();
   }, [refresh]);
 
-  const recordVote = useCallback(async (projectId) => {
+  const recordVote = useCallback(async (projectIds) => {
     const requestId = crypto.randomUUID();
     const payload = await apiRequest('/api/vote', {
       method: 'POST',
       headers: {
         'X-CSRF-Token': session.csrfToken,
       },
-      body: JSON.stringify({ projectId, requestId }),
+      body: JSON.stringify({ projectIds, requestId }),
     });
     setSession((current) => ({ ...current, ...payload, vote: payload.vote }));
     return payload;

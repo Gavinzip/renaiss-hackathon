@@ -240,10 +240,14 @@ export function loadConfig(env = process.env, options = {}) {
   }
 
   const votingOpensAt = parseTimestamp(envString(env, 'VOTING_OPENS_AT'), 'VOTING_OPENS_AT')
-  const votingClosesAt = parseTimestamp(envString(env, 'VOTING_CLOSES_AT'), 'VOTING_CLOSES_AT')
+  const configuredVotingClosesAt = envString(env, 'VOTING_CLOSES_AT')
+  const votingClosesAt = parseTimestamp(
+    configuredVotingClosesAt || (votingOpensAt !== null ? EVENT.voteWindow.endsAt : ''),
+    'VOTING_CLOSES_AT',
+  )
   const votingWindowConfigured = votingOpensAt !== null && votingClosesAt !== null
   if ((votingOpensAt === null) !== (votingClosesAt === null)) {
-    throw new Error('VOTING_OPENS_AT and VOTING_CLOSES_AT must be configured together.')
+    throw new Error('VOTING_OPENS_AT must be configured when VOTING_CLOSES_AT is set.')
   }
   if (votingWindowConfigured && votingOpensAt >= votingClosesAt) {
     throw new Error('VOTING_OPENS_AT must be earlier than VOTING_CLOSES_AT.')

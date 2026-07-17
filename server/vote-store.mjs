@@ -14,6 +14,15 @@ if (!Array.isArray(PROJECTS) || !Array.isArray(PROJECT_IDS) || PROJECTS.length =
 if (Number(EVENT.projectCount) !== PROJECTS.length) {
   throw new Error('EVENT.projectCount must match the official PROJECTS catalog.')
 }
+
+const SELECTIONS_PER_VOTER = Number(EVENT.votePolicy?.selectionsPerVoter)
+if (!Number.isInteger(SELECTIONS_PER_VOTER) || SELECTIONS_PER_VOTER < 1) {
+  throw new Error('EVENT.votePolicy.selectionsPerVoter must be a positive integer.')
+}
+if (EVENT.votePolicy?.requireDistinctTeams !== true) {
+  throw new Error('EVENT.votePolicy.requireDistinctTeams must be true for community voting.')
+}
+
 const PROJECT_ID_SET = new Set(PROJECT_IDS)
 if (PROJECT_ID_SET.size !== PROJECTS.length) {
   throw new Error('PROJECT_IDS must contain one unique id for every project.')
@@ -27,10 +36,17 @@ for (const projectId of VOTABLE_PROJECT_ID_SET) {
     throw new Error('VOTABLE_PROJECT_IDS must only contain official project ids.')
   }
 }
+
+const TEAM_KEY_BY_PROJECT_ID = new Map()
 for (const project of PROJECTS) {
   if (!project?.id || !PROJECT_ID_SET.has(project.id)) {
     throw new Error('Every project must have a stable id included in PROJECT_IDS.')
   }
+  const teamKey = normalizeTeamKey(project.team)
+  if (!teamKey) {
+    throw new Error(`Project ${project.id} must have a non-empty team name.`)
+  }
+  TEAM_KEY_BY_PROJECT_ID.set(project.id, teamKey)
 }
 
 function nowMs() {
@@ -49,14 +65,12 @@ function parseJson(value) {
   }
 }
 
-function rowToVote(row) {
-  if (!row) return null
-  return {
-    eventId: row.event_id,
-    projectId: row.project_id,
-    createdAt: iso(row.created_at),
-    updatedAt: iso(row.updated_at),
-  }
+function normalizeTeamKey(value) {
+  return String(value || '')
+    .normalize('NFKC')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .toLocaleLowerCase('en-US')
 }
 
 function normalizeRequestId(value) {
@@ -67,17 +81,34 @@ function normalizeRequestId(value) {
   return requestId
 }
 
-function normalizeProjectId(value) {
-  const projectId = String(value || '').trim()
-  if (!projectId || !VOTABLE_PROJECT_ID_SET.has(projectId)) {
-    throw new HttpError(400, 'project_not_found', 'Select a valid hackathon project.')
+function normalizeProjectIds(value) {
+  if (!Array.isArray(value) || value.length !== SELECTIONS_PER_VOTER) {
+    throw new HttpError(
+      400,
+      'vote_selection_count_invalid',
+      `Select exactly ${SELECTIONS_PER_VOTER} different teams.`,
+    )
   }
-  return projectId
+
+  const projectIds = value.map((item) => String(item || '').trim())
+  if (projectIds.some((projectId) => !projectId || !VOTABLE_PROJECT_ID_SET.has(projectId))) {
+    throw new HttpError(400, 'project_not_found', 'Select valid hackathon projects.')
+  }
+  if (new Set(projectIds).size !== projectIds.length) {
+    throw new HttpError(400, 'vote_project_duplicate', 'Each selected project must be different.')
+  }
+
+  const teamKeys = projectIds.map((projectId) => TEAM_KEY_BY_PROJECT_ID.get(projectId))
+  if (new Set(teamKeys).size !== teamKeys.length) {
+    throw new HttpError(400, 'vote_team_duplicate', 'Each selection must belong to a different team.')
+  }
+
+  return projectIds
 }
 
-function requestFingerprint(action, projectId = '') {
+function requestFingerprint(action, projectIds = []) {
   return createHash('sha256')
-    .update(JSON.stringify({ action, eventId: EVENT_ID, projectId }))
+    .update(JSON.stringify({ action, eventId: EVENT_ID, projectIds: [...projectIds].sort() }))
     .digest('hex')
 }
 
@@ -110,9 +141,18 @@ function assertVotingOpen(config, timestamp = nowMs()) {
   return window
 }
 
+function ensureVoteEventProjectListColumn(db) {
+  const columns = db.prepare('PRAGMA table_info(vote_events)').all()
+  if (!columns.some((column) => column.name === 'project_ids_json')) {
+    db.exec('ALTER TABLE vote_events ADD COLUMN project_ids_json TEXT')
+  }
+}
+
 export function createVoteStore({ database, config }) {
   const db = database.connection
   db.exec(`
+    -- Kept read-only by this store so deployments can migrate the original
+    -- one-project ballot schema without deleting any historical records.
     CREATE TABLE IF NOT EXISTS vote_allocations (
       event_id TEXT NOT NULL,
       voter_sub TEXT NOT NULL,
@@ -124,6 +164,32 @@ export function createVoteStore({ database, config }) {
 
     CREATE INDEX IF NOT EXISTS vote_allocations_project_idx
       ON vote_allocations (event_id, project_id);
+
+    CREATE TABLE IF NOT EXISTS vote_ballots (
+      event_id TEXT NOT NULL,
+      voter_sub TEXT NOT NULL,
+      selection_count INTEGER NOT NULL CHECK (selection_count >= 1 AND selection_count <= ${SELECTIONS_PER_VOTER}),
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL,
+      PRIMARY KEY (event_id, voter_sub)
+    );
+
+    CREATE TABLE IF NOT EXISTS vote_choices (
+      event_id TEXT NOT NULL,
+      voter_sub TEXT NOT NULL,
+      selection_index INTEGER NOT NULL CHECK (selection_index >= 1 AND selection_index <= ${SELECTIONS_PER_VOTER}),
+      project_id TEXT NOT NULL,
+      team_key TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      PRIMARY KEY (event_id, voter_sub, project_id),
+      UNIQUE (event_id, voter_sub, selection_index),
+      FOREIGN KEY (event_id, voter_sub)
+        REFERENCES vote_ballots (event_id, voter_sub)
+        ON DELETE RESTRICT
+    );
+
+    CREATE INDEX IF NOT EXISTS vote_choices_project_idx
+      ON vote_choices (event_id, project_id);
 
     CREATE TABLE IF NOT EXISTS vote_events (
       id TEXT PRIMARY KEY,
@@ -142,6 +208,30 @@ export function createVoteStore({ database, config }) {
     CREATE INDEX IF NOT EXISTS vote_events_voter_idx
       ON vote_events (event_id, voter_sub, created_at);
 
+    CREATE TRIGGER IF NOT EXISTS vote_ballots_no_update
+    BEFORE UPDATE ON vote_ballots
+    BEGIN
+      SELECT RAISE(ABORT, 'vote_ballots is immutable');
+    END;
+
+    CREATE TRIGGER IF NOT EXISTS vote_ballots_no_delete
+    BEFORE DELETE ON vote_ballots
+    BEGIN
+      SELECT RAISE(ABORT, 'vote_ballots is immutable');
+    END;
+
+    CREATE TRIGGER IF NOT EXISTS vote_choices_no_update
+    BEFORE UPDATE ON vote_choices
+    BEGIN
+      SELECT RAISE(ABORT, 'vote_choices is immutable');
+    END;
+
+    CREATE TRIGGER IF NOT EXISTS vote_choices_no_delete
+    BEFORE DELETE ON vote_choices
+    BEGIN
+      SELECT RAISE(ABORT, 'vote_choices is immutable');
+    END;
+
     CREATE TRIGGER IF NOT EXISTS vote_events_no_update
     BEFORE UPDATE ON vote_events
     BEGIN
@@ -154,41 +244,110 @@ export function createVoteStore({ database, config }) {
       SELECT RAISE(ABORT, 'vote_events is append-only');
     END;
   `)
+  ensureVoteEventProjectListColumn(db)
 
-  const selectVote = db.prepare(`
-    SELECT event_id, voter_sub, project_id, created_at, updated_at
-    FROM vote_allocations
+  const selectBallot = db.prepare(`
+    SELECT event_id, voter_sub, selection_count, created_at, updated_at
+    FROM vote_ballots
     WHERE event_id = ? AND voter_sub = ?
+  `)
+  const selectChoices = db.prepare(`
+    SELECT selection_index, project_id, team_key, created_at
+    FROM vote_choices
+    WHERE event_id = ? AND voter_sub = ?
+    ORDER BY selection_index ASC
   `)
   const selectEventByRequestId = db.prepare(`
     SELECT event_id, voter_sub, action, request_fingerprint, result_json
     FROM vote_events
     WHERE event_id = ? AND request_id = ?
   `)
-  const insertVote = db.prepare(`
-    INSERT INTO vote_allocations (event_id, voter_sub, project_id, created_at, updated_at)
-    VALUES (@eventId, @voterSub, @projectId, @createdAt, @updatedAt)
+  const insertBallot = db.prepare(`
+    INSERT INTO vote_ballots (event_id, voter_sub, selection_count, created_at, updated_at)
+    VALUES (@eventId, @voterSub, @selectionCount, @createdAt, @updatedAt)
+  `)
+  const insertChoice = db.prepare(`
+    INSERT INTO vote_choices (
+      event_id, voter_sub, selection_index, project_id, team_key, created_at
+    ) VALUES (
+      @eventId, @voterSub, @selectionIndex, @projectId, @teamKey, @createdAt
+    )
   `)
   const insertEvent = db.prepare(`
     INSERT INTO vote_events (
       id, event_id, voter_sub, action, previous_project_id, project_id,
-      request_id, request_fingerprint, result_json, created_at
+      project_ids_json, request_id, request_fingerprint, result_json, created_at
     ) VALUES (
       @id, @eventId, @voterSub, @action, @previousProjectId, @projectId,
-      @requestId, @requestFingerprint, @resultJson, @createdAt
+      @projectIdsJson, @requestId, @requestFingerprint, @resultJson, @createdAt
     )
+  `)
+  const migrateLegacyBallots = db.prepare(`
+    INSERT OR IGNORE INTO vote_ballots (
+      event_id, voter_sub, selection_count, created_at, updated_at
+    )
+    SELECT event_id, voter_sub, 1, created_at, updated_at
+    FROM vote_allocations
+    WHERE event_id = @eventId
+  `)
+  const migrateLegacyChoices = db.prepare(`
+    INSERT OR IGNORE INTO vote_choices (
+      event_id, voter_sub, selection_index, project_id, team_key, created_at
+    )
+    SELECT event_id, voter_sub, 1, project_id, @teamKey, created_at
+    FROM vote_allocations
+    WHERE event_id = @eventId
+      AND voter_sub = @voterSub
+      AND project_id = @projectId
+  `)
+  const legacyVotes = db.prepare(`
+    SELECT voter_sub, project_id
+    FROM vote_allocations
+    WHERE event_id = ?
   `)
   const countVotes = db.prepare(`
     SELECT project_id, COUNT(*) AS votes
-    FROM vote_allocations
+    FROM vote_choices
     WHERE event_id = ?
     GROUP BY project_id
   `)
   const selectLatestVote = db.prepare(`
     SELECT MAX(updated_at) AS updated_at
-    FROM vote_allocations
+    FROM vote_ballots
     WHERE event_id = ?
   `)
+
+  database.immediateTransaction(() => {
+    migrateLegacyBallots.run({ eventId: EVENT_ID })
+    for (const legacyVote of legacyVotes.all(EVENT_ID)) {
+      const teamKey = TEAM_KEY_BY_PROJECT_ID.get(legacyVote.project_id)
+      if (!teamKey) {
+        throw new Error(`Legacy vote references unknown project ${legacyVote.project_id}.`)
+      }
+      migrateLegacyChoices.run({
+        eventId: EVENT_ID,
+        voterSub: legacyVote.voter_sub,
+        projectId: legacyVote.project_id,
+        teamKey,
+      })
+    }
+  })
+
+  function readVote(voterSub) {
+    const ballot = selectBallot.get(EVENT_ID, voterSub)
+    if (!ballot) return null
+    const choices = selectChoices.all(EVENT_ID, voterSub)
+    if (choices.length !== ballot.selection_count) {
+      throw new HttpError(500, 'stored_vote_incomplete')
+    }
+    return {
+      eventId: ballot.event_id,
+      projectIds: choices.map((choice) => choice.project_id),
+      selectionCount: ballot.selection_count,
+      createdAt: iso(ballot.created_at),
+      updatedAt: iso(ballot.updated_at),
+    }
+  }
 
   function voteCountsByProject() {
     return new Map(countVotes.all(EVENT_ID).map((row) => [row.project_id, Number(row.votes)]))
@@ -270,34 +429,46 @@ export function createVoteStore({ database, config }) {
 
   function publicState(voterSub) {
     return {
-      vote: rowToVote(selectVote.get(EVENT_ID, voterSub)),
+      vote: readVote(voterSub),
       event: publicEvent(),
     }
   }
 
-  function castVote({ voterSub, projectId: rawProjectId, requestId: rawRequestId }) {
-    const projectId = normalizeProjectId(rawProjectId)
+  function castVote({ voterSub, projectIds: rawProjectIds, requestId: rawRequestId }) {
+    const projectIds = normalizeProjectIds(rawProjectIds)
     const requestId = normalizeRequestId(rawRequestId)
-    const fingerprint = requestFingerprint('vote', projectId)
+    const fingerprint = requestFingerprint('cast', projectIds)
 
     database.immediateTransaction(() => {
       const replay = idempotentResult(requestId, voterSub, fingerprint)
       if (replay) return replay
       assertVotingOpen(config)
 
-      const existing = selectVote.get(EVENT_ID, voterSub)
+      const existing = readVote(voterSub)
       if (existing) {
         throw new HttpError(409, 'vote_already_recorded', 'A vote is already recorded for this identity.')
       }
+
       const timestamp = nowMs()
-      insertVote.run({
+      insertBallot.run({
         eventId: EVENT_ID,
         voterSub,
-        projectId,
+        selectionCount: projectIds.length,
         createdAt: timestamp,
         updatedAt: timestamp,
       })
-      const vote = rowToVote(selectVote.get(EVENT_ID, voterSub))
+      projectIds.forEach((projectId, index) => {
+        insertChoice.run({
+          eventId: EVENT_ID,
+          voterSub,
+          selectionIndex: index + 1,
+          projectId,
+          teamKey: TEAM_KEY_BY_PROJECT_ID.get(projectId),
+          createdAt: timestamp,
+        })
+      })
+
+      const vote = readVote(voterSub)
       const storedResult = { vote }
       insertEvent.run({
         id: randomUUID(),
@@ -305,7 +476,8 @@ export function createVoteStore({ database, config }) {
         voterSub,
         action: 'cast',
         previousProjectId: null,
-        projectId,
+        projectId: null,
+        projectIdsJson: JSON.stringify(projectIds),
         requestId,
         requestFingerprint: fingerprint,
         resultJson: JSON.stringify(storedResult),
@@ -314,9 +486,7 @@ export function createVoteStore({ database, config }) {
       return storedResult
     })
 
-    return {
-      ...publicState(voterSub),
-    }
+    return publicState(voterSub)
   }
 
   return {

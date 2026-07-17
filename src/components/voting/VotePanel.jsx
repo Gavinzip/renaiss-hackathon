@@ -6,8 +6,8 @@ import { localizeVoteError, sbtEligibilityError } from '../../lib/voteEligibilit
 import { MobileVoteGuide } from './MobileVoteGuide.jsx';
 
 export function VotePanel({
-  project,
-  recordedProject,
+  selectedProjects,
+  recordedProjects,
   session,
   event,
   selectionLock,
@@ -21,26 +21,29 @@ export function VotePanel({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [receipt, setReceipt] = useState(null);
+  const selectedProjectIds = selectedProjects.map((project) => project.id).join(',');
+  const selectionLimit = event.votePolicy.selectionsPerVoter;
+  const readyToSubmit = selectedProjects.length === selectionLimit;
 
   const phase = useMemo(() => {
-    if (interaction && project && interaction.projectId === project.id) return interaction.phase;
-    if (project && recordedProject?.id === project.id) return 'receipt';
-    if (project) return 'selected';
-    if (recordedProject) return 'receipt';
+    if (interaction?.phase === 'confirm' || interaction?.phase === 'success') return interaction.phase;
+    if (recordedProjects.length) return 'receipt';
+    if (selectedProjects.length) return 'selected';
     return 'choose';
-  }, [interaction, project, recordedProject]);
+  }, [interaction?.phase, recordedProjects.length, selectedProjects.length]);
 
-  const displayProject = phase === 'receipt' && !project ? recordedProject : project;
+  const displayedProjects = phase === 'receipt' ? recordedProjects : selectedProjects;
   const canWrite = event?.voting?.status === 'open';
   const selectionBlocked = Boolean(selectionLock);
 
   useEffect(() => {
     setError(null);
     setReceipt(null);
-  }, [project?.id]);
+    if (interaction?.phase !== 'success') setInteraction(null);
+  }, [selectedProjectIds]);
 
   const submit = async () => {
-    if (!project || !canWrite || selectionBlocked) return;
+    if (!readyToSubmit || !canWrite || selectionBlocked) return;
     setError(null);
     if (!session.authenticated) {
       onSignIn();
@@ -53,7 +56,7 @@ export function VotePanel({
         throw sbtEligibilityError(eligibility);
       }
       trackEligibleSbtVoter();
-      setInteraction({ projectId: project.id, phase: 'confirm' });
+      setInteraction({ phase: 'confirm' });
     } catch (caught) {
       setError(caught);
     } finally {
@@ -62,13 +65,13 @@ export function VotePanel({
   };
 
   const confirm = async () => {
-    if (!project || submitting || !canWrite || selectionBlocked) return;
+    if (!readyToSubmit || submitting || !canWrite || selectionBlocked) return;
     setSubmitting(true);
     setError(null);
     try {
-      const payload = await onConfirm(project.id);
+      const payload = await onConfirm(selectedProjects.map((project) => project.id));
       setReceipt(payload.vote || null);
-      setInteraction({ projectId: project.id, phase: 'success' });
+      setInteraction({ phase: 'success' });
     } catch (caught) {
       setError(caught);
     } finally {
@@ -86,8 +89,10 @@ export function VotePanel({
     <aside className={`vote-panel vote-panel--${phase}`} aria-label={t('vote.panelLabel')}>
       <MobileVoteGuide
         phase={phase}
-        project={project}
-        recordedProject={recordedProject}
+        projects={displayedProjects}
+        selectionCount={selectedProjects.length}
+        selectionLimit={selectionLimit}
+        readyToSubmit={readyToSubmit}
         canWrite={canWrite}
         selectionBlocked={selectionBlocked}
         submitting={submitting}
@@ -97,7 +102,7 @@ export function VotePanel({
         t={t}
         onSubmit={submit}
         onConfirm={confirm}
-        onBack={() => setInteraction({ projectId: displayProject?.id, phase: 'selected' })}
+        onBack={() => setInteraction(null)}
         onClearSelection={clearSelection}
       />
     </aside>

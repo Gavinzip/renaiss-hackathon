@@ -10,8 +10,8 @@ import { useI18n } from '../i18n/I18nProvider.jsx';
 export function VotePage({
   event,
   projects,
-  recordedProject,
-  selectedProject,
+  recordedProjects,
+  selectedProjects,
   session,
   authenticated,
   eligibility,
@@ -52,8 +52,9 @@ export function VotePage({
     <div className="vote-page">
       <ProjectGallery
         projects={projects}
-        selectedId={selectedProject?.id || null}
-        recordedId={recordedProject?.id || null}
+        selectedIds={selectedProjects.map((project) => project.id)}
+        recordedIds={recordedProjects.map((project) => project.id)}
+        selectionLimit={event.votePolicy.selectionsPerVoter}
         authenticated={authenticated}
         selectionLock={selectionLock}
         openProjectId={openProjectId}
@@ -64,8 +65,8 @@ export function VotePage({
         notice={notices}
         votePanel={(
           <VotePanel
-            project={selectedProject}
-            recordedProject={recordedProject}
+            selectedProjects={selectedProjects}
+            recordedProjects={recordedProjects}
             session={{ ...session, event }}
             event={event}
             selectionLock={selectionLock}

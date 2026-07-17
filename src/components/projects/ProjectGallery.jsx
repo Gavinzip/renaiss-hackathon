@@ -16,7 +16,7 @@ const TRACKS = [
 ];
 const INITIAL_COUNT = 9;
 
-export function ProjectGallery({ projects, selectedId, recordedId, authenticated, selectionLock, openProjectId, onOpen, onSelect, onSignIn, onShare, notice, votePanel }) {
+export function ProjectGallery({ projects, selectedIds, recordedIds, selectionLimit, authenticated, selectionLock, openProjectId, onOpen, onSelect, onSignIn, onShare, notice, votePanel }) {
   const { intlLocale, t } = useI18n();
   const reduceMotion = useReducedMotion();
   const [track, setTrack] = useState('All');
@@ -24,6 +24,11 @@ export function ProjectGallery({ projects, selectedId, recordedId, authenticated
   const [sortMode, setSortMode] = useState('default');
   const [defaultProjectOrder] = useState(() => shuffleProjectIds(projects));
   const [expanded, setExpanded] = useState(false);
+  const selectedTeamKeys = useMemo(() => new Set(
+    projects
+      .filter((project) => selectedIds.includes(project.id))
+      .map((project) => normalizeTeamKey(project.team)),
+  ), [projects, selectedIds]);
 
   const defaultProjectOrderIndex = useMemo(
     () => new Map(defaultProjectOrder.map((projectId, index) => [projectId, index])),
@@ -112,8 +117,10 @@ export function ProjectGallery({ projects, selectedId, recordedId, authenticated
                         project={project}
                         coverLoading={index < 3 ? 'eager' : 'lazy'}
                         coverFetchPriority={index < 3 ? 'high' : 'auto'}
-                        selected={selectedId === project.id}
-                        recorded={recordedId === project.id}
+                        selected={selectedIds.includes(project.id)}
+                        recorded={recordedIds.includes(project.id)}
+                        selectionLimitReached={selectedIds.length >= selectionLimit}
+                        teamAlreadySelected={!selectedIds.includes(project.id) && selectedTeamKeys.has(normalizeTeamKey(project.team))}
                         authenticated={authenticated}
                         selectionLock={selectionLock}
                         dialogOpen={openProjectId === project.id}
@@ -137,6 +144,14 @@ export function ProjectGallery({ projects, selectedId, recordedId, authenticated
       </div>
     </section>
   );
+}
+
+function normalizeTeamKey(value) {
+  return String(value || '')
+    .normalize('NFKC')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .toLocaleLowerCase('en-US');
 }
 
 function shuffleProjectIds(projects) {

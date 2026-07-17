@@ -333,7 +333,7 @@ export function createApplication(options = {}) {
     const eligibility = await sbtEligibility.requireEligible(session)
     const result = voteStore.castVote({
       voterSub: session.user.sub,
-      projectId: request.body?.projectId,
+      projectIds: request.body?.projectIds,
       requestId: requestIdFrom(request),
     })
     sendNoStore(response, 200, { ...result, eligibility })

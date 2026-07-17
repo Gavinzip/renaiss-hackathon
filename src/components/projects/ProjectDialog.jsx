@@ -15,7 +15,7 @@ import { ProjectCover } from './ProjectCover.jsx';
 import { ProjectShareButton } from './ProjectShareButton.jsx';
 import { ProjectTeamIdentity } from './ProjectTeamIdentity.jsx';
 
-export function ProjectDialog({ project, open, onClose, onSelect, selected, recorded, authenticated, selectionLock, onSignIn, onShare }) {
+export function ProjectDialog({ project, open, onClose, onSelect, selected, recorded, selectionLimitReached, teamAlreadySelected, authenticated, selectionLock, onSignIn, onShare }) {
   const { t } = useI18n();
   const reduceMotion = useReducedMotion();
   if (!project) return null;
@@ -31,7 +31,11 @@ export function ProjectDialog({ project, open, onClose, onSelect, selected, reco
       : recorded
         ? t('project.voteRecorded')
         : selected
-          ? t('project.selected')
+          ? t('project.removeSelection')
+          : selectionLimitReached
+            ? t('project.selectionLimitReached')
+            : teamAlreadySelected
+              ? t('project.teamAlreadySelected')
           : t('project.select');
   const actionNotice = securityBlocked
     ? t('project.securityReviewNotice')
@@ -43,6 +47,10 @@ export function ProjectDialog({ project, open, onClose, onSelect, selected, reco
         ? t('project.recordedNotice')
         : selected
           ? t('project.selectedNotice')
+          : selectionLimitReached
+            ? t('project.selectionLimitReachedNotice')
+            : teamAlreadySelected
+              ? t('project.teamAlreadySelectedNotice')
           : t('project.readyNotice');
   return (
     <Modal
@@ -102,7 +110,7 @@ export function ProjectDialog({ project, open, onClose, onSelect, selected, reco
             className={`project-dialog__vote-action ${selected || recorded ? 'project-vote-action--selected' : ''}`}
             type="button"
             onClick={() => (loginRequired ? onSignIn() : onSelect(project))}
-            disabled={securityBlocked || (!loginRequired && (selectionBlocked || selected || recorded))}
+            disabled={securityBlocked || (!loginRequired && (selectionBlocked || recorded || (!selected && (selectionLimitReached || teamAlreadySelected))))}
             leading={selected || recorded ? <CheckCircle weight="fill" /> : null}
             trailing={selected || recorded ? null : <ArrowRight weight="bold" />}
           >

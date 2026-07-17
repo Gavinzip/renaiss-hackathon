@@ -9,7 +9,6 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { createPortal } from 'react-dom';
 
-import { staticAssetUrl } from '../../lib/staticAssets.js';
 import { VoteProgress } from './VoteProgress.jsx';
 import { MOTION_EASE, MOTION_EXIT_EASE, SURFACE_HIDDEN, SURFACE_VISIBLE } from '../motion/motionTokens.js';
 
@@ -21,8 +20,10 @@ const GUIDE_STEPS = [
 
 export function MobileVoteGuide({
   phase,
-  project,
-  recordedProject,
+  projects,
+  selectionCount,
+  selectionLimit,
+  readyToSubmit,
   canWrite,
   selectionBlocked,
   submitting,
@@ -36,8 +37,7 @@ export function MobileVoteGuide({
   onClearSelection,
 }) {
   const reduceMotion = useReducedMotion();
-
-  const displayProject = phase === 'receipt' && !project ? recordedProject : project;
+  const projectNames = projects.map((project) => project.name).join('、');
   const guide = (
     <AnimatePresence initial={false}>
       <motion.section
@@ -70,67 +70,71 @@ export function MobileVoteGuide({
               exit={reduceMotion ? undefined : { opacity: 0.56, y: -8, scale: 0.99, filter: 'blur(2px)', transition: { duration: 0.14, ease: MOTION_EXIT_EASE } }}
               transition={{ duration: reduceMotion ? 0 : 0.24, ease: MOTION_EASE }}
             >
-                {phase === 'choose' ? <VoteGuidePrompt t={t} /> : null}
-                {phase === 'selected' && displayProject ? (
-                  <div className="mobile-vote-guide__selected">
-                    <MobileProjectSummary project={displayProject} t={t} />
-                    <button className="button button--primary mobile-vote-guide__primary" type="button" onClick={onSubmit} disabled={!canWrite || selectionBlocked || submitting}>
+              {phase === 'choose' ? <VoteGuidePrompt t={t} /> : null}
+              {phase === 'selected' ? (
+                <div className="mobile-vote-guide__selected">
+                  <VoteProjectList projects={projects} t={t} />
+                  <div className="mobile-vote-guide__selection-actions">
+                    <strong>{t('vote.selectionProgress', { count: selectionCount, total: selectionLimit })}</strong>
+                    <span>{readyToSubmit ? t('vote.selectionReady') : t('vote.selectionRemaining', { count: selectionLimit - selectionCount })}</span>
+                    <button className="button button--primary mobile-vote-guide__primary" type="button" onClick={onSubmit} disabled={!readyToSubmit || !canWrite || selectionBlocked || submitting}>
                       {submitting ? t('vote.checkingEligibility') : t('vote.submit')}
                     </button>
                     <button className="mobile-vote-guide__text-action" type="button" onClick={onClearSelection}>
                       {t('vote.clearSelection')}
                     </button>
-                    {!canWrite ? <small className="mobile-vote-guide__status">{statusText}</small> : null}
                   </div>
-                ) : null}
+                  {!canWrite ? <small className="mobile-vote-guide__status">{statusText}</small> : null}
+                </div>
+              ) : null}
 
-                {phase === 'confirm' && displayProject ? (
-                  <div className="mobile-vote-guide__confirm">
-                    <div className="mobile-vote-guide__confirm-copy">
-                      <strong>{t('vote.confirmTitle')}</strong>
-                      <span>{t('vote.confirmBody', { project: displayProject.name })}</span>
-                    </div>
-                    <div className="mobile-vote-guide__actions">
-                      <button className="button button--secondary" type="button" onClick={onBack} disabled={submitting} aria-label={t('common.back')}>
-                        <ArrowLeft aria-hidden="true" />
-                      </button>
-                      <button className="button button--primary" type="button" onClick={onConfirm} disabled={submitting || !canWrite || selectionBlocked}>
-                        {submitting ? t('vote.recording') : t('vote.confirm')}
-                      </button>
-                    </div>
+              {phase === 'confirm' ? (
+                <div className="mobile-vote-guide__confirm">
+                  <div className="mobile-vote-guide__confirm-copy">
+                    <strong>{t('vote.confirmTitle')}</strong>
+                    <span>{t('vote.confirmBody', { projects: projectNames })}</span>
                   </div>
-                ) : null}
-
-                {phase === 'success' && displayProject ? (
-                  <div className="mobile-vote-guide__success">
-                    <CheckCircle size={25} weight="fill" aria-hidden="true" />
-                    <div>
-                      <strong>{t('vote.successTitle')}</strong>
-                      <span>{t('vote.successBody', { project: displayProject.name })}</span>
-                      {recordedAt ? <small>{recordedAt}</small> : null}
-                    </div>
-                    <button className="button button--secondary" type="button" onClick={onClearSelection}>
-                      {t('vote.backToProjects')}
+                  <div className="mobile-vote-guide__actions">
+                    <button className="button button--secondary" type="button" onClick={onBack} disabled={submitting} aria-label={t('common.back')}>
+                      <ArrowLeft aria-hidden="true" />
+                    </button>
+                    <button className="button button--primary" type="button" onClick={onConfirm} disabled={submitting || !readyToSubmit || !canWrite || selectionBlocked}>
+                      {submitting ? t('vote.recording') : t('vote.confirm')}
                     </button>
                   </div>
-                ) : null}
+                </div>
+              ) : null}
 
-                {phase === 'receipt' && displayProject ? (
-                  <div className="mobile-vote-guide__receipt">
-                    <MobileProjectSummary project={displayProject} t={t} />
-                    <div className="mobile-vote-guide__receipt-state">
-                      <CheckCircle size={20} weight="fill" aria-hidden="true" />
-                      <strong>{t('vote.receiptTitle')}</strong>
-                    </div>
+              {phase === 'success' ? (
+                <div className="mobile-vote-guide__success">
+                  <CheckCircle size={25} weight="fill" aria-hidden="true" />
+                  <div>
+                    <strong>{t('vote.successTitle')}</strong>
+                    <span>{t('vote.successBody', { projects: projectNames })}</span>
+                    {recordedAt ? <small>{recordedAt}</small> : null}
                   </div>
-                ) : null}
+                  <button className="button button--secondary" type="button" onClick={onClearSelection}>
+                    {t('vote.backToProjects')}
+                  </button>
+                </div>
+              ) : null}
 
-                {errorMessage ? (
-                  <p className="mobile-vote-guide__error" role="alert">
-                    <WarningCircle aria-hidden="true" />
-                    {errorMessage}
-                  </p>
-                ) : null}
+              {phase === 'receipt' ? (
+                <div className="mobile-vote-guide__receipt">
+                  <VoteProjectList projects={projects} t={t} />
+                  <div className="mobile-vote-guide__receipt-state">
+                    <CheckCircle size={20} weight="fill" aria-hidden="true" />
+                    <strong>{t('vote.receiptTitle')}</strong>
+                  </div>
+                </div>
+              ) : null}
+
+              {errorMessage ? (
+                <p className="mobile-vote-guide__error" role="alert">
+                  <WarningCircle aria-hidden="true" />
+                  {errorMessage}
+                </p>
+              ) : null}
             </motion.div>
           </AnimatePresence>
         </div>
@@ -138,8 +142,6 @@ export function MobileVoteGuide({
     </AnimatePresence>
   );
 
-  // The page entry animation uses transform/filter. Rendering the persistent
-  // guide at the document layer keeps its fixed position tied to the viewport.
   return createPortal(guide, document.body);
 }
 
@@ -166,15 +168,18 @@ function VoteGuidePrompt({ t }) {
   );
 }
 
-function MobileProjectSummary({ project, t }) {
+function VoteProjectList({ projects, t }) {
   return (
-    <div className="mobile-vote-guide__project">
-      {project.coverUrl ? <img src={staticAssetUrl(project.coverUrl)} alt="" width="1200" height="675" decoding="async" /> : null}
-      <div>
-        <span>{t('vote.selectedLabel')}</span>
-        <strong>{project.name}</strong>
-        <small>{project.team}</small>
-      </div>
-    </div>
+    <ol className="mobile-vote-guide__project-list" aria-label={t('vote.selectedLabel')}>
+      {projects.map((project, index) => (
+        <li key={project.id}>
+          <span>{index + 1}</span>
+          <div>
+            <strong>{project.name}</strong>
+            <small>{project.team}</small>
+          </div>
+        </li>
+      ))}
+    </ol>
   );
 }
