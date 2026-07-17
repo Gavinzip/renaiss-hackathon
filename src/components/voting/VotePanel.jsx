@@ -24,7 +24,9 @@ export function VotePanel({
   const selectedProjectIds = selectedProjects.map((project) => project.id).join(',');
   const selectionLimit = event.votePolicy.selectionsPerVoter;
   const recordedSelectionCount = Number(session.vote?.selectionCount || recordedProjects.length);
-  const readyToSubmit = selectedProjects.length === selectionLimit;
+  const pendingProjects = selectedProjects.slice(recordedSelectionCount);
+  const pendingSelectionCount = pendingProjects.length;
+  const readyToSubmit = pendingSelectionCount > 0;
   const isComplete = recordedSelectionCount >= selectionLimit;
 
   const phase = useMemo(() => {
@@ -92,7 +94,9 @@ export function VotePanel({
       <MobileVoteGuide
         phase={phase}
         projects={displayedProjects}
+        pendingProjects={pendingProjects}
         selectionCount={selectedProjects.length}
+        pendingSelectionCount={pendingSelectionCount}
         selectionLimit={selectionLimit}
         readyToSubmit={readyToSubmit}
         canWrite={canWrite}

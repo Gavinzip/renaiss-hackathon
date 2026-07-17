@@ -21,7 +21,9 @@ const GUIDE_STEPS = [
 export function MobileVoteGuide({
   phase,
   projects,
+  pendingProjects,
   selectionCount,
+  pendingSelectionCount,
   selectionLimit,
   readyToSubmit,
   canWrite,
@@ -37,7 +39,7 @@ export function MobileVoteGuide({
   onClearSelection,
 }) {
   const reduceMotion = useReducedMotion();
-  const projectNames = projects.map((project) => project.name).join('、');
+  const pendingProjectNames = pendingProjects.map((project) => project.name).join('、');
   const guide = (
     <AnimatePresence initial={false}>
       <motion.section
@@ -77,9 +79,9 @@ export function MobileVoteGuide({
                   <div className="mobile-vote-guide__selection-actions">
                     <strong>{t('vote.selectionProgress', { count: selectionCount, total: selectionLimit })}</strong>
                     <strong className="mobile-vote-guide__remaining-votes">{t('vote.votesRemaining', { count: Math.max(0, selectionLimit - selectionCount) })}</strong>
-                    <span>{readyToSubmit ? t('vote.selectionReady') : t('vote.selectionRemaining', { count: selectionLimit - selectionCount })}</span>
+                    <span>{readyToSubmit ? t('vote.selectionReady', { count: pendingSelectionCount }) : t('vote.selectionRemaining', { count: selectionLimit - selectionCount })}</span>
                     <button className="button button--primary mobile-vote-guide__primary" type="button" onClick={onSubmit} disabled={!readyToSubmit || !canWrite || selectionBlocked || submitting}>
-                      {submitting ? t('vote.checkingEligibility') : t('vote.submit')}
+                      {submitting ? t('vote.checkingEligibility') : t('vote.submit', { count: pendingSelectionCount })}
                     </button>
                     <button className="mobile-vote-guide__text-action" type="button" onClick={onClearSelection}>
                       {t('vote.clearSelection')}
@@ -93,7 +95,7 @@ export function MobileVoteGuide({
                 <div className="mobile-vote-guide__confirm">
                   <div className="mobile-vote-guide__confirm-copy">
                     <strong>{t('vote.confirmTitle')}</strong>
-                    <span>{t('vote.confirmBody', { projects: projectNames })}</span>
+                    <span>{t('vote.confirmBody', { projects: pendingProjectNames })}</span>
                   </div>
                   <div className="mobile-vote-guide__actions">
                     <button className="button button--secondary" type="button" onClick={onBack} disabled={submitting} aria-label={t('common.back')}>
@@ -111,7 +113,7 @@ export function MobileVoteGuide({
                   <CheckCircle size={25} weight="fill" aria-hidden="true" />
                   <div>
                     <strong>{t('vote.successTitle')}</strong>
-                    <span>{t('vote.successBody', { projects: projectNames })}</span>
+                    <span>{t('vote.successBody', { projects: pendingProjectNames })}</span>
                     {recordedAt ? <small>{recordedAt}</small> : null}
                   </div>
                   <button className="button button--secondary" type="button" onClick={onClearSelection}>

@@ -82,11 +82,11 @@ function normalizeRequestId(value) {
 }
 
 function normalizeProjectIds(value) {
-  if (!Array.isArray(value) || value.length !== SELECTIONS_PER_VOTER) {
+  if (!Array.isArray(value) || value.length < 1 || value.length > SELECTIONS_PER_VOTER) {
     throw new HttpError(
       400,
       'vote_selection_count_invalid',
-      `Select exactly ${SELECTIONS_PER_VOTER} different teams.`,
+      `Select between 1 and ${SELECTIONS_PER_VOTER} different teams.`,
     )
   }
 
@@ -470,8 +470,8 @@ export function createVoteStore({ database, config }) {
       }
 
       const addedProjectIds = projectIds.filter((projectId) => !existingProjectIds.has(projectId))
-      if (existing && addedProjectIds.length !== SELECTIONS_PER_VOTER - existing.selectionCount) {
-        throw new HttpError(409, 'vote_completion_invalid', 'Complete the remaining selections for this ballot.')
+      if (existing && addedProjectIds.length < 1) {
+        throw new HttpError(409, 'vote_completion_invalid', 'Add at least one new selection to this ballot.')
       }
 
       if (!existing) {
@@ -500,9 +500,9 @@ export function createVoteStore({ database, config }) {
         id: randomUUID(),
         eventId: EVENT_ID,
         voterSub,
-        action: existing ? 'complete' : 'cast',
-        previousProjectId: existing?.projectIds[0] || null,
-        projectId: null,
+        action: existing ? 'append' : 'cast',
+        previousProjectId: existing?.projectIds.at(-1) || null,
+        projectId: addedProjectIds.at(-1) || null,
         projectIdsJson: JSON.stringify(projectIds),
         requestId,
         requestFingerprint: fingerprint,
