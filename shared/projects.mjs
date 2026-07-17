@@ -427,7 +427,7 @@ const PROJECT_DATA = [
     "id": "tgpoke-renaiss",
     "name": "Tgpoke (with Renaiss)",
     "track": "Game",
-    "team": "MOONYU",
+    "team": "MOONYU / blue_dragon / blurac",
     "xLabel": "@moonyu_myu",
     "xUrl": "https://x.com/moonyu_myu",
     "repoUrl": "https://github.com/yys5584/renaiss-tcg-bot",
