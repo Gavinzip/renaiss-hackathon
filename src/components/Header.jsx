@@ -13,16 +13,14 @@ const NAV_ITEMS = [
   ['nav.vote', '/vote'],
 ];
 
-export function Header({ session, onSignIn, onLogout }) {
+export function Header({ session, showResults = false, onSignIn, onLogout }) {
   const { t } = useI18n();
   const reduceMotion = useReducedMotion();
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const userLabel = session.user?.name || session.user?.twitterUsername || t('nav.member');
-  const navigationItems = session.user?.isAdministrator
-    ? [...NAV_ITEMS, ['nav.admin', '/admin']]
-    : NAV_ITEMS;
+  const navigationItems = showResults ? [...NAV_ITEMS, ['nav.results', '/results']] : NAV_ITEMS;
 
   useEffect(() => {
     const updateHeader = () => {

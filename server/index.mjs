@@ -201,13 +201,17 @@ export function createApplication(options = {}) {
     const publicVoteState = session
       ? voteStore.getPublicState(session.user.sub)
       : { vote: null, event: voteStore.getPublicEvent() }
+    const administrator = isAdministrator(config, session)
+    const event = administrator && !publicVoteState.event.resultsPublished
+      ? { ...publicVoteState.event, results: voteStore.getResults() }
+      : publicVoteState.event
     sendNoStore(response, 200, {
       authenticated: Boolean(session),
       authConfigured: config.ssoConfigured,
       user: displayUser(config, session),
       csrfToken: session ? csrfTokenForSession(config.sessionSecret, session) : null,
       vote: publicVoteState.vote,
-      event: publicVoteState.event,
+      event,
     })
   })
 

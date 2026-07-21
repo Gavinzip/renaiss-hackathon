@@ -21,8 +21,8 @@ import { warmProjectCoverCache } from './lib/projectCoverPreload.js';
 import { staticAssetCssUrl, staticAssetUrl } from './lib/staticAssets.js';
 import { voteSelectionLockStatus } from './lib/voteEligibility.js';
 import { HomePage } from './pages/HomePage.jsx';
-import { AdminPage } from './pages/AdminPage.jsx';
 import { NotFoundPage } from './pages/NotFoundPage.jsx';
+import { ResultsPage } from './pages/ResultsPage.jsx';
 import { VotePage } from './pages/VotePage.jsx';
 import initialLoaderLogoUrl from 'virtual:initial-loader-logo';
 
@@ -74,6 +74,7 @@ export function App() {
     ...EVENT,
     voting: { status: session.loading ? 'loading' : 'configuration_required', opensAt: null, closesAt: null },
   };
+  const canViewResults = Boolean(event.results && (event.resultsPublished || session.user?.isAdministrator));
   const voteEligibility = useVoteEligibility({
     enabled: location.pathname === '/vote',
     authenticated: session.authenticated,
@@ -301,7 +302,12 @@ export function App() {
     <div className="site-frame" style={{ '--vote-ribbon-asset': staticAssetCssUrl('/assets/backgrounds/renaiss-vote-ribbon-field.webp') }}>
       {initialLoaderMounted ? <InitialExperienceLoader isLeaving={!initialLoaderVisible} /> : null}
       <RouteScrollManager />
-      <Header session={session} onSignIn={beginHeaderSignIn} onLogout={signOut} />
+      <Header
+        session={session}
+        showResults={canViewResults}
+        onSignIn={beginHeaderSignIn}
+        onLogout={signOut}
+      />
       <LayoutGroup id="project-dialog">
         <main>
           <PageTransition key={location.pathname}>
@@ -338,12 +344,16 @@ export function App() {
               />
               <Route path="/rules" element={<Navigate to="/#rules" replace />} />
               <Route
-                path="/admin"
+                path="/results"
                 element={session.loading
                   ? null
-                  : session.user?.isAdministrator
-                    ? <AdminPage projects={projects} session={session} onSignIn={beginHeaderSignIn} />
-                    : <Navigate to="/" replace />}
+                  : canViewResults
+                  ? <ResultsPage event={event} projects={projects} />
+                  : <Navigate to="/" replace />}
+              />
+              <Route
+                path="/admin"
+                element={session.loading ? null : <Navigate to={canViewResults ? '/results' : '/'} replace />}
               />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>

@@ -7,7 +7,7 @@ Official project gallery and Renaiss-authenticated community voting surface for 
 - `/` — official event home and primary entry points.
 - `/vote` — dedicated project gallery, filtering, project detail, selection, and vote confirmation flow.
 - `/rules` — redirects to the official rules section at `/#rules`.
-- `/admin` — private live vote dashboard; requires Renaiss SSO plus a server-side Safe wallet allowlist.
+- `/results` — final community-vote ranking, limited to the top ten projects. Before publication, it is available only to authenticated wallets on the server-side administrator allowlist. It becomes public only after the voting window has closed and `RESULTS_PUBLISHED=true` is set in the server environment; it contains project-level totals only.
 
 ## Local development
 
@@ -39,7 +39,7 @@ Set `VITE_GA_MEASUREMENT_ID` in the Zeabur **build environment** to the Google A
 - Set the exact `VOTING_OPENS_AT` timestamp before launch. Season 1 closes at `2026-07-20T23:59:59+08:00`; set the same `VOTING_CLOSES_AT` value in Zeabur when the variable is present so the deployed override stays aligned with the official event policy.
 - Each identity may submit up to three choices from three different teams, one vote at a time or together. A recorded choice is final: a voter may only append an eligible choice from a different team until all three votes are used; existing choices cannot be replaced or removed.
 - Mount `/data` as persistent storage and run a single application instance when using the bundled SQLite store. Move sessions and votes to shared Postgres/Redis-backed storage before horizontal scaling.
-- Keep `RESULTS_PUBLISHED=false` until the organizer intentionally publishes results.
+- Keep `RESULTS_PUBLISHED=false` until the organizer intentionally publishes results. While it remains false, the final ranking is available only to the existing server-side administrator wallet allowlist. Set it to `true` in Zeabur when the top-ten ranking should appear publicly; no deploy-time timestamp is hard-coded for publication.
 - Define the official community-score normalization, team-score input, tie-breaking, and result aggregation process before calculating the final combined score. The current vote store records the community selection truth; it does not invent the organizer's 60% scoring data.
 
 ## Zeabur offsite backup

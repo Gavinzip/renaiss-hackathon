@@ -519,6 +519,7 @@ export function createVoteStore({ database, config }) {
     eventId: EVENT_ID,
     getPublicEvent: publicEvent,
     getPublicState: publicState,
+    getResults: results,
     getAdminResults: adminResults,
     castVote,
   }

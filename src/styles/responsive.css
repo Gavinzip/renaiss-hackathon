@@ -41,34 +41,21 @@
     width: min(590px, 58%);
   }
 
-  .admin-page {
+  .results-page {
     padding-top: 122px;
   }
 
-  .admin-page__heading,
-  .admin-leaderboard__header {
-    flex-direction: column;
-  }
-
-  .admin-dashboard__metrics {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-leaderboard__header p {
-    text-align: left;
-  }
-
-  .admin-leaderboard__project-link {
+  .results-leaderboard__project-link {
     grid-template-columns: 46px minmax(0, 1fr);
     gap: 10px;
   }
 
-  .admin-leaderboard__thumbnail {
+  .results-leaderboard__thumbnail {
     width: 46px;
     height: 34px;
   }
 
-  .admin-leaderboard__open-project {
+  .results-leaderboard__open-project {
     grid-column: 2;
     justify-self: start;
   }
