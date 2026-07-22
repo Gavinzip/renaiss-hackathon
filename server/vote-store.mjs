@@ -22,6 +22,10 @@ if (!Number.isInteger(SELECTIONS_PER_VOTER) || SELECTIONS_PER_VOTER < 1) {
 if (EVENT.votePolicy?.requireDistinctTeams !== true) {
   throw new Error('EVENT.votePolicy.requireDistinctTeams must be true for community voting.')
 }
+const RESULT_VOTE_MULTIPLIER = Number(EVENT.votePolicy?.resultVoteMultiplier)
+if (!Number.isInteger(RESULT_VOTE_MULTIPLIER) || RESULT_VOTE_MULTIPLIER < 1) {
+  throw new Error('EVENT.votePolicy.resultVoteMultiplier must be a positive integer.')
+}
 
 const PROJECT_ID_SET = new Set(PROJECT_IDS)
 if (PROJECT_ID_SET.size !== PROJECTS.length) {
@@ -360,7 +364,10 @@ export function createVoteStore({ database, config }) {
   }
 
   function voteCountsByProject() {
-    return new Map(countVotes.all(EVENT_ID).map((row) => [row.project_id, Number(row.votes)]))
+    return new Map(countVotes.all(EVENT_ID).map((row) => [
+      row.project_id,
+      Number(row.votes) * RESULT_VOTE_MULTIPLIER,
+    ]))
   }
 
   function idempotentResult(requestId, voterSub, fingerprint) {

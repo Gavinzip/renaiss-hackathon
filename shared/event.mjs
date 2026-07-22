@@ -36,6 +36,7 @@ export const EVENT = Object.freeze({
   votePolicy: Object.freeze({
     selectionsPerVoter: 3,
     requireDistinctTeams: true,
+    resultVoteMultiplier: 3,
   }),
   voteWindow: Object.freeze({
     startsAt: null,
