@@ -46,7 +46,9 @@ Set `VITE_GA_MEASUREMENT_ID` in the server **build environment** to the Google A
 
 This branch deploys Vite output and one Node 24 API function through `vercel.json`. `/api/*`, `/auth/*`, and `/healthz` keep the existing Express routes. The original Zeabur service, domains, variables, deployment, volume, and scheduled workflow remain unchanged. Do not deploy this PostgreSQL branch to that SQLite service.
 
+- Canonical website: https://build.renaisscltb.com
 - Pilot URL: https://renaiss-hackathon-vercel-pilot.vercel.app
+- OAuth starts on the canonical host so the httpOnly challenge cookie reaches the callback. The preview host stays noindex while the canonical host follows the original production indexing behavior.
 - Preserve the original R2 release and voting window; the pilot does not reopen voting.
 - `npm run db:migrate`: requires a direct `DATABASE_URL_UNPOOLED` and an ordinary SQL-created `APP_DATABASE_ROLE`. Neon CLI-created management roles are not suitable application roles.
 - `npm run db:import -- /private/path/snapshot.json`: imports the four historical vote tables into empty tables atomically. It refuses to overwrite data. Existing session/challenge credentials remain in the private source backup; the pilot has a new session secret and separate host cookies.

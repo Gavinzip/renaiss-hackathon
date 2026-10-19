@@ -218,6 +218,14 @@ export function createApplication(options = {}) {
   })
 
   app.get('/api/auth/renaiss/start', asyncRoute(async (request, response) => {
+    // Start OAuth on the canonical host so its httpOnly challenge cookie reaches the callback.
+    if (config.production && request.get('host') !== new URL(config.publicOrigin).host) {
+      const returnTo = safeReturnTo(request.query.returnTo || request.query.return_to)
+      const url = new URL('/api/auth/renaiss/start', config.publicOrigin)
+      url.searchParams.set('returnTo', returnTo)
+      response.redirect(302, url.toString())
+      return
+    }
     await rateLimiter.consume({
       scope: 'auth_start_ip',
       key: clientIp(request),

@@ -18,7 +18,6 @@
         "X-Content-Type-Options": "nosniff",
         "X-Frame-Options": "DENY",
         "Referrer-Policy": "strict-origin-when-cross-origin",
-        "X-Robots-Tag": "noindex, nofollow",
         "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
         "content-security-policy": "default-src 'self';base-uri 'self';connect-src 'self';font-src 'self' data:;form-action 'self';frame-ancestors 'none';img-src 'self' data: https:;object-src 'none';script-src 'self';style-src 'self' 'unsafe-inline';upgrade-insecure-requests;script-src-attr 'none'",
         "cross-origin-opener-policy": "same-origin",
@@ -28,6 +27,19 @@
         "x-download-options": "noopen",
         "x-permitted-cross-domain-policies": "none",
         "x-xss-protection": "0"
+      },
+      "continue": true
+    },
+    {
+      "src": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": ".*\\.vercel\\.app"
+        }
+      ],
+      "headers": {
+        "X-Robots-Tag": "noindex, nofollow"
       },
       "continue": true
     },
