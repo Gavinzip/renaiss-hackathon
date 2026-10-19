@@ -107,10 +107,9 @@ function createBscScanRequestScheduler({
   })
 }
 
-export function createSbtEligibilityService({ config, fetchImpl = fetch, now = () => Date.now() }) {
+export function createSbtEligibilityService({ config, fetchImpl = fetch, now = () => Date.now(), requestScheduler = createBscScanRequestScheduler(config.sbtEligibility) }) {
   const cache = new Map()
   const inFlight = new Map()
-  const requestScheduler = createBscScanRequestScheduler(config.sbtEligibility)
 
   function requireReadyConfiguration() {
     if (!config.sbtEligibility.configured) {

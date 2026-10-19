@@ -1,177 +1,54 @@
-import { spawn } from 'node:child_process'
-import { mkdir, mkdtemp, rm, stat } from 'node:fs/promises'
-import { join } from 'node:path'
+import { randomBytes } from 'node:crypto'
+import { exportSnapshot, encryptSnapshot, decryptSnapshot, sha256 } from './snapshot.mjs'
 
-class BackupCommandError extends Error {
-  constructor(command, code, timedOut) {
-    super(timedOut
-      ? `${command} timed out.`
-      : `${command} exited with status ${code ?? 'unknown'}.`)
-    this.name = 'BackupCommandError'
-    this.command = command
-  }
-}
-
-function run(command, args, { env, timeoutMs }) {
-  return new Promise((resolve, reject) => {
-    let settled = false
-    let timedOut = false
-    const child = spawn(command, args, {
-      env,
-      stdio: ['ignore', 'ignore', 'pipe'],
-    })
-
-    const timer = setTimeout(() => {
-      timedOut = true
-      child.kill('SIGTERM')
-    }, timeoutMs)
-
-    let stderr = ''
-    child.stderr.setEncoding('utf8')
-    child.stderr.on('data', (chunk) => {
-      stderr = `${stderr}${chunk}`.slice(-4096)
-    })
-
-    function finish(error) {
-      if (settled) return
-      settled = true
-      clearTimeout(timer)
-      if (error) reject(error)
-      else resolve()
-    }
-
-    child.once('error', () => finish(new BackupCommandError(command, null, timedOut)))
-    child.once('close', (code) => {
-      if (code === 0 && !timedOut) return finish()
-      const error = new BackupCommandError(command, code, timedOut)
-      error.stderr = stderr
-      finish(error)
-    })
+async function driveAccessToken(backup) {
+  const response = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ client_id: backup.clientId, client_secret: backup.clientSecret, refresh_token: backup.refreshToken, grant_type: 'refresh_token' }),
+    signal: AbortSignal.timeout(15000),
   })
+  const result = await response.json()
+  if (!response.ok || !result.access_token) throw new Error(`Backup Drive authorization failed (${response.status}).`)
+  return result.access_token
 }
-
-function sqliteBackupInstruction(destination) {
-  return `.backup '${destination.replaceAll("'", "''")}'`
+function requireConfigured(config) {
+  if (!config.backup.configured) throw new Error(`Backup configuration is ${config.backup.state}.`)
 }
-
-let activeOperation = null
-
-function requireAvailable(config) {
-  if (!config.backup.configured) {
-    throw new Error(`Backup configuration is ${config.backup.state}.`)
-  }
-  if (activeOperation) {
-    const error = new Error('A backup operation is already running.')
-    error.code = 'backup_in_progress'
-    throw error
-  }
-}
-
-function resticEnvironment(config) {
-  return {
-    ...process.env,
-    RESTIC_REPOSITORY: config.backup.repository,
-    RESTIC_PASSWORD: config.backup.password,
-  }
-}
-
-function repositoryIsMissing(error) {
-  const detail = String(error?.stderr || '')
-  return detail.includes('unable to open config file')
-    || detail.includes('Is there a repository at the following location?')
-}
-
-async function ensureRepository(config, environment) {
-  try {
-    await run('restic', ['cat', 'config'], {
-      env: environment,
-      timeoutMs: config.backup.timeoutMs,
-    })
-    return false
-  } catch (error) {
-    if (!repositoryIsMissing(error)) throw error
-  }
-
-  await run('restic', ['init'], {
-    env: environment,
-    timeoutMs: config.backup.timeoutMs,
+export async function runDatabaseBackup(config, database) {
+  requireConfigured(config)
+  const token = await driveAccessToken(config.backup)
+  const snapshot = await exportSnapshot(database)
+  const bytes = encryptSnapshot(snapshot,config.backup.encryptionKey)
+  const hash = sha256(bytes)
+  const boundary = randomBytes(24).toString('hex')
+  const metadata = { name: `hackathon-${snapshot.createdAt.replaceAll(':','-')}.json.enc`, parents: [config.backup.folderId], appProperties: { format: snapshot.format, sha256: hash } }
+  const body = Buffer.concat([
+    Buffer.from(`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n--${boundary}\r\nContent-Type: application/octet-stream\r\n\r\n`),
+    bytes, Buffer.from(`\r\n--${boundary}--\r\n`),
+  ])
+  const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,size,appProperties', {
+    method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': `multipart/related; boundary=${boundary}` }, body,
+    signal: AbortSignal.timeout(30000),
   })
-  return true
+  const file = await response.json()
+  if (!response.ok || !file.id || Number(file.size) !== bytes.length || file.appProperties?.sha256 !== hash) throw new Error(`Backup upload verification failed (${response.status}).`)
+  return { completedAt: snapshot.createdAt, bytes: bytes.length, sha256: hash, fileId: file.id }
 }
-
-async function runExclusive(operation) {
-  activeOperation = operation
-  try {
-    return await operation
-  } finally {
-    if (activeOperation === operation) activeOperation = null
-  }
-}
-
-export async function runDatabaseBackup(config) {
-  requireAvailable(config)
-
-  const operation = (async () => {
-    await mkdir(config.backup.stagingDir, { recursive: true })
-    const temporaryDirectory = await mkdtemp(join(config.backup.stagingDir, 'snapshot-'))
-    const snapshotPath = join(temporaryDirectory, 'renaiss-hackathon.sqlite')
-    const childEnv = resticEnvironment(config)
-
-    try {
-      const repositoryInitialized = await ensureRepository(config, childEnv)
-      await run('sqlite3', [config.databasePath, sqliteBackupInstruction(snapshotPath)], {
-        env: childEnv,
-        timeoutMs: config.backup.timeoutMs,
-      })
-      const snapshot = await stat(snapshotPath)
-      if (!snapshot.isFile() || snapshot.size === 0) {
-        throw new Error('SQLite snapshot was not created.')
-      }
-      await run('restic', [
-        'backup',
-        '--tag', 'renaiss-hackathon',
-        '--tag', 'sqlite',
-        '--host', 'renaiss-hackathon',
-        snapshotPath,
-      ], {
-        env: childEnv,
-        timeoutMs: config.backup.timeoutMs,
-      })
-      await run('restic', [
-        'forget',
-        '--prune',
-        '--tag', 'renaiss-hackathon',
-        '--keep-hourly', String(config.backup.retention.hourly),
-        '--keep-daily', String(config.backup.retention.daily),
-        '--keep-weekly', String(config.backup.retention.weekly),
-        '--keep-monthly', String(config.backup.retention.monthly),
-      ], {
-        env: childEnv,
-        timeoutMs: config.backup.timeoutMs,
-      })
-      return {
-        completedAt: new Date().toISOString(),
-        bytes: snapshot.size,
-        repositoryInitialized,
-      }
-    } finally {
-      await rm(temporaryDirectory, { recursive: true, force: true })
-    }
-  })()
-
-  return runExclusive(operation)
-}
-
 export async function runRepositoryCheck(config) {
-  requireAvailable(config)
-  const operation = run('restic', [
-    'check',
-    '--read-data-subset=5%',
-  ], {
-    env: resticEnvironment(config),
-    timeoutMs: config.backup.timeoutMs,
-  }).then(() => ({
-    checkedAt: new Date().toISOString(),
-  }))
-  return runExclusive(operation)
+  requireConfigured(config)
+  const token = await driveAccessToken(config.backup)
+  const url = new URL('https://www.googleapis.com/drive/v3/files')
+  url.searchParams.set('q',`'${config.backup.folderId}' in parents and trashed=false and appProperties has { key='format' and value='renaiss-hackathon-postgres-v1' }`)
+  url.searchParams.set('fields','files(id,size,appProperties)')
+  url.searchParams.set('orderBy','createdTime desc')
+  url.searchParams.set('pageSize','1')
+  const list = await fetch(url,{ headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(15000) })
+  const result = await list.json(), file = result.files?.[0]
+  if (!list.ok || !file) throw new Error('No offsite backup is available to verify.')
+  const response = await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`,{ headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(30000) })
+  if (!response.ok) throw new Error(`Backup download failed (${response.status}).`)
+  const bytes = Buffer.from(await response.arrayBuffer())
+  if (sha256(bytes) !== file.appProperties?.sha256) throw new Error('Backup checksum mismatch.')
+  const snapshot = decryptSnapshot(bytes,config.backup.encryptionKey)
+  return { checkedAt: new Date().toISOString(), snapshotAt: snapshot.createdAt, bytes: bytes.length, fileId: file.id }
 }

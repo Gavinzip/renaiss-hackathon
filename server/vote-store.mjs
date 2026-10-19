@@ -5,6 +5,7 @@ import { orderProjectsByVotes } from '../shared/project-order.mjs'
 import { PROJECTS, PROJECT_IDS, VOTABLE_PROJECT_IDS } from '../shared/projects.mjs'
 
 import { HttpError } from './http.mjs'
+import { createVoteRepository } from './vote-repository.mjs'
 
 const EVENT_ID = String(EVENT?.id || '').trim()
 if (!EVENT_ID) throw new Error('shared/event.mjs must export EVENT with a stable id.')
@@ -58,7 +59,7 @@ function nowMs() {
 }
 
 function iso(timestamp) {
-  return new Date(timestamp).toISOString()
+  return new Date(Number(timestamp)).toISOString()
 }
 
 function parseJson(value) {
@@ -145,209 +146,13 @@ function assertVotingOpen(config, timestamp = nowMs()) {
   return window
 }
 
-function ensureVoteEventProjectListColumn(db) {
-  const columns = db.prepare('PRAGMA table_info(vote_events)').all()
-  if (!columns.some((column) => column.name === 'project_ids_json')) {
-    db.exec('ALTER TABLE vote_events ADD COLUMN project_ids_json TEXT')
-  }
-}
-
 export function createVoteStore({ database, config }) {
-  const db = database.connection
-  db.exec(`
-    -- Kept read-only by this store so deployments can migrate the original
-    -- one-project ballot schema without deleting any historical records.
-    CREATE TABLE IF NOT EXISTS vote_allocations (
-      event_id TEXT NOT NULL,
-      voter_sub TEXT NOT NULL,
-      project_id TEXT NOT NULL,
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL,
-      PRIMARY KEY (event_id, voter_sub)
-    );
+  const repository = createVoteRepository(database, EVENT_ID)
 
-    CREATE INDEX IF NOT EXISTS vote_allocations_project_idx
-      ON vote_allocations (event_id, project_id);
-
-    CREATE TABLE IF NOT EXISTS vote_ballots (
-      event_id TEXT NOT NULL,
-      voter_sub TEXT NOT NULL,
-      selection_count INTEGER NOT NULL CHECK (selection_count >= 1 AND selection_count <= ${SELECTIONS_PER_VOTER}),
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL,
-      PRIMARY KEY (event_id, voter_sub)
-    );
-
-    CREATE TABLE IF NOT EXISTS vote_choices (
-      event_id TEXT NOT NULL,
-      voter_sub TEXT NOT NULL,
-      selection_index INTEGER NOT NULL CHECK (selection_index >= 1 AND selection_index <= ${SELECTIONS_PER_VOTER}),
-      project_id TEXT NOT NULL,
-      team_key TEXT NOT NULL,
-      created_at INTEGER NOT NULL,
-      PRIMARY KEY (event_id, voter_sub, project_id),
-      UNIQUE (event_id, voter_sub, selection_index),
-      FOREIGN KEY (event_id, voter_sub)
-        REFERENCES vote_ballots (event_id, voter_sub)
-        ON DELETE RESTRICT
-    );
-
-    CREATE INDEX IF NOT EXISTS vote_choices_project_idx
-      ON vote_choices (event_id, project_id);
-
-    CREATE TABLE IF NOT EXISTS vote_events (
-      id TEXT PRIMARY KEY,
-      event_id TEXT NOT NULL,
-      voter_sub TEXT NOT NULL,
-      action TEXT NOT NULL,
-      previous_project_id TEXT,
-      project_id TEXT,
-      request_id TEXT NOT NULL,
-      request_fingerprint TEXT NOT NULL,
-      result_json TEXT NOT NULL,
-      created_at INTEGER NOT NULL,
-      UNIQUE (event_id, request_id)
-    );
-
-    CREATE INDEX IF NOT EXISTS vote_events_voter_idx
-      ON vote_events (event_id, voter_sub, created_at);
-
-    CREATE TRIGGER IF NOT EXISTS vote_ballots_no_update
-    BEFORE UPDATE ON vote_ballots
-    BEGIN
-      SELECT RAISE(ABORT, 'vote_ballots is immutable');
-    END;
-
-    CREATE TRIGGER IF NOT EXISTS vote_ballots_no_delete
-    BEFORE DELETE ON vote_ballots
-    BEGIN
-      SELECT RAISE(ABORT, 'vote_ballots is immutable');
-    END;
-
-    CREATE TRIGGER IF NOT EXISTS vote_choices_no_update
-    BEFORE UPDATE ON vote_choices
-    BEGIN
-      SELECT RAISE(ABORT, 'vote_choices is immutable');
-    END;
-
-    CREATE TRIGGER IF NOT EXISTS vote_choices_no_delete
-    BEFORE DELETE ON vote_choices
-    BEGIN
-      SELECT RAISE(ABORT, 'vote_choices is immutable');
-    END;
-
-    CREATE TRIGGER IF NOT EXISTS vote_events_no_update
-    BEFORE UPDATE ON vote_events
-    BEGIN
-      SELECT RAISE(ABORT, 'vote_events is append-only');
-    END;
-
-    CREATE TRIGGER IF NOT EXISTS vote_events_no_delete
-    BEFORE DELETE ON vote_events
-    BEGIN
-      SELECT RAISE(ABORT, 'vote_events is append-only');
-    END;
-  `)
-  ensureVoteEventProjectListColumn(db)
-
-  const selectBallot = db.prepare(`
-    SELECT event_id, voter_sub, selection_count, created_at, updated_at
-    FROM vote_ballots
-    WHERE event_id = ? AND voter_sub = ?
-  `)
-  const selectChoices = db.prepare(`
-    SELECT selection_index, project_id, team_key, created_at
-    FROM vote_choices
-    WHERE event_id = ? AND voter_sub = ?
-    ORDER BY selection_index ASC
-  `)
-  const selectEventByRequestId = db.prepare(`
-    SELECT event_id, voter_sub, action, request_fingerprint, result_json
-    FROM vote_events
-    WHERE event_id = ? AND request_id = ?
-  `)
-  const insertBallot = db.prepare(`
-    INSERT INTO vote_ballots (event_id, voter_sub, selection_count, created_at, updated_at)
-    VALUES (@eventId, @voterSub, @selectionCount, @createdAt, @updatedAt)
-  `)
-  const insertChoice = db.prepare(`
-    INSERT INTO vote_choices (
-      event_id, voter_sub, selection_index, project_id, team_key, created_at
-    ) VALUES (
-      @eventId, @voterSub, @selectionIndex, @projectId, @teamKey, @createdAt
-    )
-  `)
-  const insertEvent = db.prepare(`
-    INSERT INTO vote_events (
-      id, event_id, voter_sub, action, previous_project_id, project_id,
-      project_ids_json, request_id, request_fingerprint, result_json, created_at
-    ) VALUES (
-      @id, @eventId, @voterSub, @action, @previousProjectId, @projectId,
-      @projectIdsJson, @requestId, @requestFingerprint, @resultJson, @createdAt
-    )
-  `)
-  const migrateLegacyBallots = db.prepare(`
-    INSERT OR IGNORE INTO vote_ballots (
-      event_id, voter_sub, selection_count, created_at, updated_at
-    )
-    SELECT event_id, voter_sub, 1, created_at, updated_at
-    FROM vote_allocations
-    WHERE event_id = @eventId
-  `)
-  const migrateLegacyChoices = db.prepare(`
-    INSERT OR IGNORE INTO vote_choices (
-      event_id, voter_sub, selection_index, project_id, team_key, created_at
-    )
-    SELECT event_id, voter_sub, 1, project_id, @teamKey, created_at
-    FROM vote_allocations
-    WHERE event_id = @eventId
-      AND voter_sub = @voterSub
-      AND project_id = @projectId
-  `)
-  const legacyVotes = db.prepare(`
-    SELECT voter_sub, project_id
-    FROM vote_allocations
-    WHERE event_id = ?
-  `)
-  const countVotes = db.prepare(`
-    SELECT project_id, COUNT(*) AS votes
-    FROM vote_choices
-    WHERE event_id = ?
-    GROUP BY project_id
-  `)
-  const selectLatestVote = db.prepare(`
-    SELECT MAX(recorded_at) AS updated_at
-    FROM (
-      SELECT updated_at AS recorded_at
-      FROM vote_ballots
-      WHERE event_id = ?
-      UNION ALL
-      SELECT created_at AS recorded_at
-      FROM vote_events
-      WHERE event_id = ?
-    )
-  `)
-
-  database.immediateTransaction(() => {
-    migrateLegacyBallots.run({ eventId: EVENT_ID })
-    for (const legacyVote of legacyVotes.all(EVENT_ID)) {
-      const teamKey = TEAM_KEY_BY_PROJECT_ID.get(legacyVote.project_id)
-      if (!teamKey) {
-        throw new Error(`Legacy vote references unknown project ${legacyVote.project_id}.`)
-      }
-      migrateLegacyChoices.run({
-        eventId: EVENT_ID,
-        voterSub: legacyVote.voter_sub,
-        projectId: legacyVote.project_id,
-        teamKey,
-      })
-    }
-  })
-
-  function readVote(voterSub) {
-    const ballot = selectBallot.get(EVENT_ID, voterSub)
+  async function readVote(voterSub) {
+    const ballot = await repository.ballot(voterSub)
     if (!ballot) return null
-    const choices = selectChoices.all(EVENT_ID, voterSub)
+    const choices = await repository.choices(voterSub)
     if (choices.length < 1 || choices.length > SELECTIONS_PER_VOTER) {
       throw new HttpError(500, 'stored_vote_incomplete')
     }
@@ -363,15 +168,15 @@ export function createVoteStore({ database, config }) {
     }
   }
 
-  function voteCountsByProject() {
-    return new Map(countVotes.all(EVENT_ID).map((row) => [
+  async function voteCountsByProject() {
+    return new Map((await repository.counts()).map((row) => [
       row.project_id,
       Number(row.votes) * RESULT_VOTE_MULTIPLIER,
     ]))
   }
 
-  function idempotentResult(requestId, voterSub, fingerprint) {
-    const event = selectEventByRequestId.get(EVENT_ID, requestId)
+  async function idempotentResult(requestId, voterSub, fingerprint) {
+    const event = await repository.event(requestId)
     if (!event) return null
     if (
       event.event_id !== EVENT_ID
@@ -386,8 +191,8 @@ export function createVoteStore({ database, config }) {
     }
   }
 
-  function results() {
-    const counts = voteCountsByProject()
+  async function results() {
+    const counts = await voteCountsByProject()
     const projects = PROJECTS.map((project) => ({
       projectId: project.id,
       votes: counts.get(project.id) || 0,
@@ -398,8 +203,8 @@ export function createVoteStore({ database, config }) {
     }
   }
 
-  function adminResults() {
-    const counts = voteCountsByProject()
+  async function adminResults() {
+    const counts = await voteCountsByProject()
     const ordered = orderProjectsByVotes(
       PROJECTS.filter((project) => VOTABLE_PROJECT_ID_SET.has(project.id)),
       counts,
@@ -412,7 +217,7 @@ export function createVoteStore({ database, config }) {
       previousVotes = project.votes
       return { ...project, rank }
     })
-    const latestVote = selectLatestVote.get(EVENT_ID, EVENT_ID)
+    const latestVote = await repository.latest()
 
     return {
       totalVotes: leaderboard.reduce((total, project) => total + project.votes, 0),
@@ -422,7 +227,7 @@ export function createVoteStore({ database, config }) {
     }
   }
 
-  function publicEvent() {
+  async function publicEvent() {
     const voting = votingWindowPayload(config)
     const resultsPublished = config.resultsPublished && voting.status === 'closed'
     const event = {
@@ -440,28 +245,29 @@ export function createVoteStore({ database, config }) {
     delete event.results
     delete event.totalVotes
     delete event.voteTotals
-    if (resultsPublished) event.results = results()
+    if (resultsPublished) event.results = await results()
     return event
   }
 
-  function publicState(voterSub) {
+  async function publicState(voterSub) {
     return {
-      vote: readVote(voterSub),
-      event: publicEvent(),
+      vote: await readVote(voterSub),
+      event: await publicEvent(),
     }
   }
 
-  function castVote({ voterSub, projectIds: rawProjectIds, requestId: rawRequestId }) {
+  async function castVote({ voterSub, projectIds: rawProjectIds, requestId: rawRequestId }) {
     const projectIds = normalizeProjectIds(rawProjectIds)
     const requestId = normalizeRequestId(rawRequestId)
     const fingerprint = requestFingerprint('submit', projectIds)
 
-    database.immediateTransaction(() => {
-      const replay = idempotentResult(requestId, voterSub, fingerprint)
+    await database.transaction(async () => {
+      await repository.lock(voterSub, requestId)
+      const replay = await idempotentResult(requestId, voterSub, fingerprint)
       if (replay) return replay
       assertVotingOpen(config)
 
-      const existing = readVote(voterSub)
+      const existing = await readVote(voterSub)
       if (existing && existing.selectionCount >= SELECTIONS_PER_VOTER) {
         throw new HttpError(409, 'vote_already_recorded', 'A vote is already recorded for this identity.')
       }
@@ -482,7 +288,7 @@ export function createVoteStore({ database, config }) {
       }
 
       if (!existing) {
-        insertBallot.run({
+        await repository.insertBallot({
           eventId: EVENT_ID,
           voterSub,
           selectionCount: projectIds.length,
@@ -490,8 +296,8 @@ export function createVoteStore({ database, config }) {
           updatedAt: timestamp,
         })
       }
-      addedProjectIds.forEach((projectId, index) => {
-        insertChoice.run({
+      for (const [index, projectId] of addedProjectIds.entries()) {
+        await repository.insertChoice({
           eventId: EVENT_ID,
           voterSub,
           selectionIndex: (existing?.selectionCount || 0) + index + 1,
@@ -499,11 +305,11 @@ export function createVoteStore({ database, config }) {
           teamKey: TEAM_KEY_BY_PROJECT_ID.get(projectId),
           createdAt: timestamp,
         })
-      })
+      }
 
-      const vote = readVote(voterSub)
+      const vote = await readVote(voterSub)
       const storedResult = { vote }
-      insertEvent.run({
+      await repository.insertEvent({
         id: randomUUID(),
         eventId: EVENT_ID,
         voterSub,

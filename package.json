@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=20.19"
+    "node": "24.x"
   },
   "scripts": {
     "dev": "concurrently --kill-others --names web,server --prefix-colors magenta,cyan \"vite --host 0.0.0.0 --port 4173 --strictPort\" \"node --watch server/index.mjs\"",
@@ -13,7 +13,9 @@
     "assets:publish": "node scripts/r2-static-assets.mjs publish --bucket renaiss-hackathon-media",
     "assets:verify": "node scripts/r2-static-assets.mjs verify",
     "preview": "vite preview --host 0.0.0.0 --port 4173 --strictPort",
-    "start": "node server/index.mjs"
+    "start": "node server/index.mjs",
+    "db:migrate": "node scripts/postgres-migrate.mjs",
+    "db:import": "node scripts/postgres-import.mjs"
   },
   "dependencies": {
     "@fontsource-variable/noto-sans-tc": "5.2.10",
@@ -21,13 +23,13 @@
     "@fontsource-variable/space-grotesk": "5.2.10",
     "@fontsource/archivo-black": "5.2.8",
     "@phosphor-icons/react": "2.1.10",
-    "better-sqlite3": "12.11.1",
     "compression": "1.8.1",
     "express": "5.2.1",
     "helmet": "8.2.0",
     "jose": "6.2.3",
     "motion": "12.42.2",
     "ogl": "1.0.11",
+    "pg": "8.23.1",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "react-router-dom": "7.18.1"

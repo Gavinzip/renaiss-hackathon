@@ -26,7 +26,6 @@ import {
   applySecurityHeaders,
   clearCookie,
   clientIp,
-  createMemoryRateLimiter,
   csrfTokenForSession,
   parseCookies,
   requireUnsafeRequestSecurity,
@@ -36,6 +35,8 @@ import {
   verifyCookieValue,
 } from './security.mjs'
 import { createVoteStore } from './vote-store.mjs'
+import { createSharedRequestScheduler } from './request-scheduler.mjs'
+import { createDatabaseRateLimiter } from './rate-limiter.mjs'
 import { createSbtEligibilityService } from './sbt-eligibility.mjs'
 import { runDatabaseBackup, runRepositoryCheck } from './backup/runner.mjs'
 
@@ -90,8 +91,8 @@ export function createApplication(options = {}) {
   const database = options.database || createDatabase(config)
   const oidc = options.oidc || createOidcClient(config)
   const voteStore = options.voteStore || createVoteStore({ database, config })
-  const sbtEligibility = options.sbtEligibility || createSbtEligibilityService({ config })
-  const rateLimiter = options.rateLimiter || createMemoryRateLimiter()
+  const sbtEligibility = options.sbtEligibility || createSbtEligibilityService({ config, requestScheduler: createSharedRequestScheduler(database, config) })
+  const rateLimiter = options.rateLimiter || createDatabaseRateLimiter(database)
   const app = express()
 
   app.disable('x-powered-by')
@@ -125,21 +126,21 @@ export function createApplication(options = {}) {
     return verifyCookieValue(config.sessionSecret, purpose, signedValue)
   }
 
-  function readSession(request) {
+  async function readSession(request) {
     return database.readSession(
       signedCookieToken(request, config.sessionCookieName, 'session'),
     )
   }
 
-  function requireSession(request) {
-    const session = readSession(request)
+  async function requireSession(request) {
+    const session = await readSession(request)
     if (!session) throw new HttpError(401, 'session_required', 'Sign in with Renaiss to vote.')
     return session
   }
 
-  function requireVoteWriteSecurity(request, session) {
+  async function requireVoteWriteSecurity(request, session) {
     requireUnsafeRequestSecurity(config, session, request)
-    rateLimiter.consume([
+    await rateLimiter.consume([
       {
         scope: 'vote_subject',
         key: session.user.sub,
@@ -153,8 +154,8 @@ export function createApplication(options = {}) {
     ])
   }
 
-  function requireVoteEligibilityReadSecurity(request, session) {
-    rateLimiter.consume([
+  async function requireVoteEligibilityReadSecurity(request, session) {
+    await rateLimiter.consume([
       {
         scope: 'vote_eligibility_subject',
         key: session.user.sub,
@@ -168,7 +169,7 @@ export function createApplication(options = {}) {
     ])
   }
 
-  function requireBackupTrigger(request) {
+  async function requireBackupTrigger(request) {
     if (!config.backup.configured) {
       throw new HttpError(503, 'backup_not_configured', 'Offsite backup is not configured.')
     }
@@ -179,7 +180,7 @@ export function createApplication(options = {}) {
     if (!secretsMatch(config.backup.triggerSecret, token)) {
       throw new HttpError(401, 'backup_trigger_unauthorized', 'Backup trigger is not authorized.')
     }
-    rateLimiter.consume({
+    await rateLimiter.consume({
       scope: 'backup_trigger',
       key: 'service',
       limit: 1,
@@ -187,7 +188,8 @@ export function createApplication(options = {}) {
     })
   }
 
-  app.get('/healthz', (_request, response) => {
+  app.get('/healthz', async (_request, response) => {
+    await database.connection.query('SELECT 1 FROM auth_sessions LIMIT 1')
     sendNoStore(response, 200, {
       ok: true,
       service: 'renaiss-hackathon-vote',
@@ -196,14 +198,14 @@ export function createApplication(options = {}) {
     })
   })
 
-  app.get('/api/session', (request, response) => {
-    const session = readSession(request)
+  app.get('/api/session', async (request, response) => {
+    const session = await readSession(request)
     const publicVoteState = session
-      ? voteStore.getPublicState(session.user.sub)
-      : { vote: null, event: voteStore.getPublicEvent() }
+      ? await voteStore.getPublicState(session.user.sub)
+      : { vote: null, event: await voteStore.getPublicEvent() }
     const administrator = isAdministrator(config, session)
     const event = administrator && !publicVoteState.event.resultsPublished
-      ? { ...publicVoteState.event, results: voteStore.getResults() }
+      ? { ...publicVoteState.event, results: await voteStore.getResults() }
       : publicVoteState.event
     sendNoStore(response, 200, {
       authenticated: Boolean(session),
@@ -216,7 +218,7 @@ export function createApplication(options = {}) {
   })
 
   app.get('/api/auth/renaiss/start', asyncRoute(async (request, response) => {
-    rateLimiter.consume({
+    await rateLimiter.consume({
       scope: 'auth_start_ip',
       key: clientIp(request),
       ...config.authStartRateLimit,
@@ -226,7 +228,7 @@ export function createApplication(options = {}) {
     const returnTo = safeReturnTo(request.query.returnTo || request.query.return_to)
     const cookieToken = cryptoRandomToken()
     const { challenge, authorizationUrl } = await oidc.createAuthorizationRequest()
-    database.saveChallenge({
+    await database.saveChallenge({
       cookieToken,
       state: challenge.state,
       codeVerifier: challenge.codeVerifier,
@@ -264,7 +266,7 @@ export function createApplication(options = {}) {
         config.challengeCookieName,
         'challenge',
       )
-      challenge = database.consumeChallenge(cookieToken, request.query.state)
+      challenge = await database.consumeChallenge(cookieToken, request.query.state)
       if (!challenge) throw new HttpError(401, 'invalid_oauth_state')
       if (request.query.error) throw new HttpError(401, 'sso_authorization_failed')
 
@@ -276,7 +278,7 @@ export function createApplication(options = {}) {
         redirectUri: challenge.redirectUri,
         nonce: challenge.nonce,
       })
-      const { token } = database.createSession(identity)
+      const { token } = await database.createSession(identity)
       appendCookie(response, serializeCookie(
         config.sessionCookieName,
         signCookieValue(config.sessionSecret, 'session', token),
@@ -299,11 +301,11 @@ export function createApplication(options = {}) {
     }
   }))
 
-  app.post('/api/auth/logout', (request, response) => {
-    const session = requireSession(request)
+  app.post('/api/auth/logout', async (request, response) => {
+    const session = await requireSession(request)
     requireUnsafeRequestSecurity(config, session, request)
     const token = signedCookieToken(request, config.sessionCookieName, 'session')
-    database.removeSession(token)
+    await database.removeSession(token)
     clearCookie(response, config.sessionCookieName, {
       path: '/',
       httpOnly: true,
@@ -314,28 +316,28 @@ export function createApplication(options = {}) {
     response.status(204).end()
   })
 
-  app.get('/api/vote', (request, response) => {
-    const session = requireSession(request)
-    sendNoStore(response, 200, voteStore.getPublicState(session.user.sub))
+  app.get('/api/vote', async (request, response) => {
+    const session = await requireSession(request)
+    sendNoStore(response, 200, await voteStore.getPublicState(session.user.sub))
   })
 
   app.get('/api/vote/eligibility', asyncRoute(async (request, response) => {
-    const session = requireSession(request)
-    requireVoteEligibilityReadSecurity(request, session)
+    const session = await requireSession(request)
+    await requireVoteEligibilityReadSecurity(request, session)
     sendNoStore(response, 200, await sbtEligibility.read(session))
   }))
 
-  app.get('/api/admin/votes', (request, response) => {
-    const session = requireSession(request)
+  app.get('/api/admin/votes', async (request, response) => {
+    const session = await requireSession(request)
     requireAdministrator(config, session)
-    sendNoStore(response, 200, voteStore.getAdminResults())
+    sendNoStore(response, 200, await voteStore.getAdminResults())
   })
 
   app.post('/api/vote', asyncRoute(async (request, response) => {
-    const session = requireSession(request)
-    requireVoteWriteSecurity(request, session)
+    const session = await requireSession(request)
+    await requireVoteWriteSecurity(request, session)
     const eligibility = await sbtEligibility.requireEligible(session)
-    const result = voteStore.castVote({
+    const result = await voteStore.castVote({
       voterSub: session.user.sub,
       projectIds: request.body?.projectIds,
       requestId: requestIdFrom(request),
@@ -344,9 +346,9 @@ export function createApplication(options = {}) {
   }))
 
   app.post('/api/internal/backup', asyncRoute(async (request, response) => {
-    requireBackupTrigger(request)
+    await requireBackupTrigger(request)
     try {
-      const result = await runDatabaseBackup(config)
+      const result = await runDatabaseBackup(config, database)
       sendNoStore(response, 200, { ok: true, ...result })
     } catch (error) {
       if (error?.code === 'backup_in_progress') {
@@ -362,7 +364,7 @@ export function createApplication(options = {}) {
   }))
 
   app.post('/api/internal/backup/check', asyncRoute(async (request, response) => {
-    requireBackupTrigger(request)
+    await requireBackupTrigger(request)
     try {
       const result = await runRepositoryCheck(config)
       sendNoStore(response, 200, { ok: true, ...result })
@@ -428,8 +430,7 @@ export function startServer(options = {}) {
     if (closing) return
     closing = true
     server.close(() => {
-      application.database.close()
-      process.exit(0)
+      application.database.close().then(() => process.exit(0))
     })
     setTimeout(() => process.exit(1), 10000).unref()
   }

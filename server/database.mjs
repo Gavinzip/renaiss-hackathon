@@ -1,235 +1,77 @@
 import { randomBytes, timingSafeEqual } from 'node:crypto'
-import { mkdirSync } from 'node:fs'
-import { dirname } from 'node:path'
-
-import Database from 'better-sqlite3'
-
+import { createPostgres } from './postgres.mjs'
 import { hmacDigest } from './security.mjs'
 
-function nowMs() {
-  return Date.now()
-}
-
-function nullableText(value) {
-  const text = typeof value === 'string' ? value.trim() : ''
-  return text || null
-}
-
+const nullableText = (value) => (typeof value === 'string' ? value.trim() : '') || null
 function safeEqual(left, right) {
-  const leftBuffer = Buffer.from(String(left || ''))
-  const rightBuffer = Buffer.from(String(right || ''))
-  return leftBuffer.length === rightBuffer.length && timingSafeEqual(leftBuffer, rightBuffer)
+  const a = Buffer.from(String(left || '')), b = Buffer.from(String(right || ''))
+  return a.length === b.length && timingSafeEqual(a, b)
 }
-
 function rowToSession(row) {
   if (!row) return null
   return {
     idHash: row.id_hash,
-    user: {
-      sub: row.user_sub,
-      name: row.name,
-      picture: row.picture,
-      safeWalletAddress: row.safe_wallet_address,
-      legacyWalletAddress: row.legacy_wallet_address,
-      chainId: row.chain_id,
-      twitterUsername: row.twitter_username,
-    },
-    createdAt: row.created_at,
-    expiresAt: row.expires_at,
+    user: { sub: row.user_sub, name: row.name, picture: row.picture,
+      safeWalletAddress: row.safe_wallet_address, legacyWalletAddress: row.legacy_wallet_address,
+      chainId: row.chain_id, twitterUsername: row.twitter_username },
+    createdAt: Number(row.created_at), expiresAt: Number(row.expires_at),
   }
 }
-
 export function createDatabase(config) {
-  mkdirSync(dirname(config.databasePath), { recursive: true })
-  const connection = new Database(config.databasePath, { timeout: 5000 })
-  connection.pragma('journal_mode = WAL')
-  connection.pragma('synchronous = FULL')
-  connection.pragma('busy_timeout = 5000')
-  connection.pragma('foreign_keys = ON')
-
-  connection.exec(`
-    CREATE TABLE IF NOT EXISTS auth_challenges (
-      id_hash TEXT PRIMARY KEY,
-      state_hash TEXT NOT NULL,
-      code_verifier TEXT NOT NULL,
-      nonce TEXT NOT NULL,
-      redirect_uri TEXT NOT NULL,
-      return_to TEXT NOT NULL,
-      created_at INTEGER NOT NULL,
-      expires_at INTEGER NOT NULL
-    );
-
-    CREATE INDEX IF NOT EXISTS auth_challenges_expires_at_idx
-      ON auth_challenges (expires_at);
-
-    CREATE TABLE IF NOT EXISTS auth_sessions (
-      id_hash TEXT PRIMARY KEY,
-      user_sub TEXT NOT NULL,
-      name TEXT,
-      picture TEXT,
-      safe_wallet_address TEXT,
-      legacy_wallet_address TEXT,
-      chain_id TEXT,
-      twitter_username TEXT,
-      created_at INTEGER NOT NULL,
-      expires_at INTEGER NOT NULL
-    );
-
-    CREATE INDEX IF NOT EXISTS auth_sessions_user_sub_idx
-      ON auth_sessions (user_sub);
-
-    CREATE INDEX IF NOT EXISTS auth_sessions_expires_at_idx
-      ON auth_sessions (expires_at);
-  `)
-
-  const cleanupExpiredChallenges = connection.prepare(
-    'DELETE FROM auth_challenges WHERE expires_at <= ?',
-  )
-  const cleanupExpiredSessions = connection.prepare(
-    'DELETE FROM auth_sessions WHERE expires_at <= ?',
-  )
-  const insertChallenge = connection.prepare(`
-    INSERT INTO auth_challenges (
-      id_hash, state_hash, code_verifier, nonce, redirect_uri, return_to, created_at, expires_at
-    ) VALUES (
-      @idHash, @stateHash, @codeVerifier, @nonce, @redirectUri, @returnTo, @createdAt, @expiresAt
-    )
-  `)
-  const selectChallenge = connection.prepare(`
-    SELECT id_hash, state_hash, code_verifier, nonce, redirect_uri, return_to, created_at, expires_at
-    FROM auth_challenges
-    WHERE id_hash = ?
-  `)
-  const deleteChallenge = connection.prepare('DELETE FROM auth_challenges WHERE id_hash = ?')
-  const insertSession = connection.prepare(`
-    INSERT INTO auth_sessions (
-      id_hash, user_sub, name, picture, safe_wallet_address,
-      legacy_wallet_address, chain_id, twitter_username, created_at, expires_at
-    ) VALUES (
-      @idHash, @sub, @name, @picture, @safeWalletAddress,
-      @legacyWalletAddress, @chainId, @twitterUsername, @createdAt, @expiresAt
-    )
-  `)
-  const selectSession = connection.prepare(`
-    SELECT id_hash, user_sub, name, picture, safe_wallet_address,
-      legacy_wallet_address, chain_id, twitter_username, created_at, expires_at
-    FROM auth_sessions
-    WHERE id_hash = ?
-  `)
-  const deleteSession = connection.prepare('DELETE FROM auth_sessions WHERE id_hash = ?')
-
-  function tokenHash(purpose, token) {
-    return hmacDigest(config.sessionSecret, `opaque:${purpose}`, token)
+  const connection = createPostgres(config.databaseUrl)
+  const tokenHash = (purpose, token) => hmacDigest(config.sessionSecret, `opaque:${purpose}`, token)
+  async function cleanupExpired(timestamp = Date.now()) {
+    await connection.query('DELETE FROM auth_challenges WHERE expires_at <= $1', [timestamp])
+    await connection.query('DELETE FROM auth_sessions WHERE expires_at <= $1', [timestamp])
   }
-
-  function cleanupExpired(timestamp = nowMs()) {
-    cleanupExpiredChallenges.run(timestamp)
-    cleanupExpiredSessions.run(timestamp)
-  }
-
-  function immediateTransaction(callback) {
-    connection.exec('BEGIN IMMEDIATE')
-    try {
-      const result = callback()
-      connection.exec('COMMIT')
-      return result
-    } catch (error) {
-      try {
-        connection.exec('ROLLBACK')
-      } catch (rollbackError) {
-        console.error('[database] rollback failed', rollbackError)
-      }
-      throw error
-    }
-  }
-
-  function saveChallenge({ cookieToken, state, codeVerifier, nonce, redirectUri, returnTo }) {
-    cleanupExpired()
-    const createdAt = nowMs()
-    const record = {
-      idHash: tokenHash('challenge', cookieToken),
-      stateHash: tokenHash('state', state),
-      codeVerifier,
-      nonce,
-      redirectUri,
-      returnTo,
-      createdAt,
-      expiresAt: createdAt + config.challengeTtlMs,
-    }
-    insertChallenge.run(record)
-    return record
-  }
-
-  function consumeChallenge(cookieToken, returnedState) {
-    if (!cookieToken) return null
-    const idHash = tokenHash('challenge', cookieToken)
-    return immediateTransaction(() => {
-      const row = selectChallenge.get(idHash)
-      deleteChallenge.run(idHash)
-      if (!row || row.expires_at <= nowMs()) return null
-      if (!safeEqual(row.state_hash, tokenHash('state', returnedState))) return null
-      return {
-        codeVerifier: row.code_verifier,
-        nonce: row.nonce,
-        redirectUri: row.redirect_uri,
-        returnTo: row.return_to,
-        createdAt: row.created_at,
-        expiresAt: row.expires_at,
-      }
+  async function saveChallenge({ cookieToken, state, codeVerifier, nonce, redirectUri, returnTo }) {
+    const createdAt = Date.now(), expiresAt = createdAt + config.challengeTtlMs
+    await connection.transaction(async () => {
+      await cleanupExpired(createdAt)
+      await connection.query(`INSERT INTO auth_challenges
+        (id_hash,state_hash,code_verifier,nonce,redirect_uri,return_to,created_at,expires_at)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+      [tokenHash('challenge', cookieToken),tokenHash('state', state),codeVerifier,nonce,redirectUri,returnTo,createdAt,expiresAt])
     })
+    return { createdAt, expiresAt }
   }
-
-  function createSession(user) {
-    cleanupExpired()
-    const token = randomBytes(32).toString('base64url')
-    const createdAt = nowMs()
-    const record = {
-      idHash: tokenHash('session', token),
-      sub: user.sub,
-      name: nullableText(user.name),
-      picture: nullableText(user.picture),
-      safeWalletAddress: nullableText(user.safeWalletAddress),
-      legacyWalletAddress: nullableText(user.legacyWalletAddress),
-      chainId: nullableText(user.chainId),
-      twitterUsername: nullableText(user.twitterUsername),
-      createdAt,
-      expiresAt: createdAt + config.sessionTtlMs,
-    }
-    insertSession.run(record)
-    return {
-      token,
-      session: rowToSession(selectSession.get(record.idHash)),
-    }
+  async function consumeChallenge(cookieToken, returnedState) {
+    if (!cookieToken) return null
+    // DELETE RETURNING atomically consumes even expired or incorrect-state challenges.
+    const { rows: [row] } = await connection.query('DELETE FROM auth_challenges WHERE id_hash = $1 RETURNING *', [tokenHash('challenge', cookieToken)])
+    if (!row || Number(row.expires_at) <= Date.now() || !safeEqual(row.state_hash, tokenHash('state', returnedState))) return null
+    return { codeVerifier: row.code_verifier, nonce: row.nonce, redirectUri: row.redirect_uri,
+      returnTo: row.return_to, createdAt: Number(row.created_at), expiresAt: Number(row.expires_at) }
   }
-
-  function readSession(token) {
+  async function createSession(user) {
+    const token = randomBytes(32).toString('base64url'), createdAt = Date.now()
+    const session = await connection.transaction(async () => {
+      await cleanupExpired(createdAt)
+      const { rows: [row] } = await connection.query(`INSERT INTO auth_sessions
+        (id_hash,user_sub,name,picture,safe_wallet_address,legacy_wallet_address,chain_id,twitter_username,created_at,expires_at)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
+      [tokenHash('session',token),user.sub,nullableText(user.name),nullableText(user.picture),
+        nullableText(user.safeWalletAddress),nullableText(user.legacyWalletAddress),nullableText(user.chainId),
+        nullableText(user.twitterUsername),createdAt,createdAt+config.sessionTtlMs])
+      return rowToSession(row)
+    })
+    return { token, session }
+  }
+  async function readSession(token) {
     if (!token) return null
-    const idHash = tokenHash('session', token)
-    const row = selectSession.get(idHash)
+    const idHash = tokenHash('session',token)
+    const { rows: [row] } = await connection.query('SELECT * FROM auth_sessions WHERE id_hash = $1', [idHash])
     if (!row) return null
-    if (row.expires_at <= nowMs()) {
-      deleteSession.run(idHash)
+    if (Number(row.expires_at) <= Date.now()) {
+      await connection.query('DELETE FROM auth_sessions WHERE id_hash = $1 AND expires_at <= $2', [idHash,Date.now()])
       return null
     }
     return rowToSession(row)
   }
-
-  function removeSession(token) {
+  async function removeSession(token) {
     if (!token) return false
-    return deleteSession.run(tokenHash('session', token)).changes > 0
+    return (await connection.query('DELETE FROM auth_sessions WHERE id_hash = $1', [tokenHash('session',token)])).rowCount > 0
   }
-
-  return {
-    connection,
-    immediateTransaction,
-    cleanupExpired,
-    saveChallenge,
-    consumeChallenge,
-    createSession,
-    readSession,
-    removeSession,
-    close() {
-      connection.close()
-    },
-  }
+  return { connection, cleanupExpired, saveChallenge, consumeChallenge, createSession, readSession, removeSession,
+    transaction: connection.transaction, close: connection.close }
 }

@@ -5,5 +5,5 @@
 - Keep community voting separate from judging. Do not claim it decides Champion or Excellence Awards unless the organizer updates the official rules.
 - Do not add authentication, vote, project-data, or result fallbacks. Missing runtime configuration must stay visible.
 - Renaiss SSO uses server-side Authorization Code + PKCE. Never expose client secrets or persist OIDC tokens.
-- Vote writes must use the verified session `sub`, CSRF and Origin checks, an idempotency key, and one SQLite transaction.
+- Vote writes must use the verified session `sub`, CSRF and Origin checks, an idempotency key, and one PostgreSQL transaction.
 - Do not run git push without explicit user approval.

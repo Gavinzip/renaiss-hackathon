@@ -1,4 +1,4 @@
-import { dirname, isAbsolute, resolve } from 'node:path'
+import { resolve } from 'node:path'
 
 import { EVENT } from '../shared/event.mjs'
 
@@ -115,63 +115,22 @@ function sbtEligibilityConfiguration(env) {
   })
 }
 
-function backupConfiguration(env, databasePath) {
-  const repository = envString(env, 'BACKUP_REPOSITORY')
-  const password = envString(env, 'RESTIC_PASSWORD')
-  const triggerSecret = envString(env, 'BACKUP_TRIGGER_SECRET')
-  const configuredValues = [repository, password, triggerSecret].filter(Boolean)
-
-  if (configuredValues.length > 0 && configuredValues.length < 3) {
-    return Object.freeze({
-      configured: false,
-      state: 'incomplete',
-      repository: '',
-      password: '',
-      triggerSecret: '',
-      stagingDir: '',
-      timeoutMs: 0,
-    })
+function backupConfiguration(env) {
+  const values = {
+    folderId: envString(env,'BACKUP_DRIVE_FOLDER_ID'),
+    clientId: envString(env,'BACKUP_DRIVE_CLIENT_ID'),
+    clientSecret: envString(env,'BACKUP_DRIVE_CLIENT_SECRET'),
+    refreshToken: envString(env,'BACKUP_DRIVE_REFRESH_TOKEN'),
+    encryptionKey: envString(env,'BACKUP_ENCRYPTION_KEY'),
+    triggerSecret: envString(env,'BACKUP_TRIGGER_SECRET'),
   }
-
-  if (configuredValues.length === 0) {
-    return Object.freeze({
-      configured: false,
-      state: 'not_configured',
-      repository: '',
-      password: '',
-      triggerSecret: '',
-      stagingDir: '',
-      timeoutMs: 0,
-    })
-  }
-
-  if (!repository.startsWith('rclone:')) {
-    throw new Error('BACKUP_REPOSITORY must use the rclone:<remote>:<path> format.')
-  }
-  if (triggerSecret.length < 48) {
-    throw new Error('BACKUP_TRIGGER_SECRET must contain at least 48 characters.')
-  }
-
-  const stagingDir = envString(env, 'BACKUP_STAGING_DIR', resolve(dirname(databasePath), 'backup-staging'))
-  if (!isAbsolute(stagingDir)) {
-    throw new Error('BACKUP_STAGING_DIR must be absolute and use persistent storage.')
-  }
-
-  return Object.freeze({
-    configured: true,
-    state: 'ready',
-    repository,
-    password,
-    triggerSecret,
-    stagingDir: resolve(stagingDir),
-    timeoutMs: envInteger(env, 'BACKUP_TIMEOUT_SECONDS', 30 * 60, 60, 2 * 60 * 60) * 1000,
-    retention: Object.freeze({
-      hourly: envInteger(env, 'BACKUP_KEEP_HOURLY', 48, 1, 24 * 14),
-      daily: envInteger(env, 'BACKUP_KEEP_DAILY', 14, 1, 365),
-      weekly: envInteger(env, 'BACKUP_KEEP_WEEKLY', 8, 1, 104),
-      monthly: envInteger(env, 'BACKUP_KEEP_MONTHLY', 12, 1, 120),
-    }),
-  })
+  const count = Object.values(values).filter(Boolean).length
+  if (count && count !== Object.keys(values).length) throw new Error('PostgreSQL offsite backup configuration is incomplete.')
+  if (!count) return Object.freeze({configured:false,state:'not_configured'})
+  if (!/^[A-Za-z0-9_-]+$/.test(values.folderId)) throw new Error('Invalid BACKUP_DRIVE_FOLDER_ID.')
+  if (!/^[a-f0-9]{64}$/i.test(values.encryptionKey)) throw new Error('BACKUP_ENCRYPTION_KEY must contain 64 hex characters.')
+  if (values.triggerSecret.length < 48) throw new Error('BACKUP_TRIGGER_SECRET must contain at least 48 characters.')
+  return Object.freeze({...values,configured:true,state:'ready'})
 }
 
 export function loadConfig(env = process.env, options = {}) {
@@ -199,17 +158,9 @@ export function loadConfig(env = process.env, options = {}) {
   const adminSafeWalletAddresses = adminWalletAllowlist(env)
   const sbtEligibility = sbtEligibilityConfiguration(env)
 
-  const configuredDatabasePath = envString(env, 'DATABASE_PATH')
-  if (production && !configuredDatabasePath) {
-    throw new Error('Production requires an explicit persistent DATABASE_PATH.')
-  }
-  if (production && !isAbsolute(configuredDatabasePath)) {
-    throw new Error('Production DATABASE_PATH must be absolute and point to persistent storage.')
-  }
-  const databasePath = configuredDatabasePath
-    ? resolve(cwd, configuredDatabasePath)
-    : resolve(cwd, 'data/hackathon.sqlite')
-  const backup = backupConfiguration(env, databasePath)
+  const databaseUrl = envString(env, 'DATABASE_URL')
+  if (!databaseUrl) throw new Error('DATABASE_URL is required for PostgreSQL storage.')
+  const backup = backupConfiguration(env)
 
   const issuer = envString(env, 'RENAISS_ISSUER', RENAISS_PRODUCTION_ISSUER).replace(/\/+$/, '')
   if (issuer !== RENAISS_PRODUCTION_ISSUER) {
@@ -275,7 +226,7 @@ export function loadConfig(env = process.env, options = {}) {
     port,
     host,
     publicOrigin,
-    databasePath,
+    databaseUrl,
     backup,
     distDir: resolve(cwd, 'dist'),
     sessionSecret,
